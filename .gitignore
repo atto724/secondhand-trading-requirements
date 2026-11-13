@@ -1,0 +1,19 @@
+﻿# Python virtual environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+
+# Local application data
+/code/data/
+/code/backups/
+
+# Build outputs
+build/
+dist/
+*.egg-info/
+
+# Development tool caches
+.pytest_cache/
+.pylint.d/
+.coverage
+htmlcov/

@@ -1,9 +1,10 @@
-﻿"""Database connections and initial account schema."""
+"""Database connections and initial account schema."""
 
 import sqlite3
 from contextlib import closing
 from pathlib import Path
 
+from schema import migrate
 
 DATABASE_PATH = Path(__file__).resolve().parent / "data" / "trading.db"
 
@@ -11,7 +12,7 @@ DATABASE_PATH = Path(__file__).resolve().parent / "data" / "trading.db"
 def connect_database() -> sqlite3.Connection:
     """Open a connection with foreign key enforcement enabled."""
     DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    connection = sqlite3.connect(DATABASE_PATH)
+    connection = sqlite3.connect(DATABASE_PATH, timeout=15)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
     return connection
@@ -20,9 +21,10 @@ def connect_database() -> sqlite3.Connection:
 def initialize_database() -> None:
     """Create account tables and built-in roles if they do not exist."""
     with closing(connect_database()) as connection:
+        # WAL improves concurrent readers/writers while retaining FULL durability.
+        connection.execute("PRAGMA journal_mode = WAL")
         with connection:
-            connection.executescript(
-                """
+            connection.executescript("""
                 CREATE TABLE IF NOT EXISTS accounts (
                     id INTEGER PRIMARY KEY,
                     username TEXT NOT NULL UNIQUE,
@@ -106,8 +108,10 @@ def initialize_database() -> None:
                 INSERT OR IGNORE INTO roles (name) VALUES ('buyer');
                 INSERT OR IGNORE INTO roles (name) VALUES ('seller');
                 INSERT OR IGNORE INTO roles (name) VALUES ('admin');
-                """
-            )
+                """)
+
+    with closing(connect_database()) as connection:
+        migrate(connection)
 
 
 def main() -> None:
@@ -115,8 +119,7 @@ def main() -> None:
     initialize_database()
     with closing(connect_database()) as connection:
         tables = connection.execute(
-            "SELECT name FROM sqlite_master "
-            "WHERE type = 'table' ORDER BY name"
+            "SELECT name FROM sqlite_master " "WHERE type = 'table' ORDER BY name"
         ).fetchall()
         print(f"Database: {DATABASE_PATH}")
         print("Tables:", ", ".join(row["name"] for row in tables))

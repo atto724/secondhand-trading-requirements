@@ -17,3 +17,6 @@ dist/
 .pylint.d/
 .coverage
 htmlcov/
+/work/
+/code/.test-temp/
+/code/demo_data/

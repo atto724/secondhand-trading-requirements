@@ -1,9 +1,8 @@
-﻿"""Password hashing and verification helpers."""
+"""Password hashing and verification helpers."""
 
 import hashlib
 import hmac
 import secrets
-
 
 ALGORITHM = "pbkdf2_sha256"
 ITERATIONS = 600_000

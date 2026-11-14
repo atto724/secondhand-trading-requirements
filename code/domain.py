@@ -1,4 +1,4 @@
-﻿"""Domain states used by the trading system."""
+"""Domain states used by the trading system."""
 
 from enum import Enum
 

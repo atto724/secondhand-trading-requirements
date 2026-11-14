@@ -1,0 +1,83 @@
+@startuml
+title 二手交易系统类图
+hide empty methods
+skinparam classAttributeIconSize 0
+
+class "账号" as Account {
+  账号编号
+  手机号
+  账号状态
+}
+
+class "角色" as Role {
+  角色名称
+}
+
+class "商品" as Product {
+  商品编号
+  标题
+  当前价格
+  商品状态
+  内容版本号
+}
+
+class "分类" as Category
+class "商品图片" as ProductImage {
+  显示顺序
+}
+
+class "预约" as Reservation {
+  预约编号
+  预约状态
+  创建时间
+}
+
+class "商品快照" as Snapshot {
+  预约时标题
+  预约时价格
+  预约时主要公开信息
+}
+
+class "审核记录" as Review {
+  被审核版本号
+  审核结论
+  驳回原因
+  处理时间
+}
+
+class "站内消息" as Message {
+  事件类型
+  发送时间
+  阅读状态
+}
+
+class "操作日志" as AuditLog {
+  操作对象
+  前后状态
+  操作时间
+  操作结果
+  原因
+}
+
+Account "0..*" -- "1..*" Role : 拥有
+Account "1" -- "0..*" Product : 卖家发布
+Account "1" -- "0..*" Reservation : 买家发起
+Category "1" -- "0..*" Product : 分类
+Product "1" *-- "0..*" ProductImage : 包含
+Product "1" -- "0..*" Reservation : 接收预约
+Reservation "1" *-- "1" Snapshot : 创建时保存
+Product "1" -- "0..*" Review : 审核历史
+Account "1" -- "0..*" Review : 管理员处理
+Account "1" -- "0..*" Message : 接收
+Account "0..1" -- "0..*" AuditLog : 操作者
+
+note right of Reservation
+  同一买家对同一商品同时至多有一条有效预约。
+  同一商品同时至多有一条已确认预约。
+end note
+note bottom of Snapshot
+  发起预约时保存买家所见的商品信息。
+  商品后续修改、重新审核或成交更正时，
+  已保存的快照继续保留原值。
+end note
+@enduml

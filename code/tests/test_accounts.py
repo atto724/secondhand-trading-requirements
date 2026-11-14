@@ -27,9 +27,7 @@ class AccountTests(unittest.TestCase):
 
     def create_demo_account(self):
         """Create an ordinary account for a test."""
-        return create_account(
-            "demo_user", "13800000000", "DemoPassword123!"
-        )
+        return create_account("demo_user", "13800000000", "DemoPassword123!")
 
     def test_registration_assigns_ordinary_roles(self):
         """New accounts receive buyer and seller roles only."""
@@ -42,9 +40,7 @@ class AccountTests(unittest.TestCase):
                 (account_id,),
             ).fetchall()
 
-        self.assertEqual(
-            [row["name"] for row in rows], ["buyer", "seller"]
-        )
+        self.assertEqual([row["name"] for row in rows], ["buyer", "seller"])
 
     def test_duplicate_registration_is_rejected(self):
         """Duplicate names and phones do not create extra accounts."""
@@ -58,9 +54,7 @@ class AccountTests(unittest.TestCase):
                     create_account(username, phone, "DemoPassword123!")
 
         with closing(database.connect_database()) as connection:
-            count = connection.execute(
-                "SELECT COUNT(*) FROM accounts"
-            ).fetchone()[0]
+            count = connection.execute("SELECT COUNT(*) FROM accounts").fetchone()[0]
         self.assertEqual(count, 1)
 
     def test_valid_login(self):

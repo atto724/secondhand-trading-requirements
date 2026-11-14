@@ -1,0 +1,91 @@
+{
+  "scope": "production Python only; tests/demo/benchmark/generated build excluded; SQL strings count as implementation",
+  "files": {
+    "accounts.py": {
+      "physical_lines": 112,
+      "nonblank_noncomment_nondocstring": 81
+    },
+    "admin_ui.py": {
+      "physical_lines": 352,
+      "nonblank_noncomment_nondocstring": 294
+    },
+    "catalog.py": {
+      "physical_lines": 351,
+      "nonblank_noncomment_nondocstring": 325
+    },
+    "core.py": {
+      "physical_lines": 227,
+      "nonblank_noncomment_nondocstring": 164
+    },
+    "database.py": {
+      "physical_lines": 129,
+      "nonblank_noncomment_nondocstring": 105
+    },
+    "domain.py": {
+      "physical_lines": 26,
+      "nonblank_noncomment_nondocstring": 18
+    },
+    "editor_ui.py": {
+      "physical_lines": 264,
+      "nonblank_noncomment_nondocstring": 240
+    },
+    "governance.py": {
+      "physical_lines": 310,
+      "nonblank_noncomment_nondocstring": 273
+    },
+    "images.py": {
+      "physical_lines": 72,
+      "nonblank_noncomment_nondocstring": 51
+    },
+    "main.py": {
+      "physical_lines": 243,
+      "nonblank_noncomment_nondocstring": 207
+    },
+    "manage.py": {
+      "physical_lines": 45,
+      "nonblank_noncomment_nondocstring": 37
+    },
+    "market_ui.py": {
+      "physical_lines": 360,
+      "nonblank_noncomment_nondocstring": 318
+    },
+    "operations.py": {
+      "physical_lines": 267,
+      "nonblank_noncomment_nondocstring": 230
+    },
+    "products.py": {
+      "physical_lines": 31,
+      "nonblank_noncomment_nondocstring": 19
+    },
+    "products_ui.py": {
+      "physical_lines": 15,
+      "nonblank_noncomment_nondocstring": 8
+    },
+    "registration_ui.py": {
+      "physical_lines": 72,
+      "nonblank_noncomment_nondocstring": 61
+    },
+    "schema.py": {
+      "physical_lines": 99,
+      "nonblank_noncomment_nondocstring": 94
+    },
+    "security.py": {
+      "physical_lines": 51,
+      "nonblank_noncomment_nondocstring": 38
+    },
+    "trades.py": {
+      "physical_lines": 429,
+      "nonblank_noncomment_nondocstring": 383
+    },
+    "trades_ui.py": {
+      "physical_lines": 181,
+      "nonblank_noncomment_nondocstring": 150
+    },
+    "ui_common.py": {
+      "physical_lines": 133,
+      "nonblank_noncomment_nondocstring": 100
+    }
+  },
+  "physical_total": 3769,
+  "nonblank_noncomment_nondocstring_total": 3196
+}

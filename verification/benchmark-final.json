@@ -1,0 +1,37 @@
+{
+  "host": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "logical_cpus": 32
+  },
+  "products": 100000,
+  "workers": 100,
+  "note": "本机合成数据服务层测量，不等同于4核8GB指定环境验收，不含网络或GUI渲染。",
+  "list": {
+    "samples": 100,
+    "errors": 0,
+    "p95_seconds": 1.6861054999753833,
+    "under_2s_ratio_including_errors": 1.0,
+    "under_3s_ratio_including_errors": 1.0
+  },
+  "detail": {
+    "samples": 100,
+    "errors": 0,
+    "p95_seconds": 0.1667487000231631,
+    "under_2s_ratio_including_errors": 1.0,
+    "under_3s_ratio_including_errors": 1.0
+  },
+  "reserve": {
+    "samples": 100,
+    "errors": 0,
+    "p95_seconds": 0.5036367000429891,
+    "under_2s_ratio_including_errors": 1.0,
+    "under_3s_ratio_including_errors": 1.0
+  },
+  "confirm": {
+    "samples": 100,
+    "errors": 0,
+    "p95_seconds": 0.520151500008069,
+    "under_2s_ratio_including_errors": 1.0,
+    "under_3s_ratio_including_errors": 1.0
+  }
+}

@@ -1,0 +1,218 @@
+test_disabled_account_cannot_login (test_accounts.AccountTests.test_disabled_account_cannot_login)
+Disabled accounts cannot log in with a correct password. ... ok
+test_duplicate_registration_is_rejected (test_accounts.AccountTests.test_duplicate_registration_is_rejected)
+Duplicate names and phones do not create extra accounts. ... ok
+test_invalid_login (test_accounts.AccountTests.test_invalid_login)
+Wrong passwords and unknown accounts are rejected. ... ok
+test_registration_assigns_ordinary_roles (test_accounts.AccountTests.test_registration_assigns_ordinary_roles)
+New accounts receive buyer and seller roles only. ... ok
+test_valid_login (test_accounts.AccountTests.test_valid_login)
+Correct credentials return the account ID. ... ok
+test_admin_permissions_rechecked (test_workflows.WorkflowTests.test_admin_permissions_rechecked) ... ok
+test_audit_failure_and_export_are_recorded (test_workflows.WorkflowTests.test_audit_failure_and_export_are_recorded) ... ok
+test_bilateral_cancel_restores_publication (test_workflows.WorkflowTests.test_bilateral_cancel_restores_publication) ... ok
+test_combined_search_and_pagination (test_workflows.WorkflowTests.test_combined_search_and_pagination) ... ok
+test_completion_failure_does_not_sell_product (test_workflows.WorkflowTests.test_completion_failure_does_not_sell_product) ... ok
+test_completion_idempotent_and_snapshot_immutable (test_workflows.WorkflowTests.test_completion_idempotent_and_snapshot_immutable) ... ok
+test_confirmation_fault_rolls_back_both_states (test_workflows.WorkflowTests.test_confirmation_fault_rolls_back_both_states) ... ok
+test_contacts_hidden_before_confirm_and_after_completion (test_workflows.WorkflowTests.test_contacts_hidden_before_confirm_and_after_completion) ... ok
+test_database_image_failure_rolls_back_and_cleans (test_workflows.WorkflowTests.test_database_image_failure_rolls_back_and_cleans) ... ok
+test_disabled_seller_restore_does_not_republish (test_workflows.WorkflowTests.test_disabled_seller_restore_does_not_republish) ... ok
+test_edit_published_requires_new_review_and_preserves_history (test_workflows.WorkflowTests.test_edit_published_requires_new_review_and_preserves_history) ... ok
+test_image_success_and_source_independence (test_workflows.WorkflowTests.test_image_success_and_source_independence) ... ok
+test_legacy_empty_draft_requires_repair_or_delete (test_workflows.WorkflowTests.test_legacy_empty_draft_requires_repair_or_delete) ... ok
+test_more_than_five_images_rejected_atomically (test_workflows.WorkflowTests.test_more_than_five_images_rejected_atomically) ... ok
+test_notification_failure_does_not_undo_confirmation (test_workflows.WorkflowTests.test_notification_failure_does_not_undo_confirmation) ... ok
+test_overdue_delivery_remains_reserved (test_workflows.WorkflowTests.test_overdue_delivery_remains_reserved) ... ok
+test_owner_isolation (test_workflows.WorkflowTests.test_owner_isolation) ... ok
+test_required_fields_and_price (test_workflows.WorkflowTests.test_required_fields_and_price) ... ok
+test_restore_into_new_directory_and_refuse_overwrite (test_workflows.WorkflowTests.test_restore_into_new_directory_and_refuse_overwrite) ... ok
+test_review_rejection_and_stale_version (test_workflows.WorkflowTests.test_review_rejection_and_stale_version) ... ok
+test_schema_upgrade_preserves_old_rows (test_workflows.WorkflowTests.test_schema_upgrade_preserves_old_rows) ... ok
+test_second_image_failure_rolls_back_everything (test_workflows.WorkflowTests.test_second_image_failure_rolls_back_everything) ... ok
+test_self_reservation_forbidden_and_retry_idempotent (test_workflows.WorkflowTests.test_self_reservation_forbidden_and_retry_idempotent) ... ok
+test_soft_delete_draft (test_workflows.WorkflowTests.test_soft_delete_draft) ... ok
+test_timeout_boundary_and_fresh_request (test_workflows.WorkflowTests.test_timeout_boundary_and_fresh_request) ... ok
+test_twenty_concurrent_confirmations_only_one_succeeds (test_workflows.WorkflowTests.test_twenty_concurrent_confirmations_only_one_succeeds) ... ok
+test_violation_cancellation_never_republishes (test_workflows.WorkflowTests.test_violation_cancellation_never_republishes) ... ok
+test_waiting_blocks_edit_and_delist (test_workflows.WorkflowTests.test_waiting_blocks_edit_and_delist) ... ok
+test_zero_cohort_statistics_and_backup_restore (test_workflows.WorkflowTests.test_zero_cohort_statistics_and_backup_restore) ... ok
+
+----------------------------------------------------------------------
+Ran 34 tests in 4.193s
+
+OK
+All done! ✨ 🍰 ✨
+25 files would be left unchanged.
+
+------------------------------------
+Your code has been rated at 10.00/10
+
+* Getting build dependencies for sdist...
+running egg_info
+writing secondhand_trading_desktop.egg-info\PKG-INFO
+writing dependency_links to secondhand_trading_desktop.egg-info\dependency_links.txt
+writing entry points to secondhand_trading_desktop.egg-info\entry_points.txt
+writing requirements to secondhand_trading_desktop.egg-info\requires.txt
+writing top-level names to secondhand_trading_desktop.egg-info\top_level.txt
+reading manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+writing manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+* Building sdist...
+running sdist
+running egg_info
+writing secondhand_trading_desktop.egg-info\PKG-INFO
+writing dependency_links to secondhand_trading_desktop.egg-info\dependency_links.txt
+writing entry points to secondhand_trading_desktop.egg-info\entry_points.txt
+writing requirements to secondhand_trading_desktop.egg-info\requires.txt
+writing top-level names to secondhand_trading_desktop.egg-info\top_level.txt
+reading manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+writing manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+running check
+creating secondhand_trading_desktop-0.3.0
+creating secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+creating secondhand_trading_desktop-0.3.0\tests
+copying files to secondhand_trading_desktop-0.3.0...
+copying README.md -> secondhand_trading_desktop-0.3.0
+copying accounts.py -> secondhand_trading_desktop-0.3.0
+copying admin_ui.py -> secondhand_trading_desktop-0.3.0
+copying benchmark.py -> secondhand_trading_desktop-0.3.0
+copying catalog.py -> secondhand_trading_desktop-0.3.0
+copying core.py -> secondhand_trading_desktop-0.3.0
+copying database.py -> secondhand_trading_desktop-0.3.0
+copying demo.py -> secondhand_trading_desktop-0.3.0
+copying domain.py -> secondhand_trading_desktop-0.3.0
+copying editor_ui.py -> secondhand_trading_desktop-0.3.0
+copying governance.py -> secondhand_trading_desktop-0.3.0
+copying images.py -> secondhand_trading_desktop-0.3.0
+copying main.py -> secondhand_trading_desktop-0.3.0
+copying manage.py -> secondhand_trading_desktop-0.3.0
+copying market_ui.py -> secondhand_trading_desktop-0.3.0
+copying operations.py -> secondhand_trading_desktop-0.3.0
+copying products.py -> secondhand_trading_desktop-0.3.0
+copying products_ui.py -> secondhand_trading_desktop-0.3.0
+copying pyproject.toml -> secondhand_trading_desktop-0.3.0
+copying registration_ui.py -> secondhand_trading_desktop-0.3.0
+copying schema.py -> secondhand_trading_desktop-0.3.0
+copying security.py -> secondhand_trading_desktop-0.3.0
+copying trades.py -> secondhand_trading_desktop-0.3.0
+copying trades_ui.py -> secondhand_trading_desktop-0.3.0
+copying ui_common.py -> secondhand_trading_desktop-0.3.0
+copying secondhand_trading_desktop.egg-info\PKG-INFO -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying secondhand_trading_desktop.egg-info\SOURCES.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying secondhand_trading_desktop.egg-info\dependency_links.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying secondhand_trading_desktop.egg-info\entry_points.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying secondhand_trading_desktop.egg-info\requires.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying secondhand_trading_desktop.egg-info\top_level.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying tests\test_accounts.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_workflows.py -> secondhand_trading_desktop-0.3.0\tests
+Writing secondhand_trading_desktop-0.3.0\setup.cfg
+Creating tar archive
+removing 'secondhand_trading_desktop-0.3.0' (and everything under it)
+* Building wheel from sdist
+* Getting build dependencies for wheel...
+running egg_info
+writing secondhand_trading_desktop.egg-info\PKG-INFO
+writing dependency_links to secondhand_trading_desktop.egg-info\dependency_links.txt
+writing entry points to secondhand_trading_desktop.egg-info\entry_points.txt
+writing requirements to secondhand_trading_desktop.egg-info\requires.txt
+writing top-level names to secondhand_trading_desktop.egg-info\top_level.txt
+reading manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+writing manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+* Building wheel...
+running bdist_wheel
+running build
+running build_py
+creating build\lib
+copying accounts.py -> build\lib
+copying admin_ui.py -> build\lib
+copying catalog.py -> build\lib
+copying core.py -> build\lib
+copying database.py -> build\lib
+copying demo.py -> build\lib
+copying domain.py -> build\lib
+copying editor_ui.py -> build\lib
+copying governance.py -> build\lib
+copying images.py -> build\lib
+copying main.py -> build\lib
+copying manage.py -> build\lib
+copying market_ui.py -> build\lib
+copying operations.py -> build\lib
+copying products.py -> build\lib
+copying products_ui.py -> build\lib
+copying registration_ui.py -> build\lib
+copying schema.py -> build\lib
+copying security.py -> build\lib
+copying trades.py -> build\lib
+copying trades_ui.py -> build\lib
+copying ui_common.py -> build\lib
+copying benchmark.py -> build\lib
+running egg_info
+writing secondhand_trading_desktop.egg-info\PKG-INFO
+writing dependency_links to secondhand_trading_desktop.egg-info\dependency_links.txt
+writing entry points to secondhand_trading_desktop.egg-info\entry_points.txt
+writing requirements to secondhand_trading_desktop.egg-info\requires.txt
+writing top-level names to secondhand_trading_desktop.egg-info\top_level.txt
+reading manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+writing manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+installing to build\bdist.win-amd64\wheel
+running install
+running install_lib
+creating build\bdist.win-amd64\wheel
+copying build\lib\accounts.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\admin_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\benchmark.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\catalog.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\core.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\database.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\demo.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\domain.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\editor_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\governance.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\images.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\main.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\manage.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\market_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\operations.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\products.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\products_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\registration_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\schema.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\security.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\trades.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\trades_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\ui_common.py -> build\bdist.win-amd64\wheel\.
+running install_egg_info
+Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
+running install_scripts
+creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-92ufglvq\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+adding 'accounts.py'
+adding 'admin_ui.py'
+adding 'benchmark.py'
+adding 'catalog.py'
+adding 'core.py'
+adding 'database.py'
+adding 'demo.py'
+adding 'domain.py'
+adding 'editor_ui.py'
+adding 'governance.py'
+adding 'images.py'
+adding 'main.py'
+adding 'manage.py'
+adding 'market_ui.py'
+adding 'operations.py'
+adding 'products.py'
+adding 'products_ui.py'
+adding 'registration_ui.py'
+adding 'schema.py'
+adding 'security.py'
+adding 'trades.py'
+adding 'trades_ui.py'
+adding 'ui_common.py'
+adding 'secondhand_trading_desktop-0.3.0.dist-info/METADATA'
+adding 'secondhand_trading_desktop-0.3.0.dist-info/WHEEL'
+adding 'secondhand_trading_desktop-0.3.0.dist-info/entry_points.txt'
+adding 'secondhand_trading_desktop-0.3.0.dist-info/top_level.txt'
+adding 'secondhand_trading_desktop-0.3.0.dist-info/RECORD'
+removing build\bdist.win-amd64\wheel
+Successfully built secondhand_trading_desktop-0.3.0.tar.gz and secondhand_trading_desktop-0.3.0-py3-none-any.whl

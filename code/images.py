@@ -1,13 +1,13 @@
-﻿"""Validation helpers for product images."""
-import shutil
-from uuid import uuid4
+"""Validation helpers for product images."""
 
-import database
+import shutil
 import warnings
 from pathlib import Path
+from uuid import uuid4
 
 from PIL import Image, UnidentifiedImageError
 
+import database
 
 MAX_FILE_BYTES = 10 * 1024 * 1024
 MAX_PIXELS = 20_000_000
@@ -49,6 +49,7 @@ def validate_image(file_path: str | Path) -> str:
         raise ValueError("图片无法读取或文件已损坏。") from error
 
     return image_format
+
 
 def copy_image(file_path: str | Path) -> str:
     """Copy a validated image into application storage."""

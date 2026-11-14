@@ -47,6 +47,61 @@ def initialize_database() -> None:
                     FOREIGN KEY (account_id) REFERENCES accounts(id),
                     FOREIGN KEY (role_id) REFERENCES roles(id)
                 );
+                CREATE TABLE IF NOT EXISTS categories (
+                    id INTEGER PRIMARY KEY,
+                    name TEXT NOT NULL UNIQUE
+                );
+
+                CREATE TABLE IF NOT EXISTS products (
+                    id INTEGER PRIMARY KEY,
+                    seller_id INTEGER NOT NULL,
+                    category_id INTEGER,
+                    title TEXT NOT NULL DEFAULT '',
+                    description TEXT NOT NULL DEFAULT '',
+                    price_cents INTEGER NOT NULL DEFAULT 0
+                        CHECK (
+                            typeof(price_cents) = 'integer'
+                            AND price_cents >= 0
+                        ),
+                    status TEXT NOT NULL DEFAULT 'draft'
+                        CHECK (status IN (
+                            'draft', 'pending_review', 'published',
+                            'reserved', 'sold', 'delisted', 'violation'
+                        )),
+                    version INTEGER NOT NULL DEFAULT 1
+                        CHECK (version >= 1),
+                    created_at TEXT NOT NULL DEFAULT
+                        (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+                    updated_at TEXT NOT NULL DEFAULT
+                        (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+                    first_published_at TEXT,
+                    sold_at TEXT,
+                    FOREIGN KEY (seller_id) REFERENCES accounts(id),
+                    FOREIGN KEY (category_id) REFERENCES categories(id)
+                );
+
+                CREATE TABLE IF NOT EXISTS product_images (
+                    id INTEGER PRIMARY KEY,
+                    product_id INTEGER NOT NULL,
+                    file_path TEXT NOT NULL UNIQUE,
+                    display_order INTEGER NOT NULL
+                        CHECK (display_order >= 0),
+                    created_at TEXT NOT NULL DEFAULT
+                        (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+                    FOREIGN KEY (product_id) REFERENCES products(id)
+                        ON DELETE CASCADE,
+                    UNIQUE (product_id, display_order)
+                );
+                CREATE INDEX IF NOT EXISTS idx_products_seller
+                    ON products(seller_id);
+
+                CREATE INDEX IF NOT EXISTS idx_products_status_category
+                    ON products(status, category_id);
+
+                INSERT OR IGNORE INTO categories (name) VALUES ('数码');
+                INSERT OR IGNORE INTO categories (name) VALUES ('图书');
+                INSERT OR IGNORE INTO categories (name) VALUES ('生活用品');
+                INSERT OR IGNORE INTO categories (name) VALUES ('其他');
 
                 INSERT OR IGNORE INTO roles (name) VALUES ('buyer');
                 INSERT OR IGNORE INTO roles (name) VALUES ('seller');

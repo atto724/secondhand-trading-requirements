@@ -87,3 +87,27 @@ def authenticate(username: str, password: str) -> int:
         raise ValueError("账号已被禁用，请联系管理员。")
 
     return account["id"]
+
+def require_role(
+    connection: sqlite3.Connection,
+    account_id: int,
+    role_name: str,
+) -> None:
+    """Require an active account with the specified role."""
+    account = connection.execute(
+        "SELECT status FROM accounts WHERE id = ?",
+        (account_id,),
+    ).fetchone()
+
+    if account is None or account["status"] != "active":
+        raise ValueError("账号不存在或已被禁用。")
+
+    role = connection.execute(
+        "SELECT 1 FROM account_roles AS ar "
+        "JOIN roles AS r ON r.id = ar.role_id "
+        "WHERE ar.account_id = ? AND r.name = ?",
+        (account_id, role_name),
+    ).fetchone()
+
+    if role is None:
+        raise ValueError("当前账号没有执行此操作所需的角色。")

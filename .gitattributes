@@ -1,0 +1,2 @@
+# Preserve historical submissions byte-for-byte, including original line endings.
+archive/** -text

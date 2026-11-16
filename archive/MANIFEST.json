@@ -1,0 +1,14 @@
+[
+  {
+    "stage": "lab1",
+    "archive": "archive/lab1/实验1_241220141_冯爱丽.zip",
+    "sha256": "71515c98d0ef56fa04f436a700ab31e9f87f46855033bce4c29f3a007d3d8c51",
+    "source": "用户在实验三聊天提供的原始提交压缩包"
+  },
+  {
+    "stage": "lab2",
+    "archive": "archive/lab2/实验2_241220141_冯爱丽.zip",
+    "sha256": "ba35934f14f9c8cc61afd6ec50c5045e647dc3cb72bb486529294237724c3740",
+    "source": "用户在实验三聊天提供的原始提交压缩包"
+  }
+]

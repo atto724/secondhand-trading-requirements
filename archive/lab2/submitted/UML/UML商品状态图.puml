@@ -1,0 +1,38 @@
+@startuml
+title 二手交易系统商品状态图
+hide empty description
+
+state "草稿" as Draft
+state "待审核" as Review
+state "已发布" as Published
+state "已预约" as Reserved
+state "已成交" as Sold
+state "已下架" as Delisted
+state "违规下架" as Violation
+
+[*] --> Draft : 卖家保存草稿
+Draft --> Review : 提交审核 [必填项齐全且价格大于零]
+Review --> Published : 管理员审核通过
+Review --> Draft : 管理员驳回并填写原因
+
+Published --> Review : 卖家修改公开内容并提交 [无等待或已确认预约]
+Published --> Delisted : 卖家自行下架 [无等待或已确认预约]
+Published --> Reserved : 卖家确认一条等待预约
+Reserved --> Published : 已确认预约取消成功 [商品仍可公开]
+Reserved --> Sold : 卖家登记交付后，买家确认完成
+
+Published --> Violation : 管理员违规下架
+Reserved --> Violation : 管理员违规下架，已确认预约转人工处理
+Sold --> Review : 管理员核实确未成交并更正
+
+note right of Published
+  买家发起预约后，商品仍为已发布。
+  等待确认是预约记录的状态。
+end note
+
+note right of Reserved
+  卖家登记交付后，买家 7 天未确认：
+  商品保持已预约，系统提醒确认，
+  争议交管理员处理。
+end note
+@enduml

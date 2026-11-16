@@ -1,0 +1,58 @@
+@startuml
+title 二手交易系统组件图
+
+skinparam componentStyle uml2
+top to bottom direction
+
+component "前台界面\n买家与卖家" as Web
+component "管理后台界面" as AdminUI
+
+package "二手交易系统" {
+  component "账号与权限" as Account
+  component "商品管理与浏览" as Product
+  component "预约与交易" as Trade
+
+  component "后台治理" as Governance
+  note right of Governance
+    商品审核
+    违规处理
+    交易争议与成交更正
+  end note
+
+  component "站内通知" as Notice
+  component "统计分析" as Stats
+  component "审计与运维" as Audit
+}
+
+Web ..> Account : 登录与注册
+Web ..> Product : 浏览与管理商品
+Web ..> Trade : 办理预约与交易
+Web ..> Notice : 查看消息
+
+
+AdminUI ..> Account : 管理员授权与撤销
+AdminUI ..> Governance : 办理治理任务
+AdminUI ..> Audit : 查询日志与备份结果
+
+Product ..> Account : 校验账号与商品归属
+Trade ..> Account : 校验交易参与方
+Trade ..> Product : 读取商品与联动状态
+Product ..> Trade : 修改或下架前检查预约
+
+Governance ..> Account : 校验管理员权限与处理禁用
+Governance ..> Product : 审核、下架与更正商品状态
+Governance ..> Trade : 处理受影响预约与交易
+
+Trade ..> Notice : 通知预约与交易进度
+Governance ..> Notice : 通知审核与治理结果
+
+Stats ..> Account : 读取用户注册数据
+Stats ..> Product : 读取商品发布数据
+Stats ..> Trade : 读取预约与成交数据
+Stats ..> Audit : 读取审核与违规事件
+
+Account ..> Audit : 记录账号与授权操作
+Product ..> Audit : 记录商品变更
+Trade ..> Audit : 记录预约与交易操作
+Governance ..> Audit : 记录审核与治理操作
+@enduml

@@ -1,0 +1,50 @@
+@startuml
+title 二手交易系统卖家确认预约序列图
+autonumber
+
+actor 卖家 as Seller
+boundary "卖家预约管理页" as Page
+participant "账号与权限" as Account
+participant "预约与交易" as Trade
+participant "商品管理与浏览" as Product
+participant "站内通知" as Notice
+
+Seller -> Page : 点击确认预约
+Page -> Trade : 提交预约编号
+Trade -> Account : 校验卖家身份和商品归属
+Account --> Trade : 返回校验结果
+
+alt 无权操作
+  Trade --> Page : 提示无权确认
+else 有权操作
+  group 商品与预约的同一事务
+    Trade -> Product : 锁定商品并读取最新状态
+    Product --> Trade : 返回当前状态
+
+    alt 商品已发布且目标预约仍在等待确认
+      Trade -> Trade : 将目标预约置为已确认
+      Trade -> Product : 将商品置为已预约
+      Trade -> Trade : 将其他等待预约置为失效
+      Trade -> Trade : 提交事务
+    else 商品或预约状态已变化
+      Trade -> Trade : 结束事务
+    end
+  end
+
+  alt 事务成功提交
+    Trade ->> Notice : 通知确认结果和其他预约失效
+    note over Trade, Notice
+      站内通知发送失败时，预约确认结果仍然有效。
+      卖家刷新列表后可见最新状态，
+      买家可在「我的预约」查看结果。
+    end note
+    Trade --> Page : 确认成功，刷新预约列表
+  else 状态冲突或更新失败
+    Trade --> Page : 确认失败，提示刷新后查看最新状态
+  end
+end
+
+note over Trade, Product
+  任一步更新失败时，撤销本次事务的全部更新。
+end note
+@enduml

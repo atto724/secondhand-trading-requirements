@@ -2,6 +2,9 @@
 
 from contextlib import closing
 
+import database
+from images import copy_image
+
 from core import active, audit, now, transaction
 from database import connect_database
 
@@ -12,7 +15,8 @@ def seller_profile(actor, seller_id):
         active(connection, actor)
         seller = active(connection, seller_id)
         profile = connection.execute(
-            "SELECT nickname,bio,region FROM public_profiles WHERE account_id=?", (seller_id,)
+            "SELECT nickname,bio,region,avatar_path FROM public_profiles WHERE account_id=?",
+            (seller_id,),
         ).fetchone()
         stats = connection.execute(
             "SELECT COUNT(*) AS published,COALESCE(SUM(status='sold'),0) AS sold "
@@ -30,6 +34,7 @@ def seller_profile(actor, seller_id):
             "nickname": profile["nickname"] if profile else "",
             "bio": profile["bio"] if profile else "",
             "region": profile["region"] if profile else "",
+            "avatar_path": profile["avatar_path"] if profile else "",
             "published": stats["published"],
             "sold": stats["sold"],
             "selling": selling,
@@ -52,6 +57,26 @@ def update_profile(actor, nickname, bio, region):
             (actor, nickname.strip(), bio.strip(), region.strip(), now()),
         )
         audit(connection, actor, "update_profile", "account", actor)
+
+
+def update_avatar(actor, file_path):
+    """Validate and copy an owner-only avatar, compensating failed DB writes."""
+    relative = None
+    try:
+        with transaction() as connection:
+            active(connection, actor)
+            relative = copy_image(file_path)
+            connection.execute(
+                "INSERT INTO public_profiles(account_id,avatar_path,updated_at) VALUES(?,?,?) "
+                "ON CONFLICT(account_id) DO UPDATE SET avatar_path=excluded.avatar_path,updated_at=excluded.updated_at",
+                (actor, relative, now()),
+            )
+            audit(connection, actor, "update_avatar", "account", actor)
+    except Exception:
+        if relative:
+            (database.DATABASE_PATH.parent / relative).unlink(missing_ok=True)
+        raise
+    return relative
 
 
 def send_direct_message(actor, receiver, content):

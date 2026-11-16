@@ -5,11 +5,14 @@ import logging
 import sqlite3
 import tkinter as tk
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
 from tkinter import messagebox, ttk
 
 from PIL import Image, ImageOps, ImageTk
 
 import database
+import demo_assets
 
 BG = "#fbf3e6"
 PAPER = "#ffffff"
@@ -66,6 +69,17 @@ def stored_image(relative):
     if not path.is_relative_to(root):
         raise ValueError("图片路径无效。")
     return path
+
+
+def avatar_photo(parent, account_id, relative="", size=(56, 56)):
+    """Load a stored avatar or a bundled default without relying on temporary files."""
+    if relative:
+        try:
+            return thumbnail(parent, stored_image(relative), size)
+        except (OSError, ValueError):
+            pass
+    default = Path(demo_assets.__file__).parent / f"avatar_{(account_id-1)%4+1}.jpg"
+    return thumbnail(parent, default, size)
 
 
 class Window(tk.Toplevel):

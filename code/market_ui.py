@@ -17,7 +17,17 @@ from editor_ui import ProductEditor
 from products import list_categories, list_my_products
 from seller_ui import SellerPage
 from trades import reserve
-from ui_common import ACCENT, BG, INK, PAPER, DataTable, guarded, stored_image, thumbnail
+from ui_common import (
+    ACCENT,
+    BG,
+    INK,
+    PAPER,
+    DataTable,
+    avatar_photo,
+    guarded,
+    stored_image,
+    thumbnail,
+)
 
 
 def status_label(value):
@@ -144,6 +154,10 @@ class ProductDetail(tk.Frame):
         label("提交后可在「我的预约」查看确认进度。", fg="#80634f", wraplength=420)
         seller = tk.Frame(right, bg="#fffaf4", highlightbackground="#edcdb7", highlightthickness=1)
         seller.pack(fill="x", pady=(22, 10))
+        avatar = tk.Label(seller, bg="#fffaf4")
+        avatar.photo = avatar_photo(self, item["seller_id"], item["seller_avatar"])
+        avatar.configure(image=avatar.photo)
+        avatar.pack(side="left", padx=12, pady=10)
         tk.Label(
             seller, text=f"卖家 · {item['seller_name']}", bg="#fffaf4", fg=INK, padx=14, pady=14
         ).pack(anchor="w")
@@ -164,6 +178,10 @@ class ProductDetail(tk.Frame):
         ttk.Button(seller, text="进入卖家主页 →", command=open_seller).pack(
             anchor="e", padx=12, pady=(0, 10)
         )
+        if actor != item["seller_id"]:
+            ttk.Button(
+                right, text="私信卖家 / 咨询商品", style="Accent.TButton", command=open_seller
+            ).pack(anchor="w", pady=8)
         label("付款和交付在线下协商，平台记录预约及交易结果。", fg="#80634f", wraplength=420)
         if item["reviews"]:
             review = item["reviews"][0]

@@ -8,16 +8,20 @@ test_registration_assigns_ordinary_roles (test_accounts.AccountTests.test_regist
 New accounts receive buyer and seller roles only. ... ok
 test_valid_login (test_accounts.AccountTests.test_valid_login)
 Correct credentials return the account ID. ... ok
+test_avatar_database_failure_cleans_copy (test_community.CommunityTests.test_avatar_database_failure_cleans_copy) ... ok
+test_avatar_is_owner_scoped_and_survives_source_removal (test_community.CommunityTests.test_avatar_is_owner_scoped_and_survives_source_removal) ... ok
 test_bidirectional_messages_unread_and_third_party_isolation (test_community.CommunityTests.test_bidirectional_messages_unread_and_third_party_isolation) ... ok
 test_cursor_pagination_does_not_mark_unseen_older_messages_read (test_community.CommunityTests.test_cursor_pagination_does_not_mark_unseen_older_messages_read) ... ok
 test_invalid_or_disabled_sender_and_receiver_cannot_send (test_community.CommunityTests.test_invalid_or_disabled_sender_and_receiver_cannot_send) ... ok
 test_public_allowlist_zero_cohort_and_self_profile_update (test_community.CommunityTests.test_public_allowlist_zero_cohort_and_self_profile_update) ... ok
 test_public_inventory_and_rate_have_distinct_historical_scope (test_community.CommunityTests.test_public_inventory_and_rate_have_distinct_historical_scope) ... ok
+test_all_accounts_have_default_avatar_and_owner_can_replace (test_detail_ui.DetailPageTests.test_all_accounts_have_default_avatar_and_owner_can_replace) ... ok
 test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox (test_detail_ui.DetailPageTests.test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox) ... ok
 test_gallery_boundaries_and_real_thumbnail_switching (test_detail_ui.DetailPageTests.test_gallery_boundaries_and_real_thumbnail_switching) ... ok
 test_owner_profile_can_be_saved_without_a_product (test_detail_ui.DetailPageTests.test_owner_profile_can_be_saved_without_a_product) ... ok
+test_private_composer_visible_at_minimum_window_size (test_detail_ui.DetailPageTests.test_private_composer_visible_at_minimum_window_size) ... ok
 test_return_preserves_list_state_without_secondary_window (test_detail_ui.DetailPageTests.test_return_preserves_list_state_without_secondary_window) ... ok
-test_seller_box_opens_inline_store_and_keeps_messages_unread_until_chat (test_detail_ui.DetailPageTests.test_seller_box_opens_inline_store_and_keeps_messages_unread_until_chat) ... ok
+test_seller_box_opens_inline_store_with_visible_chat (test_detail_ui.DetailPageTests.test_seller_box_opens_inline_store_with_visible_chat) ... ok
 test_duplicate_legacy_category_merges_without_losing_products (test_gallery.GalleryTests.test_duplicate_legacy_category_merges_without_losing_products) ... ok
 test_gallery_images_classification_and_idempotency (test_gallery.GalleryTests.test_gallery_images_classification_and_idempotency) ... ok
 test_interrupted_photo_marker_does_not_duplicate_images (test_gallery.GalleryTests.test_interrupted_photo_marker_does_not_duplicate_images) ... ok
@@ -60,7 +64,7 @@ test_waiting_blocks_edit_and_delist (test_workflows.WorkflowTests.test_waiting_b
 test_zero_cohort_statistics_and_backup_restore (test_workflows.WorkflowTests.test_zero_cohort_statistics_and_backup_restore) ... ok
 
 ----------------------------------------------------------------------
-Ran 55 tests in 30.380s
+Ran 59 tests in 34.723s
 
 OK
 ͼƬ�����ݻ���handbag����ǰ״̬����ЧԤԼ���ƣ�
@@ -123,6 +127,10 @@ copying trades_ui.py -> secondhand_trading_desktop-0.3.0
 copying ui_common.py -> secondhand_trading_desktop-0.3.0
 copying demo_assets\README.md -> secondhand_trading_desktop-0.3.0\demo_assets
 copying demo_assets\__init__.py -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\avatar_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\avatar_2.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\avatar_3.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\avatar_4.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
 copying demo_assets\backpack.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
 copying demo_assets\backpack_detail_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
 copying demo_assets\badminton.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
@@ -216,6 +224,10 @@ writing top-level names to secondhand_trading_desktop.egg-info\top_level.txt
 reading manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
 writing manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
 copying demo_assets\README.md -> build\lib\demo_assets
+copying demo_assets\avatar_1.jpg -> build\lib\demo_assets
+copying demo_assets\avatar_2.jpg -> build\lib\demo_assets
+copying demo_assets\avatar_3.jpg -> build\lib\demo_assets
+copying demo_assets\avatar_4.jpg -> build\lib\demo_assets
 copying demo_assets\backpack.jpg -> build\lib\demo_assets
 copying demo_assets\backpack_detail_1.jpg -> build\lib\demo_assets
 copying demo_assets\badminton.jpg -> build\lib\demo_assets
@@ -256,6 +268,10 @@ copying build\lib\core.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\database.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\demo.py -> build\bdist.win-amd64\wheel\.
 creating build\bdist.win-amd64\wheel\demo_assets
+copying build\lib\demo_assets\avatar_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\avatar_2.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\avatar_3.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\avatar_4.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
 copying build\lib\demo_assets\backpack.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
 copying build\lib\demo_assets\backpack_detail_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
 copying build\lib\demo_assets\badminton.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
@@ -306,7 +322,7 @@ running install_egg_info
 Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
 running install_scripts
 creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
-creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-kjf3rw0h\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-oqzqw8bz\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
 adding 'accounts.py'
 adding 'admin_ui.py'
 adding 'benchmark.py'
@@ -334,6 +350,10 @@ adding 'trades_ui.py'
 adding 'ui_common.py'
 adding 'demo_assets/README.md'
 adding 'demo_assets/__init__.py'
+adding 'demo_assets/avatar_1.jpg'
+adding 'demo_assets/avatar_2.jpg'
+adding 'demo_assets/avatar_3.jpg'
+adding 'demo_assets/avatar_4.jpg'
 adding 'demo_assets/backpack.jpg'
 adding 'demo_assets/backpack_detail_1.jpg'
 adding 'demo_assets/badminton.jpg'

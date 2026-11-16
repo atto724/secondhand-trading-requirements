@@ -4,11 +4,20 @@ import unittest
 from contextlib import closing
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
+from PIL import Image
 
 import database
 from accounts import create_account
 from catalog import search_products
-from community import conversation, inbox, seller_profile, send_direct_message, update_profile
+from community import (
+    update_avatar,
+    conversation,
+    inbox,
+    seller_profile,
+    send_direct_message,
+    update_profile,
+)
 
 
 class CommunityTests(unittest.TestCase):
@@ -129,6 +138,31 @@ class CommunityTests(unittest.TestCase):
         self.assertEqual(len(older), 5)
         self.assertFalse({row["id"] for row in newest} & {row["id"] for row in older})
         self.assertEqual(inbox(self.seller)[0]["unread"], 0)
+
+    def test_avatar_is_owner_scoped_and_survives_source_removal(self):
+        source = Path(self.folder.name) / "avatar.png"
+        Image.new("RGB", (30, 30), "blue").save(source)
+        relative = update_avatar(self.seller, source)
+        source.unlink()
+        self.assertTrue((database.DATABASE_PATH.parent / relative).is_file())
+        self.assertEqual(seller_profile(self.buyer, self.seller)["avatar_path"], relative)
+        update_profile(self.seller, "昵称", "简介", "所在地")
+        self.assertEqual(seller_profile(self.buyer, self.seller)["avatar_path"], relative)
+        self.assertEqual(seller_profile(self.seller, self.buyer)["avatar_path"], "")
+        broken = Path(self.folder.name) / "broken.jpg"
+        broken.write_text("invalid", encoding="utf-8")
+        with self.assertRaises(ValueError):
+            update_avatar(self.seller, broken)
+        self.assertEqual(seller_profile(self.buyer, self.seller)["avatar_path"], relative)
+
+    def test_avatar_database_failure_cleans_copy(self):
+        source = Path(self.folder.name) / "avatar.png"
+        Image.new("RGB", (30, 30), "blue").save(source)
+        with patch("community.audit", side_effect=RuntimeError("rollback")):
+            with self.assertRaises(RuntimeError):
+                update_avatar(self.seller, source)
+        self.assertEqual(seller_profile(self.buyer, self.seller)["avatar_path"], "")
+        self.assertEqual(list((database.DATABASE_PATH.parent / "images").glob("*")), [])
 
 
 if __name__ == "__main__":

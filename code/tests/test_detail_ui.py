@@ -1,5 +1,6 @@
 """Native Tk regression checks for in-place navigation and multi-image details."""
 
+import gc
 import tkinter as tk
 from tkinter import ttk
 import unittest
@@ -28,7 +29,7 @@ class DetailPageTests(unittest.TestCase):
         self.actor = demo_accounts()["demo_buyer"]
         self.root = tk.Tk()
         self.root.withdraw()
-        self.addCleanup(self.root.destroy)
+        self.addCleanup(self.cleanup_widgets)
         configure_style(self.root)
         self.root.geometry("1080x740")
         self.page = CatalogPage(self.root, self.actor)
@@ -37,6 +38,13 @@ class DetailPageTests(unittest.TestCase):
             self.product = connection.execute(
                 "SELECT product_id FROM demo_items WHERE sample_key='handbag'"
             ).fetchone()[0]
+
+    def cleanup_widgets(self):
+        """Release Tcl images and variables on the UI thread before threaded tests."""
+        self.root.destroy()
+        self.page = None
+        self.root = None
+        gc.collect()
 
     def test_return_preserves_list_state_without_secondary_window(self):
         self.page.keyword.set("手提包")
@@ -68,7 +76,7 @@ class DetailPageTests(unittest.TestCase):
         self.assertEqual(view.index, 0)
         self.assertTrue(view.previous.instate(["disabled"]))
 
-    def test_seller_box_opens_inline_store_and_keeps_messages_unread_until_chat(self):
+    def test_seller_box_opens_inline_store_with_visible_chat(self):
         seller = demo_accounts()["demo_seller"]
         send_direct_message(seller, self.actor, "询问商品")
         detail = ProductDetail(self.page, self.actor, self.product)
@@ -87,7 +95,7 @@ class DetailPageTests(unittest.TestCase):
         store = next(widget for widget in detail.winfo_children() if isinstance(widget, SellerPage))
         self.root.update()
         self.assertEqual(store.winfo_toplevel(), self.root)
-        self.assertEqual(inbox(self.actor)[0]["unread"], 1)
+        self.assertEqual(inbox(self.actor)[0]["unread"], 0)
         self.assertEqual(len(store.table.tree.get_children()), 8)
         store.table.tree.selection_set(store.table.tree.get_children()[0])
         store.open_product()
@@ -124,6 +132,30 @@ class DetailPageTests(unittest.TestCase):
         owner.fields[0].insert(0, "买家的昵称")
         owner.save_profile()
         self.assertEqual(seller_profile(self.actor, self.actor)["nickname"], "买家的昵称")
+
+    def test_private_composer_visible_at_minimum_window_size(self):
+        seller = demo_accounts()["demo_seller"]
+        store = SellerPage(self.page, self.actor, seller)
+        self.root.deiconify()
+        self.root.update()
+        for widget in (store.chat.editor, store.chat.send_button):
+            self.assertTrue(widget.winfo_viewable())
+            self.assertGreater(widget.winfo_height(), 15)
+            self.assertLessEqual(
+                widget.winfo_rooty() + widget.winfo_height(),
+                self.root.winfo_rooty() + self.root.winfo_height(),
+            )
+        self.root.withdraw()
+
+    def test_all_accounts_have_default_avatar_and_owner_can_replace(self):
+        owner = SellerPage(self.page, self.actor, self.actor)
+        self.assertTrue(owner.avatar.cget("image"))
+        assets = Path(__file__).resolve().parent.parent / "demo_assets"
+        with patch(
+            "seller_ui.filedialog.askopenfilename", return_value=str(assets / "avatar_1.jpg")
+        ):
+            owner.choose_avatar()
+        self.assertTrue(seller_profile(self.actor, self.actor)["avatar_path"])
 
 
 if __name__ == "__main__":

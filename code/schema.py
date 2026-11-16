@@ -115,6 +115,12 @@ def migrate(connection):
             connection.execute(f"ALTER TABLE products ADD COLUMN {name} {declaration}")
     connection.commit()
     connection.executescript(SQL)
+    profile_columns = {row[1] for row in connection.execute("PRAGMA table_info(public_profiles)")}
+    if "avatar_path" not in profile_columns:
+        connection.execute(
+            "ALTER TABLE public_profiles ADD COLUMN avatar_path TEXT NOT NULL DEFAULT ''"
+        )
+        connection.commit()
     migrate_categories(connection)
 
 

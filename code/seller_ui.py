@@ -2,12 +2,19 @@
 
 import tkinter as tk
 from datetime import datetime, timedelta, timezone
-from tkinter import ttk
+from tkinter import filedialog, ttk
 
 from catalog import search_products
-from community import conversation, inbox, seller_profile, send_direct_message, update_profile
+from community import (
+    conversation,
+    inbox,
+    seller_profile,
+    send_direct_message,
+    update_avatar,
+    update_profile,
+)
 from core import price
-from ui_common import ACCENT, BG, INK, PAPER, DataTable, guarded
+from ui_common import ACCENT, BG, INK, PAPER, DataTable, avatar_photo, guarded
 
 
 def local_time(value):
@@ -42,25 +49,28 @@ class ChatPanel(ttk.Frame):
         self.status = ttk.Label(toolbar, style="Sub.TLabel")
         self.status.pack(side="left")
         history_frame = ttk.Frame(self)
-        history_frame.pack(fill="both", expand=True)
+        composer = ttk.Frame(self)
+        composer.pack(side="bottom", fill="x")
         # Reparenting Tk widgets is unsupported; pack into their original parent using in_.
         self.history.pack(in_=history_frame, side="left", fill="both", expand=True)
         scrollbar.pack(in_=history_frame, side="right", fill="y")
         ttk.Label(
-            self,
-            text="私信（最多1000字）：Enter换行，Ctrl+Enter发送；消息仅在本机数据库内流转。",
+            composer,
+            text="私信（最多1000字）：Enter换行，Ctrl+Enter发送。",
             style="Sub.TLabel",
+            wraplength=320,
         ).pack(anchor="w", pady=8)
-        self.editor = tk.Text(self, height=3, wrap="word", font=("Microsoft YaHei", 10))
+        self.editor = tk.Text(composer, height=3, wrap="word", font=("Microsoft YaHei", 10))
         self.editor.pack(fill="x")
         self.editor.bind("<Control-Return>", self.keyboard_send)
         self.send_button = ttk.Button(
-            self,
+            composer,
             text="发送私信",
             style="Accent.TButton",
             command=lambda: guarded(self, self.send_message),
         )
         self.send_button.pack(anchor="e", pady=8)
+        history_frame.pack(fill="both", expand=True)
         self.refresh()
 
     def refresh(self, older=False):
@@ -170,6 +180,13 @@ class SellerPage(tk.Frame):
             )
         header = tk.Frame(self, bg=PAPER, highlightbackground="#edcdb7", highlightthickness=1)
         header.pack(fill="x", padx=20, pady=10)
+        self.avatar = tk.Label(header, bg=PAPER)
+        self.avatar.photo = avatar_photo(self, seller_id, data["avatar_path"], (72, 72))
+        self.avatar.configure(image=self.avatar.photo)
+        self.avatar.pack(side="left", anchor="n", padx=16, pady=16)
+        info = tk.Frame(header, bg=PAPER)
+        info.pack(side="left", fill="both", expand=True)
+        header = info
         title = data["nickname"] or data["username"]
         tk.Label(
             header, text=f"{title} 的主页", font=("Microsoft YaHei", 22), bg=PAPER, fg=INK
@@ -207,8 +224,10 @@ class SellerPage(tk.Frame):
             background=PAPER,
             style="Sub.TLabel",
         ).pack(anchor="w", padx=18, pady=(0, 12))
-        tabs = ttk.Notebook(self)
-        tabs.pack(fill="both", expand=True, padx=20, pady=(0, 12))
+        body = ttk.Frame(self)
+        body.pack(fill="both", expand=True, padx=20, pady=(0, 12))
+        tabs = ttk.Notebook(body)
+        tabs.pack(side="left", fill="both", expand=True)
         products = ttk.Frame(tabs, padding=12)
         tabs.add(products, text="在售商品")
         self.table = DataTable(
@@ -229,21 +248,18 @@ class SellerPage(tk.Frame):
         self.count = ttk.Label(footer)
         self.count.pack(side="left", padx=12)
         if actor != seller_id:
-            chat = ttk.Frame(tabs)
-            tabs.add(chat, text="私信卖家")
-
-            def load_chat(_event=None):
-                if tabs.select() == str(chat) and not chat.winfo_children():
-                    guarded(
-                        chat,
-                        lambda: ChatPanel(chat, actor, seller_id).pack(fill="both", expand=True),
-                    )
-
-            tabs.bind("<<NotebookTabChanged>>", load_chat)
-            ttk.Button(header, text="私信卖家 →", command=lambda: tabs.select(chat)).pack(
-                anchor="e", padx=18, pady=8
-            )
+            chat_area = tk.LabelFrame(body, text="私信卖家", bg=BG, fg=ACCENT, width=380)
+            chat_area.pack(side="right", fill="both", padx=(12, 0))
+            chat_area.pack_propagate(False)
+            self.chat = ChatPanel(chat_area, actor, seller_id)
+            self.chat.pack(fill="both", expand=True)
         else:
+            ttk.Label(
+                header,
+                text="这是你自己的主页，私信请到「消息中心 → 私信会话」查看。",
+                background=PAPER,
+                style="Sub.TLabel",
+            ).pack(anchor="w", padx=18, pady=6)
             edit = ttk.Frame(tabs, padding=18)
             tabs.add(edit, text="编辑我的公开资料")
             self.fields = []
@@ -259,12 +275,27 @@ class SellerPage(tk.Frame):
                 field.insert(0, value)
                 field.grid(row=row, column=1, sticky="ew", pady=8)
                 self.fields.append(field)
+            ttk.Button(
+                edit, text="更换头像", command=lambda: guarded(self, self.choose_avatar)
+            ).grid(row=3, column=0, sticky="w", pady=10)
             self.saved = ttk.Label(edit, style="Sub.TLabel")
             self.saved.grid(row=4, column=0, columnspan=2, sticky="w")
             ttk.Button(
                 edit, text="保存公开资料", command=lambda: guarded(self, self.save_profile)
             ).grid(row=3, column=1, sticky="e", pady=10)
         self.refresh()
+
+    def choose_avatar(self):
+        """Store a validated local copy, leaving the old avatar intact on failure."""
+        source = filedialog.askopenfilename(
+            parent=self, title="选择头像", filetypes=[("图片", "*.jpg *.jpeg *.png")]
+        )
+        if not source:
+            return
+        relative = update_avatar(self.actor, source)
+        self.avatar.photo = avatar_photo(self, self.actor, relative, (72, 72))
+        self.avatar.configure(image=self.avatar.photo)
+        self.saved.configure(text="头像已保存。")
 
     def save_profile(self):
         """Persist only this account; refreshed header appears when reopening the page."""

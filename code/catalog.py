@@ -252,7 +252,9 @@ def product_detail(actor, product_id):
             (actor,),
         ).fetchone()
         seller = connection.execute(
-            "SELECT username,status FROM accounts WHERE id=?", (product["seller_id"],)
+            "SELECT a.username,a.status,COALESCE(p.avatar_path, '') AS avatar_path "
+            "FROM accounts a LEFT JOIN public_profiles p ON p.account_id=a.id WHERE a.id=?",
+            (product["seller_id"],),
         ).fetchone()
         public = (
             product["status"] == "published"
@@ -263,6 +265,7 @@ def product_detail(actor, product_id):
             raise ValueError("商品当前不可公开查看，请从预约记录查看历史快照。")
         result = dict(product)
         result["seller_name"] = seller["username"]
+        result["seller_avatar"] = seller["avatar_path"]
         category = connection.execute(
             "SELECT name FROM categories WHERE id=?", (product["category_id"],)
         ).fetchone()

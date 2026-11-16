@@ -404,6 +404,15 @@ def transaction_detail(actor, reservation_id, admin_reason=""):
             admin_reason = reason_required(admin_reason)
         result = dict(row)
         result["snapshot"] = json.loads(row["snapshot"])
+        identities = {
+            item["id"]: item["username"]
+            for item in connection.execute(
+                "SELECT id,username FROM accounts WHERE id IN (?,?)",
+                (row["buyer_id"], row["seller_id"]),
+            )
+        }
+        result["buyer_name"] = identities[row["buyer_id"]]
+        result["seller_name"] = identities[row["seller_id"]]
         result["contact"] = None
         if row["status"] in ("confirmed", "delivered", "cancel_requested") or not participant:
             if participant:

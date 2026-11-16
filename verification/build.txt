@@ -18,6 +18,8 @@ test_latest_read_receipt_is_cleared_by_a_new_unread_message (test_community.Comm
 test_public_allowlist_zero_cohort_and_self_profile_update (test_community.CommunityTests.test_public_allowlist_zero_cohort_and_self_profile_update) ... ok
 test_public_inventory_and_rate_have_distinct_historical_scope (test_community.CommunityTests.test_public_inventory_and_rate_have_distinct_historical_scope) ... ok
 test_all_accounts_have_default_avatar_and_owner_can_replace (test_detail_ui.DetailPageTests.test_all_accounts_have_default_avatar_and_owner_can_replace) ... ok
+test_booking_detail_keeps_snapshot_images_and_refresh_rechecks_contact (test_detail_ui.DetailPageTests.test_booking_detail_keeps_snapshot_images_and_refresh_rechecks_contact) ... ok
+test_buyer_and_seller_booking_details_open_inline_and_preserve_category (test_detail_ui.DetailPageTests.test_buyer_and_seller_booking_details_open_inline_and_preserve_category) ... ok
 test_chat_long_text_wraps_and_refresh_keeps_one_bubble_per_message (test_detail_ui.DetailPageTests.test_chat_long_text_wraps_and_refresh_keeps_one_bubble_per_message) ... ok
 test_chat_receipt_only_appears_after_latest_outgoing_is_read (test_detail_ui.DetailPageTests.test_chat_receipt_only_appears_after_latest_outgoing_is_read) ... ok
 test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox (test_detail_ui.DetailPageTests.test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox) ... ok
@@ -82,7 +84,7 @@ test_waiting_blocks_edit_and_delist (test_workflows.WorkflowTests.test_waiting_b
 test_zero_cohort_statistics_and_backup_restore (test_workflows.WorkflowTests.test_zero_cohort_statistics_and_backup_restore) ... ok
 
 ----------------------------------------------------------------------
-Ran 77 tests in 56.301s
+Ran 79 tests in 64.401s
 
 OK
 ͼƬ�����ݻ���handbag����ǰ״̬����ЧԤԼ���ƣ�
@@ -341,7 +343,7 @@ running install_egg_info
 Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
 running install_scripts
 creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
-creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-21orartm\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-7t7ydv2u\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
 adding 'accounts.py'
 adding 'admin_ui.py'
 adding 'benchmark.py'

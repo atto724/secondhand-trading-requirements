@@ -16,7 +16,18 @@ from trades import (
     respond_cancel,
     transaction_detail,
 )
-from ui_common import ACCENT, BG, INK, ProductRows, TextWindow, display_value, guarded
+from ui_common import (
+    ACCENT,
+    BG,
+    INK,
+    PAPER,
+    MUTED,
+    ProductRows,
+    display_value,
+    guarded,
+    stored_image,
+    thumbnail,
+)
 
 RESERVATION_GROUPS = (
     ("all", "全部", set(LABELS)),
@@ -74,6 +85,276 @@ def reservation_actions(scope, actor, row):
     elif state == "cancel_requested" and row["cancel_by"] != actor:
         actions = [("同意取消", "agree"), ("不同意，转人工", "disagree")]
     return actions
+
+
+class ReservationDetail(tk.Frame):
+    """A read-only, in-page booking view built from authorized historical content."""
+
+    def __init__(self, parent, actor, data, scope="buyer", admin_reason=""):
+        super().__init__(parent, bg=BG)
+        self.actor, self.data, self.scope, self.admin_reason = actor, data, scope, admin_reason
+        self.photos = []
+        self.picture_index = 0
+        self.place(x=0, y=0, relwidth=1, relheight=1)
+        self.lift()
+        header = tk.Frame(self, bg=BG)
+        header.pack(fill="x", padx=22, pady=14)
+        back = {"buyer": "← 返回我的预约", "seller": "← 返回卖家预约", "admin": "← 返回交易管理"}[
+            scope
+        ]
+        tk.Button(
+            header,
+            text=back,
+            command=self.destroy,
+            bg=BG,
+            fg=ACCENT,
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+        ).pack(side="left")
+        ttk.Button(header, text="刷新详情", command=lambda: guarded(self, self.reload)).pack(
+            side="right"
+        )
+        self.canvas = tk.Canvas(self, bg=BG, highlightthickness=0)
+        scroll = ttk.Scrollbar(self, command=self.canvas.yview)
+        scroll.pack(side="right", fill="y")
+        self.canvas.pack(fill="both", expand=True)
+        self.canvas.configure(yscrollcommand=scroll.set)
+        self.body = tk.Frame(self.canvas, bg=BG)
+        window = self.canvas.create_window(20, 0, window=self.body, anchor="nw")
+        self.canvas.bind(
+            "<Configure>",
+            lambda event: self.canvas.itemconfigure(window, width=max(680, event.width - 40)),
+        )
+        self.body.bind(
+            "<Configure>", lambda event: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+        title = tk.Frame(self.body, bg=BG)
+        title.pack(fill="x", pady=(0, 14))
+        tk.Label(title, text="预约详情", font=("Microsoft YaHei", 22), bg=BG, fg=INK).pack(
+            side="left"
+        )
+        tk.Label(
+            title,
+            text=reservation_status(scope, actor, data),
+            bg="#fbe9d8",
+            fg=ACCENT,
+            padx=16,
+            pady=7,
+        ).pack(side="right")
+        tk.Label(
+            self.body,
+            text=f"预约编号 {data['id']}   ·   创建于 {display_value(data['created_at'],'created_at')}",
+            bg=BG,
+            fg=MUTED,
+        ).pack(anchor="w", pady=(0, 12))
+        snapshot = data["snapshot"]
+        card = self.section("预约时的商品")
+        tk.Label(
+            card, text="商品信息保存于发起预约时，后续修改不会改变这份记录。", bg=PAPER, fg=MUTED
+        ).pack(anchor="w", pady=(0, 12))
+        content = tk.Frame(card, bg=PAPER)
+        content.pack(fill="both", expand=True)
+        content.columnconfigure(1, weight=1)
+        gallery = tk.Frame(content, bg=PAPER)
+        gallery.grid(row=0, column=0, sticky="n", padx=(0, 24))
+        self.large = tk.Label(gallery, bg="#f3ece3")
+        self.large.pack()
+        self.images = snapshot.get("images", [])
+        strip = tk.Frame(gallery, bg=PAPER)
+        strip.pack(pady=8)
+        for index, value in enumerate(self.images):
+            try:
+                relative = value.get("file_path") if isinstance(value, dict) else value
+                photo = thumbnail(self, stored_image(relative), (45, 45))
+                self.photos.append(photo)
+                tk.Button(
+                    strip,
+                    image=photo,
+                    command=lambda position=index: self.show_image(position),
+                    relief="flat",
+                    bg=PAPER,
+                    bd=1,
+                ).pack(side="left", padx=3)
+            except (OSError, ValueError, TypeError):
+                tk.Button(
+                    strip,
+                    text=f"图片{index+1}",
+                    command=lambda position=index: self.show_image(position),
+                ).pack(side="left", padx=3)
+        info = tk.Frame(content, bg=PAPER)
+        info.grid(row=0, column=1, sticky="nsew")
+        tk.Label(
+            info,
+            text=snapshot.get("title") or "商品标题未记录",
+            font=("Microsoft YaHei", 20),
+            bg=PAPER,
+            fg=INK,
+            wraplength=500,
+            justify="left",
+        ).pack(anchor="w")
+        cents = snapshot.get("price_cents")
+        tk.Label(
+            info,
+            text=f"¥ {cents/100:.2f}" if cents is not None else "价格未记录",
+            font=("Microsoft YaHei", 24),
+            bg=PAPER,
+            fg=ACCENT,
+        ).pack(anchor="w", pady=12)
+        tags = " · ".join(
+            str(snapshot.get(key) or "未注明") for key in ("condition_label", "shipping")
+        )
+        tk.Label(
+            info,
+            text=tags + (" · 可议价" if snapshot.get("negotiable") else ""),
+            bg="#fff1e3",
+            fg=ACCENT,
+            padx=10,
+            pady=5,
+        ).pack(anchor="w")
+        self.description = tk.Label(
+            info,
+            text=snapshot.get("description") or "暂无文字描述",
+            bg=PAPER,
+            fg=INK,
+            wraplength=500,
+            justify="left",
+            anchor="w",
+        )
+        self.description.pack(fill="x", pady=14)
+        info.bind(
+            "<Configure>",
+            lambda event: self.description.configure(wraplength=max(180, event.width)),
+        )
+        self.show_image(0)
+        self.render_progress(data)
+        people = self.section("交易双方与联系方式")
+        self.field(people, "买家", data.get("buyer_name", f"用户 {data['buyer_id']}"))
+        self.field(people, "卖家", data.get("seller_name", f"用户 {data['seller_id']}"))
+        contact = data.get("contact")
+        if isinstance(contact, list):
+            contact = "；".join(f"账号 {row['id']}：{row['phone']}" for row in contact)
+        self.contact_text = contact or "当前状态暂不可查看交易电话。"
+        self.field(people, "交易电话", self.contact_text)
+        tk.Label(
+            people,
+            text="平台记录预约及交易结果，付款和交付由双方线下协商。",
+            bg=PAPER,
+            fg=MUTED,
+            wraplength=850,
+        ).pack(anchor="w", pady=8)
+        handling = self.section("取消与处理说明")
+        self.field(handling, "处理原因", data.get("reason") or "暂无取消或争议处理记录。")
+        if data.get("cancel_by"):
+            self.field(
+                handling, "申请方", "买家" if data["cancel_by"] == data["buyer_id"] else "卖家"
+            )
+        self.bind_scroll(self)
+        self.bind("<Escape>", lambda event: self.destroy())
+        self.focus_set()
+
+    def render_progress(self, data):
+        """Show actual milestone times, including closed or corrected histories."""
+        progress = self.section("交易进度")
+        steps = (
+            ("发起预约", "created_at"),
+            ("卖家确认", "confirmed_at"),
+            ("登记交付", "delivered_at"),
+            ("确认成交", "completed_at"),
+        )
+        for index, (label, key) in enumerate(steps):
+            progress.columnconfigure(index, weight=1, uniform="step")
+            cell = tk.Frame(progress, bg=PAPER)
+            cell.grid(row=1, column=index, sticky="nsew", padx=8, pady=10)
+            stamp = data.get(key)
+            tk.Label(
+                cell,
+                text=f"{'●' if stamp else '○'}  {label}",
+                bg=PAPER,
+                fg=ACCENT if stamp else MUTED,
+                font=("Microsoft YaHei", 11),
+            ).pack(anchor="w")
+            tk.Label(
+                cell,
+                text=display_value(stamp, key) if stamp else "尚未发生",
+                bg=PAPER,
+                fg=MUTED,
+                wraplength=175,
+                justify="left",
+            ).pack(anchor="w", pady=6)
+        if data["status"] in (
+            "cancelled",
+            "rejected",
+            "expired",
+            "corrected",
+            "manual",
+            "cancel_requested",
+        ):
+            tk.Label(
+                progress,
+                text=f"当前：{LABELS[data['status']]}，以上时间保留实际发生记录，以当前状态为准。",
+                bg=PAPER,
+                fg=ACCENT,
+                wraplength=850,
+            ).grid(row=2, column=0, columnspan=4, sticky="w", pady=8)
+
+    def section(self, title):
+        """Create a flat, bordered white information section."""
+        card = tk.Frame(
+            self.body,
+            bg=PAPER,
+            highlightbackground="#edcdb7",
+            highlightthickness=1,
+            padx=20,
+            pady=16,
+        )
+        card.pack(fill="x", pady=(0, 16))
+        # Progress uses grid inside its content; keep section title in its own parent.
+        heading = tk.Label(card, text=title, bg=PAPER, fg=INK, font=("Microsoft YaHei", 13))
+        heading.pack(anchor="w", pady=(0, 10))
+        content = tk.Frame(card, bg=PAPER)
+        content.pack(fill="both", expand=True)
+        return content
+
+    def field(self, parent, label, value):
+        """Render readable labels and wrapped values rather than internal field names."""
+        tk.Label(
+            parent,
+            text=f"{label}：{value}",
+            bg=PAPER,
+            fg=INK,
+            wraplength=900,
+            justify="left",
+            anchor="w",
+        ).pack(fill="x", pady=6)
+
+    def show_image(self, index):
+        """Keep original snapshot images available with missing-file fallback."""
+        self.picture_index = index
+        if not self.images:
+            self.large.configure(image="", text="预约时未添加商品图片", width=30, height=14)
+            return
+        value = self.images[index]
+        relative = value.get("file_path") if isinstance(value, dict) else value
+        try:
+            self.large.photo = thumbnail(self, stored_image(relative), (280, 280))
+            self.large.configure(image=self.large.photo, text="", width=280, height=280)
+        except (OSError, ValueError, TypeError):
+            self.large.configure(image="", text="原图片缺失，无法预览", width=30, height=14)
+
+    def bind_scroll(self, widget):
+        """Allow scrolling from anywhere in a long detail view."""
+        widget.bind(
+            "<MouseWheel>", lambda event: self.canvas.yview_scroll(-int(event.delta / 120), "units")
+        )
+        for child in widget.winfo_children():
+            self.bind_scroll(child)
+
+    def reload(self):
+        """Recheck current authorization and contact visibility when refreshing."""
+        data = transaction_detail(self.actor, self.data["id"], self.admin_reason)
+        ReservationDetail(self.master, self.actor, data, self.scope, self.admin_reason)
+        self.destroy()
 
 
 class ReservationsPage(ttk.Frame):
@@ -268,20 +549,7 @@ class ReservationsPage(ttk.Frame):
         if reason is None:
             return
         data = transaction_detail(self.actor, key, reason)
-        TextWindow(
-            self,
-            "预约详情与原始快照",
-            {
-                "预约编号": data["id"],
-                "状态": LABELS[data["status"]],
-                "创建时间（北京时间）": data["created_at"],
-                "取消/处理原因": data["reason"],
-                "交付登记时间": data["delivered_at"],
-                "成交确认时间": data["completed_at"],
-                "交易联系电话": data["contact"] or "当前状态不可查看",
-                "预约时商品快照": data["snapshot"],
-            },
-        )
+        ReservationDetail(self, self.actor, data, self.scope, reason)
 
     def confirm(self):
         """Confirm one buyer after explicit user intent."""

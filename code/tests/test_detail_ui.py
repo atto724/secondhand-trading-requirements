@@ -16,7 +16,8 @@ from community import conversation
 from operations import mark_all_messages_read
 from main import TradingApp
 from governance import account_profile
-from trades import reserve
+from trades import reserve, confirm_reservation, register_delivery
+from trades_ui import ReservationsPage, ReservationDetail
 from seller_ui import ChatPage, ChatPanel, SellerPage, InboxPage
 from community import send_direct_message, inbox, seller_profile
 from unittest.mock import patch
@@ -327,6 +328,58 @@ class DetailPageTests(unittest.TestCase):
                 self.root.winfo_rootx() + self.root.winfo_width(),
             )
         self.root.withdraw()
+
+    def test_buyer_and_seller_booking_details_open_inline_and_preserve_category(self):
+        key = reserve(self.actor, self.product)
+        seller = demo_accounts()["demo_seller"]
+        for scope, actor in (("buyer", self.actor), ("seller", seller)):
+            page = ReservationsPage(self.page, actor, scope)
+            page.table.select(key)
+            before = page.group_key
+            page.detail()
+            view = next(
+                widget for widget in page.winfo_children() if isinstance(widget, ReservationDetail)
+            )
+            self.assertEqual(view.winfo_toplevel(), self.root)
+            self.assertEqual(view.winfo_manager(), "place")
+            self.assertIn("不可查看", view.contact_text)
+            self.assertTrue(view.data["buyer_name"])
+            view.destroy()
+            self.assertEqual(page.group_key, before)
+            self.assertEqual(page.table.selected(), key)
+            page.destroy()
+
+    def test_booking_detail_keeps_snapshot_images_and_refresh_rechecks_contact(self):
+        key = reserve(self.actor, self.product)
+        seller = demo_accounts()["demo_seller"]
+        page = ReservationsPage(self.page, self.actor)
+        page.table.select(key)
+        page.detail()
+        view = next(
+            widget for widget in page.winfo_children() if isinstance(widget, ReservationDetail)
+        )
+        self.assertEqual(len(view.images), 3)
+        view.show_image(1)
+        self.assertEqual(view.picture_index, 1)
+        self.assertTrue(view.large.cget("image"))
+        original = view.data["snapshot"].copy()
+        confirm_reservation(seller, key)
+        view.reload()
+        refreshed = next(
+            widget for widget in page.winfo_children() if isinstance(widget, ReservationDetail)
+        )
+        self.assertEqual(refreshed.data["status"], "confirmed")
+        self.assertNotIn("不可查看", refreshed.contact_text)
+        self.assertEqual(refreshed.data["snapshot"], original)
+        register_delivery(seller, key)
+        refreshed.reload()
+        current = next(
+            widget for widget in page.winfo_children() if isinstance(widget, ReservationDetail)
+        )
+        self.assertTrue(current.data["delivered_at"])
+        self.assertFalse(
+            any(isinstance(widget, tk.Toplevel) for widget in self.root.winfo_children())
+        )
 
 
 if __name__ == "__main__":

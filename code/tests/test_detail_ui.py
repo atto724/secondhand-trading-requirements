@@ -15,6 +15,7 @@ from admin_ui import MessagesPage
 from community import conversation
 from operations import mark_all_messages_read
 from main import TradingApp
+from message_ui import MessageCenter, NotificationThread
 from governance import account_profile
 from trades import reserve, confirm_reservation, register_delivery
 from trades_ui import ReservationsPage, ReservationDetail
@@ -379,6 +380,66 @@ class DetailPageTests(unittest.TestCase):
         self.assertTrue(current.data["delivered_at"])
         self.assertFalse(
             any(isinstance(widget, tk.Toplevel) for widget in self.root.winfo_children())
+        )
+
+    def test_conversation_center_avatar_row_opens_chat_and_refreshes_dot_on_return(self):
+        seller = demo_accounts()["demo_seller"]
+        send_direct_message(seller, self.actor, "点进来就是对话")
+        center = MessageCenter(self.page, self.actor)
+        key = f"peer:{seller}"
+        self.assertEqual(center.entries[key]["kind"], "private")
+        self.assertTrue(center.rows[key]["dot"].find_all())
+        center.open_entry(key)
+        chat = next(widget for widget in center.winfo_children() if isinstance(widget, ChatPage))
+        self.assertEqual(chat.winfo_toplevel(), self.root)
+        self.assertTrue(
+            any("点进来" in bubble.cget("text") for bubble in chat.chat.history.bubbles.values())
+        )
+        chat.go_back()
+        self.assertFalse(center.rows[key]["dot"].find_all())
+        self.assertFalse(center.entries[key]["unread"])
+
+    def test_system_thread_groups_notifications_and_only_reads_the_opened_group(self):
+        with closing(database.connect_database()) as connection:
+            with connection:
+                for event, content in (
+                    ("review", "商品审核：published."),
+                    ("reservation", "收到预约"),
+                ):
+                    connection.execute(
+                        "INSERT INTO messages(receiver_id,event_type,content,created_at) VALUES(?,?,?,'2026-11-16T00:00:00Z')",
+                        (self.actor, event, content),
+                    )
+        center = MessageCenter(self.page, self.actor)
+        self.assertEqual(len(center.entries), 2)
+        center.open_entry("notice:商品审核")
+        thread = next(
+            widget for widget in center.winfo_children() if isinstance(widget, NotificationThread)
+        )
+        self.assertTrue(any("已发布" in label.cget("text") for label in thread.items))
+        self.assertFalse(any(isinstance(widget, tk.Text) for widget in thread.winfo_children()))
+        thread.go_back()
+        self.assertFalse(center.entries["notice:商品审核"]["unread"])
+        self.assertTrue(center.entries["notice:预约与交易"]["unread"])
+        center.read_all()
+        self.assertTrue(all(not row["unread"] for row in center.entries.values()))
+
+    def test_primary_message_center_has_no_tables_or_nested_tabs(self):
+        self.page.destroy()
+        self.page = None
+        app = TradingApp(self.root)
+        app.account_id = self.actor
+        app.profile = account_profile(self.actor)
+        center = app.message_center(app.container)
+        self.assertIsInstance(center, MessageCenter)
+
+        def descendants(widget):
+            for child in widget.winfo_children():
+                yield child
+                yield from descendants(child)
+
+        self.assertFalse(
+            any(isinstance(widget, (ttk.Treeview, ttk.Notebook)) for widget in descendants(center))
         )
 
 

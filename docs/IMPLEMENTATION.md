@@ -50,7 +50,7 @@
 
 详细原始输出位于 verification。
 
-- 79项自动化测试：覆盖账号、图片保存/损坏、业务状态、越权、并发与回滚、超时、备份恢复。
+- 82项自动化测试：覆盖账号、图片保存/损坏、业务状态、越权、并发与回滚、超时、备份恢复。
 - GUI冒烟脚本：创建11类页面、3类窗口、切换7个主标签并退出登录，无回调异常。
 - 实际桌面观察：商品卡片浏览页、管理后台审核页。其余页面仍建议学生人工逐项审查。
 - Black格式检查、Pylint按pyproject配置检查；Tkinter继承深度及构造函数参数规模阈值做了明确配置。
@@ -90,3 +90,5 @@ ProductRows替代三个业务列表的Treeview，提供键值选择与滚动卡�
 D-021以RESERVATION_GROUPS映射五个互斥状态集合，加全部入口。reservation_status根据当前身份生成细进度标签；reservation_actions继续使用原始细状态。新增2项回归验证交易中合并但标签/动作区分、取消争议排序和标签、无待处理记录默认全部及六入口文案。旧状态矩阵/分类覆盖测试保留。
 
 ReservationDetail采用主界面Frame覆盖与Canvas滚动，图像均由不可变snapshot解析，不查询当前商品图片替代快照。里程碑只用created_at/confirmed_at/delivered_at/completed_at实际值；异常状态说明与当前状态并列。刷新调用transaction_detail重新授权后替换页内视图；返回只销毁详情Frame。新增2项回归覆盖双方入口不创建Toplevel/分类选择保留、多图和快照稳定、确认/交付后刷新状态及电话授权。
+
+message_ui.py实现统一会话列表和只读系统通知线程，私信列表由inbox获取当前参与者会话，系统列表由messages(actor)按事件类别归组，按解析后的UTC时间排序。摘要按字体测量省略，行支持鼠标和Enter打开。ChatPage返回回调刷新列表，通知仅标记实际加载的本组消息。新增3项回归：私信直达与返回红点、系统归组/本组已读/全部已读、主入口无Treeview或嵌套Notebook。新模块已加入wheel模块清单。

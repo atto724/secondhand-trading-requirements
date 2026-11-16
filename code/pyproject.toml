@@ -20,7 +20,7 @@ secondhand-manage = "manage:main"
 
 [tool.setuptools]
 packages = ["demo_assets"]
-py-modules = ["accounts", "admin_ui", "catalog", "community", "core", "database", "demo", "domain", "editor_ui", "governance", "images", "main", "manage", "market_ui", "operations", "products", "products_ui", "registration_ui", "schema", "seller_ui", "security", "trades", "trades_ui", "ui_common", "benchmark"]
+py-modules = ["accounts", "admin_ui", "catalog", "community", "core", "database", "demo", "domain", "editor_ui", "governance", "images", "main", "manage", "market_ui", "message_ui", "operations", "products", "products_ui", "registration_ui", "schema", "seller_ui", "security", "trades", "trades_ui", "ui_common", "benchmark"]
 
 [tool.black]
 line-length = 100

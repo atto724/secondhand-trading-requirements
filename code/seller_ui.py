@@ -243,13 +243,16 @@ class ChatPanel(ttk.Frame):
 class ChatPage(ttk.Frame):
     """A dedicated in-page conversation, independent of the seller storefront."""
 
-    def __init__(self, parent, actor, peer, product_title=""):
+    def __init__(
+        self, parent, actor, peer, product_title="", back_label="← 返回商品详情", on_back=None
+    ):
         # Validate before mounting the overlay; ChatPanel rechecks participant access.
         data = conversation(actor, peer)
         super().__init__(parent, padding=16)
+        self.on_back = on_back
         self.place(x=0, y=0, relwidth=1, relheight=1)
         self.lift()
-        ttk.Button(self, text="← 返回商品详情", command=self.destroy).pack(anchor="w", pady=(0, 10))
+        ttk.Button(self, text=back_label, command=self.go_back).pack(anchor="w", pady=(0, 10))
         header = ttk.Frame(self)
         header.pack(fill="x", pady=(0, 10))
         avatar = ttk.Label(header)
@@ -266,7 +269,14 @@ class ChatPage(ttk.Frame):
         self.chat = ChatPanel(self, actor, peer)
         self.chat.pack(fill="both", expand=True)
         self.chat.editor.focus_set()
-        self.bind("<Escape>", lambda event: self.destroy())
+        self.bind("<Escape>", lambda event: self.go_back())
+
+    def go_back(self):
+        """Return to the caller and refresh its unread indicators."""
+        callback = self.on_back
+        self.destroy()
+        if callback:
+            callback()
 
 
 class InboxPage(ttk.Frame):

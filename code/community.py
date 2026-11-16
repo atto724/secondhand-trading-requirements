@@ -158,10 +158,12 @@ def inbox(actor):
             for row in connection.execute(
                 "WITH mine AS (SELECT *,CASE WHEN sender_id=? THEN receiver_id ELSE sender_id END AS peer_id "
                 "FROM direct_messages WHERE sender_id=? OR receiver_id=?) "
-                "SELECT m.peer_id,a.username,m.content,m.created_at,"
+                "SELECT m.peer_id,a.username,m.content,m.created_at,COALESCE(p.nickname,'') AS nickname,"
+                "COALESCE(p.avatar_path,'') AS avatar_path,"
                 "(SELECT COUNT(*) FROM direct_messages u WHERE u.receiver_id=? "
                 "AND u.sender_id=m.peer_id AND u.is_read=0) AS unread "
-                "FROM mine m JOIN accounts a ON a.id=m.peer_id WHERE m.id IN "
+                "FROM mine m JOIN accounts a ON a.id=m.peer_id "
+                "LEFT JOIN public_profiles p ON p.account_id=m.peer_id WHERE m.id IN "
                 "(SELECT MAX(id) FROM mine GROUP BY peer_id) ORDER BY m.id DESC",
                 (actor, actor, actor, actor),
             )

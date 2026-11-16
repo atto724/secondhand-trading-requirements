@@ -9,12 +9,13 @@ from tkinter import messagebox, ttk
 
 import database
 from accounts import authenticate
-from admin_ui import AccountsPage, MaintenancePage, MessagesPage, ReportsPage, ReviewPage
+from admin_ui import AccountsPage, MaintenancePage, ReportsPage, ReviewPage
 from governance import account_profile
 from market_ui import CatalogPage, MyProductsPage, ProductDetail
 from operations import backup_status, create_backup
+from message_ui import MessageCenter
 from registration_ui import RegistrationWindow
-from seller_ui import InboxPage, SellerPage
+from seller_ui import SellerPage
 from trades import run_timeouts
 from trades_ui import ReservationsPage
 from ui_common import ACCENT, INK, PAPER, configure_style, guarded
@@ -207,20 +208,8 @@ class TradingApp:
         guarded(self.root, build)
 
     def message_center(self, parent):
-        """Keep system notifications and private conversations distinctly labeled."""
-        notebook = ttk.Notebook(parent)
-        for label, factory in (("系统通知", MessagesPage), ("私信会话", InboxPage)):
-            page = factory(notebook, self.account_id)
-            notebook.add(page, text=label)
-
-        def refresh_section(_event=None):
-            selected = notebook.select()
-            if selected:
-                page = notebook.nametowidget(selected)
-                guarded(page, page.refresh)
-
-        notebook.bind("<<NotebookTabChanged>>", refresh_section)
-        return notebook
+        """Show avatar-based conversation rows that open directly into threads."""
+        return MessageCenter(parent, self.account_id)
 
     def admin_workspace(self, parent):
         """Keep privileged component pages in a dedicated secondary tab set."""

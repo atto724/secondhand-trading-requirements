@@ -103,3 +103,7 @@ D-021生效：横向文字分类为全部、待确认、交易中、取消 / 争
 ## 当前预约详情：主界面内白色分区卡片
 
 D-022：ReservationsPage.detail不再TextWindow，改为trades_ui.ReservationDetail页内覆盖；返回保留分类与记录选择，新增刷新、预约快照多图、真实进度时间、双方名称/授权联系方式、处理说明。transaction_detail只增加经过授权后的双方公开名称，电话规则不变。79项测试、Black32文件、Pylint10/10及构建通过；computer-use实际预览了卖家预约详情顶部导航、状态、返回和商品快照多图区。
+
+## 当前消息入口：淘宝式会话列表
+
+以D-023为准：main.message_center返回message_ui.MessageCenter，不再挂载旧MessagesPage/InboxPage标签。会话行展示头像/名称/最新摘要/时间/红点，一次点击进独立聊天；系统事件归组进只读NotificationThread。旧组件保留兼容及回归但不是主入口。ChatPage增加可配置返回文案和回调，返回列表刷新红点。inbox额外提供公开昵称及头像，不增加电话等字段。82项测试、Black33文件、Pylint10/10及构建通过；computer-use实际查看会话列表并点击进入气泡聊天。

@@ -23,10 +23,12 @@ test_buyer_and_seller_booking_details_open_inline_and_preserve_category (test_de
 test_chat_long_text_wraps_and_refresh_keeps_one_bubble_per_message (test_detail_ui.DetailPageTests.test_chat_long_text_wraps_and_refresh_keeps_one_bubble_per_message) ... ok
 test_chat_receipt_only_appears_after_latest_outgoing_is_read (test_detail_ui.DetailPageTests.test_chat_receipt_only_appears_after_latest_outgoing_is_read) ... ok
 test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox (test_detail_ui.DetailPageTests.test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox) ... ok
+test_conversation_center_avatar_row_opens_chat_and_refreshes_dot_on_return (test_detail_ui.DetailPageTests.test_conversation_center_avatar_row_opens_chat_and_refreshes_dot_on_return) ... ok
 test_gallery_boundaries_and_real_thumbnail_switching (test_detail_ui.DetailPageTests.test_gallery_boundaries_and_real_thumbnail_switching) ... ok
 test_my_products_cards_filter_and_bind_actions_to_each_product (test_detail_ui.DetailPageTests.test_my_products_cards_filter_and_bind_actions_to_each_product) ... ok
 test_owner_profile_can_be_saved_without_a_product (test_detail_ui.DetailPageTests.test_owner_profile_can_be_saved_without_a_product) ... ok
 test_plain_primary_navigation_preserves_labels_and_switches_pages (test_detail_ui.DetailPageTests.test_plain_primary_navigation_preserves_labels_and_switches_pages) ... ok
+test_primary_message_center_has_no_tables_or_nested_tabs (test_detail_ui.DetailPageTests.test_primary_message_center_has_no_tables_or_nested_tabs) ... ok
 test_private_composer_visible_at_minimum_window_size (test_detail_ui.DetailPageTests.test_private_composer_visible_at_minimum_window_size) ... ok
 test_private_inbox_dots_clear_after_read_or_mark_all (test_detail_ui.DetailPageTests.test_private_inbox_dots_clear_after_read_or_mark_all) ... ok
 test_private_message_button_opens_only_conversation_and_returns_to_detail (test_detail_ui.DetailPageTests.test_private_message_button_opens_only_conversation_and_returns_to_detail) ... ok
@@ -35,6 +37,7 @@ test_return_preserves_list_state_without_secondary_window (test_detail_ui.Detail
 test_seller_box_opens_profile_without_reading_private_messages (test_detail_ui.DetailPageTests.test_seller_box_opens_profile_without_reading_private_messages) ... ok
 test_sent_and_received_bubbles_are_visible_and_align_by_sender (test_detail_ui.DetailPageTests.test_sent_and_received_bubbles_are_visible_and_align_by_sender) ... ok
 test_system_notification_opens_inline_and_dot_disappears (test_detail_ui.DetailPageTests.test_system_notification_opens_inline_and_dot_disappears) ... ok
+test_system_thread_groups_notifications_and_only_reads_the_opened_group (test_detail_ui.DetailPageTests.test_system_thread_groups_notifications_and_only_reads_the_opened_group) ... ok
 test_duplicate_legacy_category_merges_without_losing_products (test_gallery.GalleryTests.test_duplicate_legacy_category_merges_without_losing_products) ... ok
 test_gallery_images_classification_and_idempotency (test_gallery.GalleryTests.test_gallery_images_classification_and_idempotency) ... ok
 test_interrupted_photo_marker_does_not_duplicate_images (test_gallery.GalleryTests.test_interrupted_photo_marker_does_not_duplicate_images) ... ok
@@ -84,11 +87,11 @@ test_waiting_blocks_edit_and_delist (test_workflows.WorkflowTests.test_waiting_b
 test_zero_cohort_statistics_and_backup_restore (test_workflows.WorkflowTests.test_zero_cohort_statistics_and_backup_restore) ... ok
 
 ----------------------------------------------------------------------
-Ran 79 tests in 64.401s
+Ran 82 tests in 74.605s
 
 OK
 ͼƬ�����ݻ���handbag����ǰ״̬����ЧԤԼ���ƣ�
-Black formatting: 32 files passed
+Black formatting: 33 files passed
 
 ------------------------------------
 Your code has been rated at 10.00/10
@@ -134,6 +137,7 @@ copying images.py -> secondhand_trading_desktop-0.3.0
 copying main.py -> secondhand_trading_desktop-0.3.0
 copying manage.py -> secondhand_trading_desktop-0.3.0
 copying market_ui.py -> secondhand_trading_desktop-0.3.0
+copying message_ui.py -> secondhand_trading_desktop-0.3.0
 copying operations.py -> secondhand_trading_desktop-0.3.0
 copying products.py -> secondhand_trading_desktop-0.3.0
 copying products_ui.py -> secondhand_trading_desktop-0.3.0
@@ -223,6 +227,7 @@ copying images.py -> build\lib
 copying main.py -> build\lib
 copying manage.py -> build\lib
 copying market_ui.py -> build\lib
+copying message_ui.py -> build\lib
 copying operations.py -> build\lib
 copying products.py -> build\lib
 copying products_ui.py -> build\lib
@@ -329,6 +334,7 @@ copying build\lib\images.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\main.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\manage.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\market_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\message_ui.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\operations.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\products.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\products_ui.py -> build\bdist.win-amd64\wheel\.
@@ -343,7 +349,7 @@ running install_egg_info
 Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
 running install_scripts
 creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
-creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-7t7ydv2u\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-rk_8i68w\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
 adding 'accounts.py'
 adding 'admin_ui.py'
 adding 'benchmark.py'
@@ -359,6 +365,7 @@ adding 'images.py'
 adding 'main.py'
 adding 'manage.py'
 adding 'market_ui.py'
+adding 'message_ui.py'
 adding 'operations.py'
 adding 'products.py'
 adding 'products_ui.py'

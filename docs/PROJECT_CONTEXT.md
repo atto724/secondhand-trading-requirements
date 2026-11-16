@@ -107,3 +107,7 @@ D-022：ReservationsPage.detail不再TextWindow，改为trades_ui.ReservationDet
 ## 当前消息入口：淘宝式会话列表
 
 以D-023为准：main.message_center返回message_ui.MessageCenter，不再挂载旧MessagesPage/InboxPage标签。会话行展示头像/名称/最新摘要/时间/红点，一次点击进独立聊天；系统事件归组进只读NotificationThread。旧组件保留兼容及回归但不是主入口。ChatPage增加可配置返回文案和回调，返回列表刷新红点。inbox额外提供公开昵称及头像，不增加电话等字段。82项测试、Black33文件、Pylint10/10及构建通过；computer-use实际查看会话列表并点击进入气泡聊天。
+
+## 当前聊天视觉：紧凑页头、圆角浅橙气泡
+
+D-024生效，seller_ui.RoundedBubble用Canvas原生矢量绘制圆角背景与自动换行文字，未改变保存内容。BubbleHistory限制阅读列宽、分组时间并保留头像/最新已读；ChatPage顶部与工具合并，ChatPanel底部为紧凑输入及发送。conversation增加peer_display_name供公开昵称展示。83项测试、Black33文件、Pylint10/10与构建通过，computer-use实际预览了双方气泡、头像、紧凑页头、已读及底部输入栏。

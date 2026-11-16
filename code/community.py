@@ -108,7 +108,9 @@ def conversation(actor, peer, before=None):
     with transaction() as connection:
         active(connection, actor)
         target = connection.execute(
-            "SELECT username,status FROM accounts WHERE id=?", (peer,)
+            "SELECT a.username,a.status,COALESCE(p.nickname,'') AS nickname FROM accounts a "
+            "LEFT JOIN public_profiles p ON p.account_id=a.id WHERE a.id=?",
+            (peer,),
         ).fetchone()
         if not target:
             raise ValueError("对方账号不存在。")
@@ -126,6 +128,7 @@ def conversation(actor, peer, before=None):
             )
         return {
             "peer_name": target["username"],
+            "peer_display_name": target["nickname"] or target["username"],
             "avatars": {
                 row["account_id"]: row["avatar_path"]
                 for row in connection.execute(

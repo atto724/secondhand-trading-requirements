@@ -25,6 +25,7 @@ test_chat_receipt_only_appears_after_latest_outgoing_is_read (test_detail_ui.Det
 test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox (test_detail_ui.DetailPageTests.test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox) ... ok
 test_conversation_center_avatar_row_opens_chat_and_refreshes_dot_on_return (test_detail_ui.DetailPageTests.test_conversation_center_avatar_row_opens_chat_and_refreshes_dot_on_return) ... ok
 test_gallery_boundaries_and_real_thumbnail_switching (test_detail_ui.DetailPageTests.test_gallery_boundaries_and_real_thumbnail_switching) ... ok
+test_modern_chat_uses_rounded_wrapped_bubbles_and_compact_header (test_detail_ui.DetailPageTests.test_modern_chat_uses_rounded_wrapped_bubbles_and_compact_header) ... ok
 test_my_products_cards_filter_and_bind_actions_to_each_product (test_detail_ui.DetailPageTests.test_my_products_cards_filter_and_bind_actions_to_each_product) ... ok
 test_owner_profile_can_be_saved_without_a_product (test_detail_ui.DetailPageTests.test_owner_profile_can_be_saved_without_a_product) ... ok
 test_plain_primary_navigation_preserves_labels_and_switches_pages (test_detail_ui.DetailPageTests.test_plain_primary_navigation_preserves_labels_and_switches_pages) ... ok
@@ -87,7 +88,7 @@ test_waiting_blocks_edit_and_delist (test_workflows.WorkflowTests.test_waiting_b
 test_zero_cohort_statistics_and_backup_restore (test_workflows.WorkflowTests.test_zero_cohort_statistics_and_backup_restore) ... ok
 
 ----------------------------------------------------------------------
-Ran 82 tests in 74.605s
+Ran 83 tests in 76.951s
 
 OK
 ͼƬ�����ݻ���handbag����ǰ״̬����ЧԤԼ���ƣ�
@@ -349,7 +350,7 @@ running install_egg_info
 Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
 running install_scripts
 creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
-creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-rk_8i68w\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-2i9kvuot\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
 adding 'accounts.py'
 adding 'admin_ui.py'
 adding 'benchmark.py'

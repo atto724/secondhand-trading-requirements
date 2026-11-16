@@ -39,19 +39,94 @@ def local_time(value):
     )
 
 
+CHAT_BG = "#f3f6f8"
+OUTGOING = "#ffe4d4"
+
+
+class RoundedBubble(tk.Canvas):
+    """Render native wrapped text on a rounded vector bubble, without image assets."""
+
+    def __init__(self, parent, text, mine, wraplength):
+        super().__init__(parent, bg=CHAT_BG, highlightthickness=0, bd=0)
+        self.value = text
+        self.fill_color = OUTGOING if mine else PAPER
+        self.text_item = self.create_text(
+            12,
+            10,
+            text=text,
+            anchor="nw",
+            fill="#24282b",
+            font=("Microsoft YaHei", 12),
+            width=wraplength,
+        )
+        self.shape = self.create_polygon(
+            0, 0, 1, 0, 1, 1, 0, 1, smooth=True, fill=self.fill_color, outline=""
+        )
+        self.tag_lower(self.shape)
+        self.reflow(wraplength)
+
+    def reflow(self, width):
+        """Size the canvas to the actual text instead of stretching short messages."""
+        self.itemconfigure(self.text_item, width=width)
+        bounds = self.bbox(self.text_item)
+        wide = max(36, bounds[2] + 12)
+        high = max(40, bounds[3] + 10)
+        radius = 10
+        self.coords(
+            self.shape,
+            radius,
+            0,
+            wide - radius,
+            0,
+            wide,
+            0,
+            wide,
+            radius,
+            wide,
+            high - radius,
+            wide,
+            high,
+            wide - radius,
+            high,
+            radius,
+            high,
+            0,
+            high,
+            0,
+            high - radius,
+            0,
+            radius,
+            0,
+            0,
+        )
+        super().configure(width=wide, height=high)
+
+    def configure(self, cnf=None, **options):
+        """Accept the same wraplength operation used by responsive message rows."""
+        wrap = options.pop("wraplength", None)
+        result = super().configure(cnf, **options)
+        if wrap is not None:
+            self.reflow(wrap)
+        return result
+
+    def cget(self, key):
+        """Expose the displayed text for accessibility and native-widget checks."""
+        return self.value if key == "text" else super().cget(key)
+
+
 class BubbleHistory(ttk.Frame):
     """Scrollable, correctly parented message rows with left/right speech bubbles."""
 
     def __init__(self, parent):
         super().__init__(parent)
         self.canvas = tk.Canvas(
-            self, background="#ededed", highlightthickness=0, width=260, height=120
+            self, background=CHAT_BG, highlightthickness=0, width=260, height=120
         )
         scrollbar = ttk.Scrollbar(self, command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side="right", fill="y")
         self.canvas.pack(side="left", fill="both", expand=True)
-        self.content = tk.Frame(self.canvas, bg="#ededed")
+        self.content = tk.Frame(self.canvas, bg=CHAT_BG)
         self.window = self.canvas.create_window(0, 0, window=self.content, anchor="nw")
         self.messages = []
         self.bubbles = {}
@@ -66,9 +141,11 @@ class BubbleHistory(ttk.Frame):
 
     def resize(self, event):
         """Wrap long messages within the visible pane instead of overflowing it."""
-        self.canvas.itemconfigure(self.window, width=event.width)
+        width = min(event.width, 880)
+        self.canvas.itemconfigure(self.window, width=width)
+        self.canvas.coords(self.window, max(0, (event.width - width) / 2), 0)
         for bubble in self.bubbles.values():
-            bubble.configure(wraplength=max(80, int(event.width * 0.62) - 24))
+            bubble.configure(wraplength=max(80, int(width * 0.68) - 80))
 
     def wheel(self, event):
         """Scroll only this conversation, without global bindings."""
@@ -77,18 +154,22 @@ class BubbleHistory(ttk.Frame):
 
     def show_receipt(self, message_id):
         """Show 'read' only beneath the latest outgoing bubble; otherwise stay blank."""
+        bubble = self.bubbles.get(message_id)
         if self.receipt is not None and self.receipt.winfo_exists():
+            if bubble is not None and self.receipt.master == bubble.master:
+                return
             self.receipt.destroy()
         self.receipt = None
-        if message_id in self.bubbles:
+        if bubble is not None:
+            at_bottom = self.canvas.yview()[1] >= 0.99
             self.receipt = tk.Label(
-                self.bubbles[message_id].master,
-                text="已读",
-                bg="#ededed",
-                fg="#888888",
-                font=("Microsoft YaHei", 8),
+                bubble.master, text="已读", bg=CHAT_BG, fg="#9ba4ac", font=("Microsoft YaHei", 8)
             )
             self.receipt.pack(anchor="e", pady=(3, 0))
+            self.update_idletasks()
+            self.update_region()
+            if at_bottom:
+                self.canvas.yview_moveto(1)
 
     def render(self, rows, actor, peer_name, avatars, older=False):
         """Show actual persisted messages and keep the reading position on older loads."""
@@ -105,45 +186,40 @@ class BubbleHistory(ttk.Frame):
         self.receipt = None
         if not self.messages:
             tk.Label(
-                self.content, text="暂无消息，向卖家打个招呼吧", bg="#ededed", fg="#888888"
+                self.content, text="暂无消息，向卖家打个招呼吧", bg=CHAT_BG, fg="#888888"
             ).pack(pady=25)
+        previous_time = None
         for row in self.messages:
             mine = row["sender_id"] == actor
-            tk.Label(
-                self.content,
-                text=local_time(row["created_at"]),
-                bg="#ededed",
-                fg="#999999",
-                font=("Microsoft YaHei", 8),
-            ).pack(pady=(12, 4))
-            line = tk.Frame(self.content, bg="#ededed")
-            line.pack(fill="x", padx=8, pady=(0, 6))
-            avatar = tk.Label(line, bg="#ededed")
+            stamp = datetime.fromisoformat(row["created_at"].replace("Z", "+00:00"))
+            if previous_time is None or (stamp - previous_time).total_seconds() >= 300:
+                tk.Label(
+                    self.content,
+                    text=local_time(row["created_at"]),
+                    bg=CHAT_BG,
+                    fg="#a1aab2",
+                    font=("Microsoft YaHei", 8),
+                ).pack(pady=(18, 12))
+            previous_time = stamp
+            line = tk.Frame(self.content, bg=CHAT_BG)
+            line.pack(fill="x", padx=18, pady=(0, 16))
+            avatar = tk.Label(line, bg=CHAT_BG)
             avatar.photo = avatar_photo(
-                self, row["sender_id"], avatars.get(row["sender_id"], ""), (32, 32)
+                self, row["sender_id"], avatars.get(row["sender_id"], ""), (38, 38)
             )
             avatar.configure(image=avatar.photo)
-            avatar.pack(side="right" if mine else "left", anchor="n", padx=4)
-            group = tk.Frame(line, bg="#ededed")
+            avatar.pack(side="right" if mine else "left", anchor="n", padx=8)
+            group = tk.Frame(line, bg=CHAT_BG)
             group.pack(side="right" if mine else "left", anchor="n")
-            tk.Label(
+            if not mine:
+                tk.Label(
+                    group, text=peer_name, bg=CHAT_BG, fg="#8c969f", font=("Microsoft YaHei", 9)
+                ).pack(anchor="w", pady=(0, 5))
+            bubble = RoundedBubble(
                 group,
-                text="我" if mine else peer_name,
-                bg="#ededed",
-                fg="#888888",
-                font=("Microsoft YaHei", 8),
-            ).pack(anchor="e" if mine else "w")
-            bubble = tk.Label(
-                group,
-                text=row["content"],
-                bg="#95ec69" if mine else PAPER,
-                fg="#222222",
-                justify="left",
-                anchor="w",
-                wraplength=max(80, int(self.canvas.winfo_width() * 0.62) - 24),
-                padx=10,
-                pady=8,
-                font=("Microsoft YaHei", 10),
+                row["content"],
+                mine,
+                max(80, int(min(self.canvas.winfo_width(), 880) * 0.68) - 80),
             )
             bubble.pack(anchor="e" if mine else "w")
             self.bubbles[row["id"]] = bubble
@@ -158,43 +234,99 @@ class BubbleHistory(ttk.Frame):
             self.canvas.yview_moveto(1)
 
 
-class ChatPanel(ttk.Frame):
+class ChatPanel(tk.Frame):
     """Read and send one participant-scoped conversation, with explicit refresh."""
 
-    def __init__(self, parent, actor, peer, on_read=None):
-        super().__init__(parent, padding=12)
+    def __init__(self, parent, actor, peer, on_read=None, tools_parent=None):
+        super().__init__(parent, bg=CHAT_BG)
         self.on_read = on_read
         self.actor, self.peer, self.before = actor, peer, None
-        toolbar = ttk.Frame(self)
-        toolbar.pack(fill="x", pady=(0, 8))
-        ttk.Button(toolbar, text="刷新最新消息", command=lambda: guarded(self, self.refresh)).pack(
-            side="left"
+        if tools_parent is None:
+            tools_parent = tk.Frame(self, bg=CHAT_BG, padx=18, pady=8)
+            tools_parent.pack(fill="x")
+        tk.Button(
+            tools_parent,
+            text="刷新",
+            command=lambda: guarded(self, self.refresh),
+            bg=tools_parent.cget("background"),
+            fg="#8c969f",
+            activebackground=PAPER,
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            padx=10,
+            pady=5,
+        ).pack(side="right")
+        self.older = tk.Button(
+            tools_parent,
+            text="更早记录",
+            command=lambda: guarded(self, lambda: self.refresh(True)),
+            bg=tools_parent.cget("background"),
+            fg="#8c969f",
+            activebackground=PAPER,
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            padx=10,
+            pady=5,
         )
-        self.older = ttk.Button(
-            toolbar, text="加载更早消息", command=lambda: guarded(self, lambda: self.refresh(True))
-        )
-        self.older.pack(side="left", padx=8)
-        self.status = ttk.Label(toolbar, style="Sub.TLabel")
-        self.status.pack(side="left")
-        composer = ttk.Frame(self)
+        self.older.pack(side="right")
+        composer = tk.Frame(self, bg=PAPER, padx=18, pady=12)
         composer.pack(side="bottom", fill="x")
-        self.history = BubbleHistory(self)
-        ttk.Label(
-            composer,
-            text="私信（最多1000字）：Enter换行，Ctrl+Enter发送。",
-            style="Sub.TLabel",
-            wraplength=320,
-        ).pack(anchor="w", pady=8)
-        self.editor = tk.Text(composer, height=3, wrap="word", font=("Microsoft YaHei", 10))
-        self.editor.pack(fill="x")
-        self.editor.bind("<Control-Return>", self.keyboard_send)
-        self.send_button = ttk.Button(
-            composer,
-            text="发送私信",
-            style="Accent.TButton",
+        input_row = tk.Frame(composer, bg=PAPER)
+        input_row.pack(fill="x")
+        self.send_button = tk.Button(
+            input_row,
+            text="发送",
             command=lambda: guarded(self, self.send_message),
+            bg="#ff6b27",
+            fg=PAPER,
+            activebackground="#ed5818",
+            activeforeground=PAPER,
+            relief="flat",
+            bd=0,
+            font=("Microsoft YaHei", 11),
+            padx=24,
+            pady=10,
+            cursor="hand2",
         )
-        self.send_button.pack(anchor="e", pady=8)
+        self.send_button.pack(side="right", padx=(12, 0))
+        input_border = tk.Frame(
+            input_row,
+            bg="#f5f7f9",
+            padx=12,
+            pady=8,
+            highlightbackground="#e7ebef",
+            highlightthickness=1,
+        )
+        input_border.pack(side="left", fill="x", expand=True)
+        self.editor = tk.Text(
+            input_border,
+            height=2,
+            width=1,
+            wrap="word",
+            font=("Microsoft YaHei", 11),
+            bg="#f5f7f9",
+            fg="#24282b",
+            insertbackground="#24282b",
+            relief="flat",
+            bd=0,
+            highlightthickness=0,
+        )
+        self.editor.pack(fill="x", expand=True)
+        self.editor.bind("<Control-Return>", self.keyboard_send)
+        footer = tk.Frame(composer, bg=PAPER)
+        footer.pack(fill="x", pady=(6, 0))
+        tk.Label(
+            footer,
+            text="Enter 换行 · Ctrl+Enter 发送",
+            bg=PAPER,
+            fg="#a2abb4",
+            font=("Microsoft YaHei", 8),
+        ).pack(side="left")
+        self.status = tk.Label(footer, bg=PAPER, fg="#a2abb4", font=("Microsoft YaHei", 8))
+        self.status.pack(side="right")
+        self.history = BubbleHistory(self)
         self.history.pack(fill="both", expand=True)
         self.refresh()
         self.receipt_timer = self.after(2000, self.poll_receipt)
@@ -218,7 +350,13 @@ class ChatPanel(ttk.Frame):
         """Load the newest or preceding 100 rows without discarding an unsent draft."""
         data = conversation(self.actor, self.peer, self.before if older else None)
         rows = data["rows"]
-        self.history.render(rows, self.actor, data["peer_name"], data["avatars"], older)
+        self.history.render(
+            rows,
+            self.actor,
+            data.get("peer_display_name", data["peer_name"]),
+            data["avatars"],
+            older,
+        )
         self.history.show_receipt(latest_read_message(self.actor, self.peer))
         if rows:
             self.before = rows[0]["id"]
@@ -240,7 +378,7 @@ class ChatPanel(ttk.Frame):
         return "break"
 
 
-class ChatPage(ttk.Frame):
+class ChatPage(tk.Frame):
     """A dedicated in-page conversation, independent of the seller storefront."""
 
     def __init__(
@@ -248,25 +386,53 @@ class ChatPage(ttk.Frame):
     ):
         # Validate before mounting the overlay; ChatPanel rechecks participant access.
         data = conversation(actor, peer)
-        super().__init__(parent, padding=16)
+        super().__init__(parent, bg=CHAT_BG)
         self.on_back = on_back
         self.place(x=0, y=0, relwidth=1, relheight=1)
         self.lift()
-        ttk.Button(self, text=back_label, command=self.go_back).pack(anchor="w", pady=(0, 10))
-        header = ttk.Frame(self)
-        header.pack(fill="x", pady=(0, 10))
-        avatar = ttk.Label(header)
-        avatar.photo = avatar_photo(self, peer, data["avatars"].get(peer, ""), (48, 48))
+        header = tk.Frame(self, bg=PAPER, padx=18, pady=12)
+        header.pack(fill="x")
+        tk.Button(
+            header,
+            text=back_label,
+            command=self.go_back,
+            bg=PAPER,
+            fg="#49535b",
+            activebackground=PAPER,
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            font=("Microsoft YaHei", 10),
+            padx=8,
+        ).pack(side="left", padx=(0, 14))
+        avatar = tk.Label(header, bg=PAPER)
+        avatar.photo = avatar_photo(self, peer, data["avatars"].get(peer, ""), (36, 36))
         avatar.configure(image=avatar.photo)
         avatar.pack(side="left", padx=(0, 12))
-        ttk.Label(header, text=f"与 {data['peer_name']} 的对话", style="Title.TLabel").pack(
-            anchor="w"
-        )
+        name = tk.Frame(header, bg=PAPER)
+        name.pack(side="left", fill="x", expand=True)
+        tk.Label(
+            name,
+            text=data.get("peer_display_name", data["peer_name"]),
+            font=("Microsoft YaHei", 16, "bold"),
+            fg="#232a30",
+            bg=PAPER,
+            anchor="w",
+        ).pack(fill="x")
         if product_title:
-            ttk.Label(
-                header, text=f"正在咨询：{product_title}", style="Sub.TLabel", wraplength=850
-            ).pack(anchor="w")
-        self.chat = ChatPanel(self, actor, peer)
+            tk.Label(
+                name,
+                text=f"正在咨询：{product_title}",
+                bg=PAPER,
+                fg="#99a2aa",
+                font=("Microsoft YaHei", 9),
+                wraplength=580,
+                anchor="w",
+            ).pack(fill="x", pady=(3, 0))
+        tools = tk.Frame(header, bg=PAPER)
+        tools.pack(side="right")
+        tk.Frame(self, height=1, bg="#e8edf1").pack(fill="x")
+        self.chat = ChatPanel(self, actor, peer, tools_parent=tools)
         self.chat.pack(fill="both", expand=True)
         self.chat.editor.focus_set()
         self.bind("<Escape>", lambda event: self.go_back())

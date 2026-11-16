@@ -19,7 +19,7 @@ from message_ui import MessageCenter, NotificationThread
 from governance import account_profile
 from trades import reserve, confirm_reservation, register_delivery
 from trades_ui import ReservationsPage, ReservationDetail
-from seller_ui import ChatPage, ChatPanel, SellerPage, InboxPage
+from seller_ui import ChatPage, ChatPanel, SellerPage, InboxPage, RoundedBubble
 from community import send_direct_message, inbox, seller_profile
 from unittest.mock import patch
 from ui_common import configure_style
@@ -182,7 +182,7 @@ class DetailPageTests(unittest.TestCase):
         self.assertTrue(mine.winfo_viewable())
         self.assertTrue(theirs.winfo_viewable())
         self.assertEqual(mine.cget("text"), "我发出的内容\n换行也保留")
-        self.assertEqual(mine.cget("background"), "#95ec69")
+        self.assertEqual(mine.fill_color, "#ffe4d4")
         self.assertEqual(mine.master.pack_info()["side"], "right")
         self.assertEqual(theirs.master.pack_info()["side"], "left")
         self.assertEqual(mine.winfo_parent(), str(mine.master))
@@ -441,6 +441,36 @@ class DetailPageTests(unittest.TestCase):
         self.assertFalse(
             any(isinstance(widget, (ttk.Treeview, ttk.Notebook)) for widget in descendants(center))
         )
+
+    def test_modern_chat_uses_rounded_wrapped_bubbles_and_compact_header(self):
+        seller = demo_accounts()["demo_seller"]
+        send_direct_message(seller, self.actor, "这是收到的一条消息")
+        send_direct_message(self.actor, seller, "这是自己的回复")
+        page = ChatPage(self.page, self.actor, seller)
+        self.root.deiconify()
+        self.root.update()
+        self.assertTrue(
+            all(isinstance(bubble, RoundedBubble) for bubble in page.chat.history.bubbles.values())
+        )
+        self.assertEqual(
+            [bubble.fill_color for bubble in page.chat.history.bubbles.values()],
+            ["#ffffff", "#ffe4d4"],
+        )
+        self.assertTrue(
+            all(
+                bubble.itemcget(bubble.shape, "smooth") == "true"
+                or bubble.itemcget(bubble.shape, "smooth") == "1"
+                for bubble in page.chat.history.bubbles.values()
+            )
+        )
+        header = page.winfo_children()[0]
+        self.assertLess(header.winfo_height(), 150)
+        self.assertEqual(page.chat.send_button.cget("text"), "发送")
+        self.assertLessEqual(
+            page.chat.send_button.winfo_rooty() + page.chat.send_button.winfo_height(),
+            self.root.winfo_rooty() + self.root.winfo_height(),
+        )
+        self.root.withdraw()
 
 
 if __name__ == "__main__":

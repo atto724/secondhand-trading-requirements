@@ -197,7 +197,9 @@ def validate_content(connection, title, description, category_id, cents):
         raise ValueError("描述必填，长度不能超过 5000 个字符。")
     if isinstance(cents, bool) or not isinstance(cents, int) or not 1 <= cents <= 9_999_999_999:
         raise ValueError("价格必须大于零且不超过 99999999.99 元。")
-    if not connection.execute("SELECT id FROM categories WHERE id=?", (category_id,)).fetchone():
+    if not connection.execute(
+        "SELECT id FROM categories WHERE id=? AND is_active=1", (category_id,)
+    ).fetchone():
         raise ValueError("请选择有效分类。")
 
 

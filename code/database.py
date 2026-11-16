@@ -100,10 +100,6 @@ def initialize_database() -> None:
                 CREATE INDEX IF NOT EXISTS idx_products_status_category
                     ON products(status, category_id);
 
-                INSERT OR IGNORE INTO categories (name) VALUES ('数码');
-                INSERT OR IGNORE INTO categories (name) VALUES ('图书');
-                INSERT OR IGNORE INTO categories (name) VALUES ('生活用品');
-                INSERT OR IGNORE INTO categories (name) VALUES ('其他');
 
                 INSERT OR IGNORE INTO roles (name) VALUES ('buyer');
                 INSERT OR IGNORE INTO roles (name) VALUES ('seller');

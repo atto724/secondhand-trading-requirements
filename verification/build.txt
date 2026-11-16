@@ -8,6 +8,10 @@ test_registration_assigns_ordinary_roles (test_accounts.AccountTests.test_regist
 New accounts receive buyer and seller roles only. ... ok
 test_valid_login (test_accounts.AccountTests.test_valid_login)
 Correct credentials return the account ID. ... ok
+test_duplicate_legacy_category_merges_without_losing_products (test_gallery.GalleryTests.test_duplicate_legacy_category_merges_without_losing_products) ... ok
+test_gallery_images_classification_and_idempotency (test_gallery.GalleryTests.test_gallery_images_classification_and_idempotency) ... ok
+test_legacy_rename_preserves_product_id_and_snapshot (test_gallery.GalleryTests.test_legacy_rename_preserves_product_id_and_snapshot) ... ok
+test_ten_categories_in_confirmed_order (test_gallery.GalleryTests.test_ten_categories_in_confirmed_order) ... ok
 test_missing_information_is_explicit (test_presentation.PresentationTests.test_missing_information_is_explicit) ... ok
 test_money_is_shown_in_yuan (test_presentation.PresentationTests.test_money_is_shown_in_yuan) ... ok
 test_password_material_is_not_displayed (test_presentation.PresentationTests.test_password_material_is_not_displayed) ... ok
@@ -44,10 +48,10 @@ test_waiting_blocks_edit_and_delist (test_workflows.WorkflowTests.test_waiting_b
 test_zero_cohort_statistics_and_backup_restore (test_workflows.WorkflowTests.test_zero_cohort_statistics_and_backup_restore) ... ok
 
 ----------------------------------------------------------------------
-Ran 39 tests in 3.846s
+Ran 43 tests in 5.446s
 
 OK
-Black formatting: 26 files passed
+Black formatting: 27 files passed
 
 ------------------------------------
 Your code has been rated at 10.00/10
@@ -73,6 +77,7 @@ reading manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
 writing manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
 running check
 creating secondhand_trading_desktop-0.3.0
+creating secondhand_trading_desktop-0.3.0\demo_assets
 creating secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
 creating secondhand_trading_desktop-0.3.0\tests
 copying files to secondhand_trading_desktop-0.3.0...
@@ -101,6 +106,23 @@ copying security.py -> secondhand_trading_desktop-0.3.0
 copying trades.py -> secondhand_trading_desktop-0.3.0
 copying trades_ui.py -> secondhand_trading_desktop-0.3.0
 copying ui_common.py -> secondhand_trading_desktop-0.3.0
+copying demo_assets\README.md -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\__init__.py -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\backpack.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\badminton.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\bear_light.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\board_game.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\chair.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\desk_lamp.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\foundation.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\handbag.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\jacket.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\laptop.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\pet_carrier.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\scooter.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\shoes.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\stroller.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\textbook.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
 copying secondhand_trading_desktop.egg-info\PKG-INFO -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
 copying secondhand_trading_desktop.egg-info\SOURCES.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
 copying secondhand_trading_desktop.egg-info\dependency_links.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
@@ -108,6 +130,7 @@ copying secondhand_trading_desktop.egg-info\entry_points.txt -> secondhand_tradi
 copying secondhand_trading_desktop.egg-info\requires.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
 copying secondhand_trading_desktop.egg-info\top_level.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
 copying tests\test_accounts.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_gallery.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_presentation.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_workflows.py -> secondhand_trading_desktop-0.3.0\tests
 Writing secondhand_trading_desktop-0.3.0\setup.cfg
@@ -151,6 +174,8 @@ copying trades.py -> build\lib
 copying trades_ui.py -> build\lib
 copying ui_common.py -> build\lib
 copying benchmark.py -> build\lib
+creating build\lib\demo_assets
+copying demo_assets\__init__.py -> build\lib\demo_assets
 running egg_info
 writing secondhand_trading_desktop.egg-info\PKG-INFO
 writing dependency_links to secondhand_trading_desktop.egg-info\dependency_links.txt
@@ -159,6 +184,22 @@ writing requirements to secondhand_trading_desktop.egg-info\requires.txt
 writing top-level names to secondhand_trading_desktop.egg-info\top_level.txt
 reading manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
 writing manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+copying demo_assets\README.md -> build\lib\demo_assets
+copying demo_assets\backpack.jpg -> build\lib\demo_assets
+copying demo_assets\badminton.jpg -> build\lib\demo_assets
+copying demo_assets\bear_light.jpg -> build\lib\demo_assets
+copying demo_assets\board_game.jpg -> build\lib\demo_assets
+copying demo_assets\chair.jpg -> build\lib\demo_assets
+copying demo_assets\desk_lamp.jpg -> build\lib\demo_assets
+copying demo_assets\foundation.jpg -> build\lib\demo_assets
+copying demo_assets\handbag.jpg -> build\lib\demo_assets
+copying demo_assets\jacket.jpg -> build\lib\demo_assets
+copying demo_assets\laptop.jpg -> build\lib\demo_assets
+copying demo_assets\pet_carrier.jpg -> build\lib\demo_assets
+copying demo_assets\scooter.jpg -> build\lib\demo_assets
+copying demo_assets\shoes.jpg -> build\lib\demo_assets
+copying demo_assets\stroller.jpg -> build\lib\demo_assets
+copying demo_assets\textbook.jpg -> build\lib\demo_assets
 installing to build\bdist.win-amd64\wheel
 running install
 running install_lib
@@ -170,6 +211,24 @@ copying build\lib\catalog.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\core.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\database.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\demo.py -> build\bdist.win-amd64\wheel\.
+creating build\bdist.win-amd64\wheel\demo_assets
+copying build\lib\demo_assets\backpack.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\badminton.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\bear_light.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\board_game.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\chair.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\desk_lamp.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\foundation.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\handbag.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\jacket.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\laptop.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\pet_carrier.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\README.md -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\scooter.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\shoes.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\stroller.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\textbook.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\__init__.py -> build\bdist.win-amd64\wheel\.\demo_assets
 copying build\lib\domain.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\editor_ui.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\governance.py -> build\bdist.win-amd64\wheel\.
@@ -190,7 +249,7 @@ running install_egg_info
 Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
 running install_scripts
 creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
-creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-cs2y2u8v\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-7azlwfrc\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
 adding 'accounts.py'
 adding 'admin_ui.py'
 adding 'benchmark.py'
@@ -214,6 +273,23 @@ adding 'security.py'
 adding 'trades.py'
 adding 'trades_ui.py'
 adding 'ui_common.py'
+adding 'demo_assets/README.md'
+adding 'demo_assets/__init__.py'
+adding 'demo_assets/backpack.jpg'
+adding 'demo_assets/badminton.jpg'
+adding 'demo_assets/bear_light.jpg'
+adding 'demo_assets/board_game.jpg'
+adding 'demo_assets/chair.jpg'
+adding 'demo_assets/desk_lamp.jpg'
+adding 'demo_assets/foundation.jpg'
+adding 'demo_assets/handbag.jpg'
+adding 'demo_assets/jacket.jpg'
+adding 'demo_assets/laptop.jpg'
+adding 'demo_assets/pet_carrier.jpg'
+adding 'demo_assets/scooter.jpg'
+adding 'demo_assets/shoes.jpg'
+adding 'demo_assets/stroller.jpg'
+adding 'demo_assets/textbook.jpg'
 adding 'secondhand_trading_desktop-0.3.0.dist-info/METADATA'
 adding 'secondhand_trading_desktop-0.3.0.dist-info/WHEEL'
 adding 'secondhand_trading_desktop-0.3.0.dist-info/entry_points.txt'

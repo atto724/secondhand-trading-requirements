@@ -1,5 +1,5 @@
 {
-  "scope": "production Python only; tests/demo/benchmark/generated build excluded; SQL strings count as implementation",
+  "scope": "production Python only; tests/demo/benchmark/assets/generated build excluded; SQL strings count as implementation",
   "files": {
     "accounts.py": {
       "physical_lines": 112,
@@ -14,12 +14,12 @@
       "nonblank_noncomment_nondocstring": 325
     },
     "core.py": {
-      "physical_lines": 227,
-      "nonblank_noncomment_nondocstring": 164
+      "physical_lines": 229,
+      "nonblank_noncomment_nondocstring": 166
     },
     "database.py": {
-      "physical_lines": 129,
-      "nonblank_noncomment_nondocstring": 105
+      "physical_lines": 125,
+      "nonblank_noncomment_nondocstring": 101
     },
     "domain.py": {
       "physical_lines": 26,
@@ -54,8 +54,8 @@
       "nonblank_noncomment_nondocstring": 230
     },
     "products.py": {
-      "physical_lines": 31,
-      "nonblank_noncomment_nondocstring": 19
+      "physical_lines": 33,
+      "nonblank_noncomment_nondocstring": 21
     },
     "products_ui.py": {
       "physical_lines": 15,
@@ -66,8 +66,8 @@
       "nonblank_noncomment_nondocstring": 61
     },
     "schema.py": {
-      "physical_lines": 99,
-      "nonblank_noncomment_nondocstring": 94
+      "physical_lines": 157,
+      "nonblank_noncomment_nondocstring": 147
     },
     "security.py": {
       "physical_lines": 51,
@@ -86,6 +86,6 @@
       "nonblank_noncomment_nondocstring": 346
     }
   },
-  "physical_total": 4190,
-  "nonblank_noncomment_nondocstring_total": 3598
+  "physical_total": 4248,
+  "nonblank_noncomment_nondocstring_total": 3651
 }

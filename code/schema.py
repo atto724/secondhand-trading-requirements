@@ -97,3 +97,61 @@ def migrate(connection):
             connection.execute(f"ALTER TABLE products ADD COLUMN {name} {declaration}")
     connection.commit()
     connection.executescript(SQL)
+    migrate_categories(connection)
+
+
+CATEGORY_NAMES = (
+    "数码电器",
+    "家居生活",
+    "服饰鞋包",
+    "图书文教",
+    "运动户外",
+    "兴趣娱乐",
+    "母婴用品",
+    "宠物用品",
+    "交通出行",
+    "其他闲置",
+)
+LEGACY_CATEGORIES = {
+    "数码": "数码电器",
+    "图书": "图书文教",
+    "生活用品": "家居生活",
+    "其他": "其他闲置",
+}
+
+
+def migrate_categories(connection):
+    """Keep original IDs where possible and hide merged legacy rows from selectors."""
+    columns = {row[1] for row in connection.execute("PRAGMA table_info(categories)")}
+    for name, declaration in {
+        "is_active": "INTEGER NOT NULL DEFAULT 1",
+        "sort_order": "INTEGER NOT NULL DEFAULT 99",
+    }.items():
+        if name not in columns:
+            connection.execute(f"ALTER TABLE categories ADD COLUMN {name} {declaration}")
+    connection.commit()
+    connection.execute("BEGIN IMMEDIATE")
+    with connection:
+        for old_name, new_name in LEGACY_CATEGORIES.items():
+            old = connection.execute(
+                "SELECT id FROM categories WHERE name=?", (old_name,)
+            ).fetchone()
+            target = connection.execute(
+                "SELECT id FROM categories WHERE name=?", (new_name,)
+            ).fetchone()
+            if old and not target:
+                connection.execute("UPDATE categories SET name=? WHERE id=?", (new_name, old[0]))
+            elif old and target:
+                connection.execute(
+                    "UPDATE products SET category_id=? WHERE category_id=?", (target[0], old[0])
+                )
+                connection.execute("UPDATE categories SET is_active=0 WHERE id=?", (old[0],))
+        for order, name in enumerate(CATEGORY_NAMES):
+            connection.execute("INSERT OR IGNORE INTO categories(name) VALUES(?)", (name,))
+            connection.execute(
+                "UPDATE categories SET is_active=1,sort_order=? WHERE name=?", (order, name)
+            )
+        placeholders = ",".join("?" for _ in CATEGORY_NAMES)
+        connection.execute(
+            f"UPDATE categories SET is_active=0 WHERE name NOT IN ({placeholders})", CATEGORY_NAMES
+        )

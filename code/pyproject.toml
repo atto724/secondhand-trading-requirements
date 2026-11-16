@@ -19,6 +19,7 @@ secondhand-demo = "demo:main"
 secondhand-manage = "manage:main"
 
 [tool.setuptools]
+packages = ["demo_assets"]
 py-modules = ["accounts", "admin_ui", "catalog", "core", "database", "demo", "domain", "editor_ui", "governance", "images", "main", "manage", "market_ui", "operations", "products", "products_ui", "registration_ui", "schema", "security", "trades", "trades_ui", "ui_common", "benchmark"]
 
 [tool.black]
@@ -49,3 +50,6 @@ disable = ["broad-exception-caught", "implicit-str-concat", "duplicate-code"]
 profile = "black"
 line_length = 100
 known_third_party = ["PIL"]
+
+[tool.setuptools.package-data]
+demo_assets = ["*.jpg", "README.md"]

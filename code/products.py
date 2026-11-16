@@ -9,7 +9,9 @@ from database import connect_database
 def list_categories():
     """Read the shared category list for forms and search filters."""
     with closing(connect_database()) as connection:
-        return connection.execute("SELECT id,name FROM categories ORDER BY id").fetchall()
+        return connection.execute(
+            "SELECT id,name FROM categories WHERE is_active=1 ORDER BY sort_order,id"
+        ).fetchall()
 
 
 def create_draft(

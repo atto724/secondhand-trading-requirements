@@ -1,0 +1,1 @@
+43 automated tests passed. Gallery: 15 published items, 17 stored image records, all 10 categories populated. Pagination: 8 + 7 products. Every published product has a readable stored photograph and detail image. Repeated seed preserves count and edits. Wheel bundles all 15 original supplied JPEG files.

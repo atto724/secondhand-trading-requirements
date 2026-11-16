@@ -126,6 +126,13 @@ def conversation(actor, peer, before=None):
             )
         return {
             "peer_name": target["username"],
+            "avatars": {
+                row["account_id"]: row["avatar_path"]
+                for row in connection.execute(
+                    "SELECT account_id,avatar_path FROM public_profiles WHERE account_id IN (?,?)",
+                    (actor, peer),
+                )
+            },
             "can_send": target["status"] == "active",
             "rows": [dict(row) for row in reversed(rows)],
         }

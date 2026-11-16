@@ -125,7 +125,9 @@ class DetailPageTests(unittest.TestCase):
         reply.editor.insert("1.0", "可以的，请问想了解什么？")
         reply.send_message()
         panel.refresh()
-        self.assertIn("请问想了解", panel.history.get("1.0", "end"))
+        self.assertTrue(
+            any("请问想了解" in bubble.cget("text") for bubble in panel.history.bubbles.values())
+        )
 
     def test_owner_profile_can_be_saved_without_a_product(self):
         owner = SellerPage(self.page, self.actor, self.actor)
@@ -156,6 +158,43 @@ class DetailPageTests(unittest.TestCase):
         ):
             owner.choose_avatar()
         self.assertTrue(seller_profile(self.actor, self.actor)["avatar_path"])
+
+    def test_sent_and_received_bubbles_are_visible_and_align_by_sender(self):
+        seller = demo_accounts()["demo_seller"]
+        outgoing = send_direct_message(self.actor, seller, "我发出的内容\n换行也保留")
+        incoming = send_direct_message(seller, self.actor, "卖家的回复")
+        panel = ChatPanel(self.page, self.actor, seller)
+        panel.pack(fill="both", expand=True)
+        self.root.deiconify()
+        self.root.update()
+        mine = panel.history.bubbles[outgoing]
+        theirs = panel.history.bubbles[incoming]
+        self.assertTrue(mine.winfo_viewable())
+        self.assertTrue(theirs.winfo_viewable())
+        self.assertEqual(mine.cget("text"), "我发出的内容\n换行也保留")
+        self.assertEqual(mine.cget("background"), "#95ec69")
+        self.assertEqual(mine.master.pack_info()["side"], "right")
+        self.assertEqual(theirs.master.pack_info()["side"], "left")
+        self.assertEqual(mine.winfo_parent(), str(mine.master))
+        self.assertNotEqual(panel.status.cget("text"), "已发送")
+        self.root.withdraw()
+
+    def test_chat_long_text_wraps_and_refresh_keeps_one_bubble_per_message(self):
+        seller = demo_accounts()["demo_seller"]
+        panel = ChatPanel(self.page, self.actor, seller)
+        panel.pack(fill="both", expand=True)
+        self.root.deiconify()
+        panel.editor.insert("1.0", "长消息" * 300)
+        panel.send_message()
+        self.root.update()
+        self.assertEqual(len(panel.history.bubbles), 1)
+        bubble = next(iter(panel.history.bubbles.values()))
+        self.assertLessEqual(bubble.winfo_width(), panel.history.canvas.winfo_width())
+        panel.refresh()
+        self.root.update()
+        self.assertEqual(len(panel.history.bubbles), 1)
+        self.assertGreater(panel.history.canvas.yview()[1], 0.99)
+        self.root.withdraw()
 
 
 if __name__ == "__main__":

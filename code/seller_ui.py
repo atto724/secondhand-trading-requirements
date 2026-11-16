@@ -26,17 +26,114 @@ def local_time(value):
     )
 
 
+class BubbleHistory(ttk.Frame):
+    """Scrollable, correctly parented message rows with left/right speech bubbles."""
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.canvas = tk.Canvas(
+            self, background="#ededed", highlightthickness=0, width=260, height=120
+        )
+        scrollbar = ttk.Scrollbar(self, command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side="right", fill="y")
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.content = tk.Frame(self.canvas, bg="#ededed")
+        self.window = self.canvas.create_window(0, 0, window=self.content, anchor="nw")
+        self.messages = []
+        self.bubbles = {}
+        self.content.bind("<Configure>", self.update_region)
+        self.canvas.bind("<Configure>", self.resize)
+        self.canvas.bind("<MouseWheel>", self.wheel)
+
+    def update_region(self, _event=None):
+        """Keep scrolling bounds synchronized with wrapped message heights."""
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+
+    def resize(self, event):
+        """Wrap long messages within the visible pane instead of overflowing it."""
+        self.canvas.itemconfigure(self.window, width=event.width)
+        for bubble in self.bubbles.values():
+            bubble.configure(wraplength=max(80, int(event.width * 0.62) - 24))
+
+    def wheel(self, event):
+        """Scroll only this conversation, without global bindings."""
+        self.canvas.yview_scroll(-int(event.delta / 120), "units")
+        return "break"
+
+    def render(self, rows, actor, peer_name, avatars, older=False):
+        """Show actual persisted messages and keep the reading position on older loads."""
+        old_height = max(1, self.content.winfo_height())
+        old_top = self.canvas.yview()[0] * old_height
+        if older:
+            combined = {row["id"]: row for row in self.messages + rows}
+            self.messages = sorted(combined.values(), key=lambda row: row["id"])
+        else:
+            self.messages = rows
+        for widget in self.content.winfo_children():
+            widget.destroy()
+        self.bubbles.clear()
+        if not self.messages:
+            tk.Label(
+                self.content, text="暂无消息，向卖家打个招呼吧", bg="#ededed", fg="#888888"
+            ).pack(pady=25)
+        for row in self.messages:
+            mine = row["sender_id"] == actor
+            tk.Label(
+                self.content,
+                text=local_time(row["created_at"]),
+                bg="#ededed",
+                fg="#999999",
+                font=("Microsoft YaHei", 8),
+            ).pack(pady=(12, 4))
+            line = tk.Frame(self.content, bg="#ededed")
+            line.pack(fill="x", padx=8, pady=(0, 6))
+            avatar = tk.Label(line, bg="#ededed")
+            avatar.photo = avatar_photo(
+                self, row["sender_id"], avatars.get(row["sender_id"], ""), (32, 32)
+            )
+            avatar.configure(image=avatar.photo)
+            avatar.pack(side="right" if mine else "left", anchor="n", padx=4)
+            group = tk.Frame(line, bg="#ededed")
+            group.pack(side="right" if mine else "left", anchor="n")
+            tk.Label(
+                group,
+                text="我" if mine else peer_name,
+                bg="#ededed",
+                fg="#888888",
+                font=("Microsoft YaHei", 8),
+            ).pack(anchor="e" if mine else "w")
+            bubble = tk.Label(
+                group,
+                text=row["content"],
+                bg="#95ec69" if mine else PAPER,
+                fg="#222222",
+                justify="left",
+                anchor="w",
+                wraplength=max(80, int(self.canvas.winfo_width() * 0.62) - 24),
+                padx=10,
+                pady=8,
+                font=("Microsoft YaHei", 10),
+            )
+            bubble.pack(anchor="e" if mine else "w")
+            self.bubbles[row["id"]] = bubble
+            for widget in (avatar, group, line, bubble):
+                widget.bind("<MouseWheel>", self.wheel)
+        self.update_idletasks()
+        self.update_region()
+        if older:
+            height = max(1, self.content.winfo_height())
+            self.canvas.yview_moveto((old_top + height - old_height) / height)
+        else:
+            self.canvas.yview_moveto(1)
+
+
 class ChatPanel(ttk.Frame):
     """Read and send one participant-scoped conversation, with explicit refresh."""
 
     def __init__(self, parent, actor, peer):
         super().__init__(parent, padding=12)
         self.actor, self.peer, self.before = actor, peer, None
-        self.history = tk.Text(
-            self, height=10, wrap="word", bg=PAPER, fg=INK, relief="flat", state="disabled"
-        )
-        scrollbar = ttk.Scrollbar(self, command=self.history.yview)
-        self.history.configure(yscrollcommand=scrollbar.set)
         toolbar = ttk.Frame(self)
         toolbar.pack(fill="x", pady=(0, 8))
         ttk.Button(toolbar, text="刷新最新消息", command=lambda: guarded(self, self.refresh)).pack(
@@ -48,12 +145,9 @@ class ChatPanel(ttk.Frame):
         self.older.pack(side="left", padx=8)
         self.status = ttk.Label(toolbar, style="Sub.TLabel")
         self.status.pack(side="left")
-        history_frame = ttk.Frame(self)
         composer = ttk.Frame(self)
         composer.pack(side="bottom", fill="x")
-        # Reparenting Tk widgets is unsupported; pack into their original parent using in_.
-        self.history.pack(in_=history_frame, side="left", fill="both", expand=True)
-        scrollbar.pack(in_=history_frame, side="right", fill="y")
+        self.history = BubbleHistory(self)
         ttk.Label(
             composer,
             text="私信（最多1000字）：Enter换行，Ctrl+Enter发送。",
@@ -70,27 +164,14 @@ class ChatPanel(ttk.Frame):
             command=lambda: guarded(self, self.send_message),
         )
         self.send_button.pack(anchor="e", pady=8)
-        history_frame.pack(fill="both", expand=True)
+        self.history.pack(fill="both", expand=True)
         self.refresh()
 
     def refresh(self, older=False):
         """Load the newest or preceding 100 rows without discarding an unsent draft."""
         data = conversation(self.actor, self.peer, self.before if older else None)
         rows = data["rows"]
-        self.history.configure(state="normal")
-        if not older:
-            self.history.delete("1.0", "end")
-        text = "".join(
-            f"{'我' if row['sender_id'] == self.actor else data['peer_name']}  "
-            f"{local_time(row['created_at'])}\n{row['content']}\n\n"
-            for row in rows
-        )
-        self.history.insert(
-            "1.0" if older else "end", text or "还没有消息，可以先向卖家询问商品情况。\n"
-        )
-        self.history.configure(state="disabled")
-        if not older:
-            self.history.see("end")
+        self.history.render(rows, self.actor, data["peer_name"], data["avatars"], older)
         if rows:
             self.before = rows[0]["id"]
         self.older.configure(state="normal" if len(rows) == 100 else "disabled")
@@ -102,7 +183,6 @@ class ChatPanel(ttk.Frame):
         send_direct_message(self.actor, self.peer, self.editor.get("1.0", "end-1c"))
         self.editor.delete("1.0", "end")
         self.refresh()
-        self.status.configure(text="已发送")
 
     def keyboard_send(self, _event):
         """Prevent Ctrl+Enter from inserting an extra newline after sending."""

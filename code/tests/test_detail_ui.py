@@ -11,7 +11,7 @@ from tempfile import TemporaryDirectory
 import database
 from demo import demo_accounts, seed_demo
 from market_ui import CatalogPage, ProductDetail
-from seller_ui import ChatPanel, SellerPage, InboxPage
+from seller_ui import ChatPage, ChatPanel, SellerPage, InboxPage
 from community import send_direct_message, inbox, seller_profile
 from unittest.mock import patch
 from ui_common import configure_style
@@ -76,7 +76,7 @@ class DetailPageTests(unittest.TestCase):
         self.assertEqual(view.index, 0)
         self.assertTrue(view.previous.instate(["disabled"]))
 
-    def test_seller_box_opens_inline_store_with_visible_chat(self):
+    def test_seller_box_opens_profile_without_reading_private_messages(self):
         seller = demo_accounts()["demo_seller"]
         send_direct_message(seller, self.actor, "询问商品")
         detail = ProductDetail(self.page, self.actor, self.product)
@@ -95,7 +95,9 @@ class DetailPageTests(unittest.TestCase):
         store = next(widget for widget in detail.winfo_children() if isinstance(widget, SellerPage))
         self.root.update()
         self.assertEqual(store.winfo_toplevel(), self.root)
-        self.assertEqual(inbox(self.actor)[0]["unread"], 0)
+        self.assertEqual(inbox(self.actor)[0]["unread"], 1)
+        self.assertFalse(any(isinstance(w, ChatPanel) for w in store.winfo_children()))
+        self.assertFalse(hasattr(store, "chat"))
         self.assertEqual(len(store.table.tree.get_children()), 8)
         store.table.tree.selection_set(store.table.tree.get_children()[0])
         store.open_product()
@@ -137,7 +139,7 @@ class DetailPageTests(unittest.TestCase):
 
     def test_private_composer_visible_at_minimum_window_size(self):
         seller = demo_accounts()["demo_seller"]
-        store = SellerPage(self.page, self.actor, seller)
+        store = ChatPage(self.page, self.actor, seller)
         self.root.deiconify()
         self.root.update()
         for widget in (store.chat.editor, store.chat.send_button):
@@ -195,6 +197,30 @@ class DetailPageTests(unittest.TestCase):
         self.assertEqual(len(panel.history.bubbles), 1)
         self.assertGreater(panel.history.canvas.yview()[1], 0.99)
         self.root.withdraw()
+
+    def test_private_message_button_opens_only_conversation_and_returns_to_detail(self):
+        detail = ProductDetail(self.page, self.actor, self.product)
+
+        def descendants(widget):
+            for child in widget.winfo_children():
+                yield child
+                yield from descendants(child)
+
+        button = next(
+            w
+            for w in descendants(detail)
+            if isinstance(w, ttk.Button) and w.cget("text") == "私信卖家 / 咨询商品"
+        )
+        button.invoke()
+        chat = next(w for w in detail.winfo_children() if isinstance(w, ChatPage))
+        self.assertTrue(any(isinstance(w, ChatPanel) for w in chat.winfo_children()))
+        self.assertFalse(any(isinstance(w, SellerPage) for w in descendants(chat)))
+        self.assertEqual(chat.winfo_toplevel(), self.root)
+        chat.chat.editor.insert("1.0", "独立聊天页咨询")
+        chat.chat.send_message()
+        self.assertTrue(chat.chat.history.bubbles)
+        chat.destroy()
+        self.assertTrue(detail.winfo_exists())
 
 
 if __name__ == "__main__":

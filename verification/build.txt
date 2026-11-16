@@ -21,8 +21,9 @@ test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox (test_detail_
 test_gallery_boundaries_and_real_thumbnail_switching (test_detail_ui.DetailPageTests.test_gallery_boundaries_and_real_thumbnail_switching) ... ok
 test_owner_profile_can_be_saved_without_a_product (test_detail_ui.DetailPageTests.test_owner_profile_can_be_saved_without_a_product) ... ok
 test_private_composer_visible_at_minimum_window_size (test_detail_ui.DetailPageTests.test_private_composer_visible_at_minimum_window_size) ... ok
+test_private_message_button_opens_only_conversation_and_returns_to_detail (test_detail_ui.DetailPageTests.test_private_message_button_opens_only_conversation_and_returns_to_detail) ... ok
 test_return_preserves_list_state_without_secondary_window (test_detail_ui.DetailPageTests.test_return_preserves_list_state_without_secondary_window) ... ok
-test_seller_box_opens_inline_store_with_visible_chat (test_detail_ui.DetailPageTests.test_seller_box_opens_inline_store_with_visible_chat) ... ok
+test_seller_box_opens_profile_without_reading_private_messages (test_detail_ui.DetailPageTests.test_seller_box_opens_profile_without_reading_private_messages) ... ok
 test_sent_and_received_bubbles_are_visible_and_align_by_sender (test_detail_ui.DetailPageTests.test_sent_and_received_bubbles_are_visible_and_align_by_sender) ... ok
 test_duplicate_legacy_category_merges_without_losing_products (test_gallery.GalleryTests.test_duplicate_legacy_category_merges_without_losing_products) ... ok
 test_gallery_images_classification_and_idempotency (test_gallery.GalleryTests.test_gallery_images_classification_and_idempotency) ... ok
@@ -66,7 +67,7 @@ test_waiting_blocks_edit_and_delist (test_workflows.WorkflowTests.test_waiting_b
 test_zero_cohort_statistics_and_backup_restore (test_workflows.WorkflowTests.test_zero_cohort_statistics_and_backup_restore) ... ok
 
 ----------------------------------------------------------------------
-Ran 61 tests in 38.820s
+Ran 62 tests in 38.259s
 
 OK
 ͼƬ�����ݻ���handbag����ǰ״̬����ЧԤԼ���ƣ�
@@ -324,7 +325,7 @@ running install_egg_info
 Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
 running install_scripts
 creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
-creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-t_cb619t\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-rlce39l7\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
 adding 'accounts.py'
 adding 'admin_ui.py'
 adding 'benchmark.py'

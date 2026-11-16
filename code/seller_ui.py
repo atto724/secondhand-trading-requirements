@@ -190,6 +190,35 @@ class ChatPanel(ttk.Frame):
         return "break"
 
 
+class ChatPage(ttk.Frame):
+    """A dedicated in-page conversation, independent of the seller storefront."""
+
+    def __init__(self, parent, actor, peer, product_title=""):
+        # Validate before mounting the overlay; ChatPanel rechecks participant access.
+        data = conversation(actor, peer)
+        super().__init__(parent, padding=16)
+        self.place(x=0, y=0, relwidth=1, relheight=1)
+        self.lift()
+        ttk.Button(self, text="← 返回商品详情", command=self.destroy).pack(anchor="w", pady=(0, 10))
+        header = ttk.Frame(self)
+        header.pack(fill="x", pady=(0, 10))
+        avatar = ttk.Label(header)
+        avatar.photo = avatar_photo(self, peer, data["avatars"].get(peer, ""), (48, 48))
+        avatar.configure(image=avatar.photo)
+        avatar.pack(side="left", padx=(0, 12))
+        ttk.Label(header, text=f"与 {data['peer_name']} 的对话", style="Title.TLabel").pack(
+            anchor="w"
+        )
+        if product_title:
+            ttk.Label(
+                header, text=f"正在咨询：{product_title}", style="Sub.TLabel", wraplength=850
+            ).pack(anchor="w")
+        self.chat = ChatPanel(self, actor, peer)
+        self.chat.pack(fill="both", expand=True)
+        self.chat.editor.focus_set()
+        self.bind("<Escape>", lambda event: self.destroy())
+
+
 class InboxPage(ttk.Frame):
     """Expose private replies through the persistent message-center navigation."""
 
@@ -327,16 +356,10 @@ class SellerPage(tk.Frame):
         self.next_button.pack(side="left")
         self.count = ttk.Label(footer)
         self.count.pack(side="left", padx=12)
-        if actor != seller_id:
-            chat_area = tk.LabelFrame(body, text="私信卖家", bg=BG, fg=ACCENT, width=380)
-            chat_area.pack(side="right", fill="both", padx=(12, 0))
-            chat_area.pack_propagate(False)
-            self.chat = ChatPanel(chat_area, actor, seller_id)
-            self.chat.pack(fill="both", expand=True)
-        else:
+        if actor == seller_id:
             ttk.Label(
                 header,
-                text="这是你自己的主页，私信请到「消息中心 → 私信会话」查看。",
+                text="收到的私信可在「消息中心 → 私信会话」查看。",
                 background=PAPER,
                 style="Sub.TLabel",
             ).pack(anchor="w", padx=18, pady=6)

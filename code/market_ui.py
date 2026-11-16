@@ -15,7 +15,7 @@ from core import money, price
 from domain import PRODUCT_STATUS_LABELS, ProductStatus
 from editor_ui import ProductEditor
 from products import list_categories, list_my_products
-from seller_ui import SellerPage
+from seller_ui import ChatPage, SellerPage
 from trades import reserve
 from ui_common import (
     ACCENT,
@@ -180,7 +180,12 @@ class ProductDetail(tk.Frame):
         )
         if actor != item["seller_id"]:
             ttk.Button(
-                right, text="私信卖家 / 咨询商品", style="Accent.TButton", command=open_seller
+                right,
+                text="私信卖家 / 咨询商品",
+                style="Accent.TButton",
+                command=lambda: guarded(
+                    self, lambda: ChatPage(self, self.actor, item["seller_id"], item["title"])
+                ),
             ).pack(anchor="w", pady=8)
         label("付款和交付在线下协商，平台记录预约及交易结果。", fg="#80634f", wraplength=420)
         if item["reviews"]:

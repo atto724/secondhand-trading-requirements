@@ -50,8 +50,8 @@
       "nonblank_noncomment_nondocstring": 37
     },
     "market_ui.py": {
-      "physical_lines": 492,
-      "nonblank_noncomment_nondocstring": 444
+      "physical_lines": 497,
+      "nonblank_noncomment_nondocstring": 449
     },
     "operations.py": {
       "physical_lines": 267,
@@ -78,8 +78,8 @@
       "nonblank_noncomment_nondocstring": 38
     },
     "seller_ui.py": {
-      "physical_lines": 407,
-      "nonblank_noncomment_nondocstring": 357
+      "physical_lines": 430,
+      "nonblank_noncomment_nondocstring": 375
     },
     "trades.py": {
       "physical_lines": 429,
@@ -94,7 +94,7 @@
       "nonblank_noncomment_nondocstring": 356
     }
   },
-  "physical_total": 5012,
-  "nonblank_noncomment_nondocstring_total": 4330,
+  "physical_total": 5040,
+  "nonblank_noncomment_nondocstring_total": 4353,
   "checked_at": "2026-11-16"
 }

@@ -383,7 +383,8 @@ def list_reservations(actor, scope="buyer"):
         return [
             dict(row)
             for row in connection.execute(
-                "SELECT r.*,p.seller_id,p.title AS current_title,a.username AS buyer_name "
+                "SELECT r.*,p.seller_id,p.status AS product_status,p.blocked,"
+                "p.title AS current_title,a.username AS buyer_name "
                 "FROM reservations r JOIN products p ON p.id=r.product_id "
                 "JOIN accounts a ON a.id=r.buyer_id WHERE " + where + " ORDER BY r.id DESC",
                 args,

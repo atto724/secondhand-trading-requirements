@@ -81,3 +81,9 @@ ChatPanel采用BubbleHistory画布及实际子Frame显示消息，移除原Text�
 ## 当前导航决定：主页与聊天分离
 
 以D-017为准：SellerPage仅资料/商品；ChatPage是从商品详情私信按钮打开的独立覆盖页，含ChatPanel和返回商品详情，不含个人主页。主页不读取私信。最新62项测试、Black、Pylint10/10及构建通过。此前“主页右侧常驻聊天”为被替代的历史方案。
+
+## 当前预约界面：状态分类和动态按钮
+
+D-018生效：ReservationsPage上方状态下拉分类显示各类数量，当前分类列表中选中一条才生成适用操作。reservation_actions集中描述买家/卖家操作矩阵、取消申请发起方向；trades.list_reservations返回当前商品状态及违规标记供显示判断。历史保留，原有事务授权不变。新增4项回归覆盖全部状态和两种身份、分类互斥、违规商品确认隐藏、取消双方按钮、刷新后移除过时操作。
+
+本轮最终验证：66项测试、Black32文件、配置后Pylint10/10与wheel/源码包构建通过；生产源码统计已更新verification/code-metrics.json。

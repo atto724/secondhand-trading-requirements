@@ -36,6 +36,10 @@ test_money_is_shown_in_yuan (test_presentation.PresentationTests.test_money_is_s
 test_password_material_is_not_displayed (test_presentation.PresentationTests.test_password_material_is_not_displayed) ... ok
 test_roles_and_state_are_localized (test_presentation.PresentationTests.test_roles_and_state_are_localized) ... ok
 test_utc_timestamp_crosses_into_next_local_date (test_presentation.PresentationTests.test_utc_timestamp_crosses_into_next_local_date) ... ok
+test_categories_partition_all_states_and_blocked_product_hides_confirmation (test_reservation_ui.ReservationActionTests.test_categories_partition_all_states_and_blocked_product_hides_confirmation) ... ok
+test_each_state_has_only_meaningful_buyer_and_seller_actions (test_reservation_ui.ReservationActionTests.test_each_state_has_only_meaningful_buyer_and_seller_actions) ... ok
+test_group_selection_and_cancellation_direction_control_visible_buttons (test_reservation_ui.ReservationPageTests.test_group_selection_and_cancellation_direction_control_visible_buttons) ... ok
+test_refresh_removes_changed_record_and_stale_actions_without_resetting_category (test_reservation_ui.ReservationPageTests.test_refresh_removes_changed_record_and_stale_actions_without_resetting_category) ... ok
 test_admin_permissions_rechecked (test_workflows.WorkflowTests.test_admin_permissions_rechecked) ... ok
 test_audit_failure_and_export_are_recorded (test_workflows.WorkflowTests.test_audit_failure_and_export_are_recorded) ... ok
 test_bilateral_cancel_restores_publication (test_workflows.WorkflowTests.test_bilateral_cancel_restores_publication) ... ok
@@ -67,11 +71,11 @@ test_waiting_blocks_edit_and_delist (test_workflows.WorkflowTests.test_waiting_b
 test_zero_cohort_statistics_and_backup_restore (test_workflows.WorkflowTests.test_zero_cohort_statistics_and_backup_restore) ... ok
 
 ----------------------------------------------------------------------
-Ran 62 tests in 38.259s
+Ran 66 tests in 41.100s
 
 OK
 ͼƬ�����ݻ���handbag����ǰ״̬����ЧԤԼ���ƣ�
-Black formatting: 31 files passed
+Black formatting: 32 files passed
 
 ------------------------------------
 Your code has been rated at 10.00/10
@@ -172,6 +176,7 @@ copying tests\test_community.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_detail_ui.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_gallery.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_presentation.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_reservation_ui.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_workflows.py -> secondhand_trading_desktop-0.3.0\tests
 Writing secondhand_trading_desktop-0.3.0\setup.cfg
 Creating tar archive
@@ -325,7 +330,7 @@ running install_egg_info
 Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
 running install_scripts
 creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
-creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-rlce39l7\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-bt7eq5fi\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
 adding 'accounts.py'
 adding 'admin_ui.py'
 adding 'benchmark.py'

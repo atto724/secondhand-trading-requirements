@@ -1,6 +1,5 @@
 """Administrator review, account governance, messages and maintenance desktop views."""
 
-import json
 import tkinter as tk
 from datetime import datetime, timedelta, timezone
 from tkinter import filedialog, simpledialog, ttk
@@ -19,7 +18,16 @@ from operations import (
     seller_statistics,
     verify_backup,
 )
-from ui_common import DataTable, TextWindow, guarded
+from ui_common import (
+    ACCENT,
+    MUTED,
+    PAPER,
+    DataTable,
+    MetricCards,
+    TextWindow,
+    display_value,
+    guarded,
+)
 
 
 class ReviewPage(ttk.Frame):
@@ -149,7 +157,16 @@ class AccountsPage(ttk.Frame):
         """Refresh roles from the database rather than UI state."""
         rows = list_accounts(self.actor)
         self.table.fill(
-            (row["id"], (row["id"], row["username"], row["status"], row["roles"])) for row in rows
+            (
+                row["id"],
+                (
+                    row["id"],
+                    row["username"],
+                    display_value(row["status"]),
+                    display_value(row["roles"], "roles"),
+                ),
+            )
+            for row in rows
         )
 
     def change(self, kind, enabled):
@@ -185,7 +202,7 @@ class MessagesPage(ttk.Frame):
                 ("read", "阅读", 65),
                 ("type", "事件", 100),
                 ("content", "消息内容", 550),
-                ("date", "发送时间（UTC）", 200),
+                ("date", "发送时间（北京时间）", 200),
             ],
         )
         self.table.pack(fill="both", expand=True)
@@ -202,9 +219,9 @@ class MessagesPage(ttk.Frame):
                 (
                     row["id"],
                     "已读" if row["is_read"] else "未读",
-                    row["event_type"],
+                    display_value(row["event_type"]),
                     row["content"],
-                    row["created_at"],
+                    display_value(row["created_at"], "created_at"),
                 ),
             )
             for row in rows
@@ -219,43 +236,180 @@ class MessagesPage(ttk.Frame):
 
 
 class ReportsPage(ttk.Frame):
-    """Custom date ranges for seller and administrator metrics."""
+    """Present statistical summaries as metric cards, charts and Chinese tables."""
 
     def __init__(self, parent, actor, administrator=False):
-
         super().__init__(parent, padding=18)
         self.actor = actor
         self.administrator = administrator
+        self.chart_data = []
+        self.chart = None
+        self.result_data = {}
+        self.platform_rows = []
         local_today = datetime.now(timezone(timedelta(hours=8))).date()
         self.start = tk.StringVar(master=self, value=str(local_today.replace(day=1)))
         self.end = tk.StringVar(master=self, value=str(local_today))
         ttk.Label(
             self, text="平台统计" if administrator else "我的统计", style="Title.TLabel"
-        ).pack(anchor="w", pady=12)
+        ).pack(anchor="w", pady=(0, 12))
         toolbar = ttk.Frame(self)
-        toolbar.pack(fill="x", pady=12)
+        toolbar.pack(fill="x", pady=8)
         for label, variable in [("开始日期", self.start), ("结束日期（包含）", self.end)]:
             ttk.Label(toolbar, text=label).pack(side="left", padx=5)
-            ttk.Entry(toolbar, textvariable=variable, width=14).pack(side="left", padx=5)
-        ttk.Button(toolbar, text="查询", command=lambda: guarded(self, self.query)).pack(
-            side="left", padx=8
-        )
+            entry = ttk.Entry(toolbar, textvariable=variable, width=14)
+            entry.pack(side="left", padx=5)
+            entry.bind("<Return>", lambda event: guarded(self, self.query))
+        ttk.Button(
+            toolbar, text="查询", style="Accent.TButton", command=lambda: guarded(self, self.query)
+        ).pack(side="left", padx=8)
         ttk.Label(
-            self, text="日期格式 YYYY-MM-DD，统一按北京时间（UTC+8）划分区间。", style="Sub.TLabel"
-        ).pack(anchor="w")
-        self.result = tk.Text(self, wrap="word", font=("Microsoft YaHei", 11), padx=16, pady=16)
-        self.result.pack(fill="both", expand=True, pady=12)
+            self, text="日期格式 YYYY-MM-DD；所有日期区间按北京时间划分。", style="Sub.TLabel"
+        ).pack(anchor="w", pady=5)
+        self.result = ttk.Frame(self)
+        self.result.pack(fill="both", expand=True, pady=10)
         self.query()
 
     def query(self):
-        """Show metric definitions together with computed values."""
-
+        """Validate first, then replace the last successful visualization."""
         function = platform_statistics if self.administrator else seller_statistics
         result = function(self.actor, self.start.get(), self.end.get())
-        self.result.configure(state="normal")
-        self.result.delete("1.0", "end")
-        self.result.insert("1.0", json.dumps(result, ensure_ascii=False, indent=2))
-        self.result.configure(state="disabled")
+        self.result_data = result
+        for widget in self.result.winfo_children():
+            widget.destroy()
+        if self.administrator:
+            self.platform_view(result)
+        else:
+            self.seller_view(result)
+
+    def seller_view(self, result):
+        """Keep current inventory separate from period and cohort statistics."""
+        metrics = [
+            ("区间首次发布", f"{result['区间首次发布数']} 件"),
+            ("当前在售 · 截至现在", f"{result['当前在售数（非区间指标）']} 件"),
+            ("区间确认成交", f"{result['区间确认成交数']} 件"),
+            ("首次发布样本成交率", result["区间首次发布商品截至当前成交率"]),
+        ]
+        MetricCards(self.result, metrics).pack(fill="x")
+        ttk.Label(self.result, text="分类发布与成交", font=("Microsoft YaHei", 13)).pack(
+            anchor="w", pady=(14, 5)
+        )
+        self.chart_data = result["分类成交情况（首次发布样本）"]
+        self.chart = tk.Canvas(self.result, height=175, bg=PAPER, highlightthickness=0)
+        self.chart.pack(fill="x", pady=4)
+        self.chart.bind("<Configure>", self.draw_chart)
+        table = DataTable(
+            self.result,
+            [
+                ("category", "商品分类", 200),
+                ("total", "区间首次发布数", 170),
+                ("sold", "其中已成交数", 170),
+                ("rate", "样本成交率", 150),
+            ],
+        )
+        table.tree.configure(height=4)
+        table.pack(fill="both", expand=True, pady=8)
+        table.fill(
+            (
+                index,
+                (
+                    row["name"] or "未分类",
+                    row["total"],
+                    row["sold"] or 0,
+                    f"{(row['sold'] or 0) / row['total']:.1%}" if row["total"] else "无可计算数据",
+                ),
+            )
+            for index, row in enumerate(self.chart_data)
+        )
+        ttk.Label(
+            self.result,
+            text="计算口径：成交率 = 区间内首次发布、截至当前已成交的商品数 ÷ 区间首次发布数。"
+            "当前在售数不受日期区间限制；区间成交数按买家确认成交时间计算。",
+            wraplength=1000,
+            justify="left",
+            style="Sub.TLabel",
+        ).pack(anchor="w", pady=8)
+
+    def draw_chart(self, _event=None):
+        """Render grouped quantity bars that resize with the statistics page."""
+        chart = self.chart
+        chart.delete("all")
+        if not self.chart_data:
+            chart.create_text(
+                max(180, chart.winfo_width() // 2),
+                85,
+                text="所选日期内没有首次发布商品，暂无分类统计。",
+                fill=MUTED,
+                font=("Microsoft YaHei", 11),
+            )
+            return
+        chart.create_rectangle(18, 12, 30, 24, fill="#dcc3a8", outline="")
+        chart.create_text(38, 18, anchor="w", text="首次发布", fill=MUTED)
+        chart.create_rectangle(135, 12, 147, 24, fill=ACCENT, outline="")
+        chart.create_text(155, 18, anchor="w", text="其中成交", fill=MUTED)
+        maximum = max(1, max(row["total"] for row in self.chart_data))
+        available = max(100, chart.winfo_width() - 230)
+        height = max(175, 42 + len(self.chart_data) * 31)
+        chart.configure(height=height)
+        for index, row in enumerate(self.chart_data):
+            y = 43 + index * 31
+            total, sold = row["total"], row["sold"] or 0
+            chart.create_text(18, y + 8, text=row["name"] or "未分类", anchor="w", fill=MUTED)
+            chart.create_rectangle(
+                120, y, 120 + available * total / maximum, y + 9, fill="#dcc3a8", outline=""
+            )
+            chart.create_rectangle(
+                120, y + 11, 120 + available * sold / maximum, y + 20, fill=ACCENT, outline=""
+            )
+            chart.create_text(
+                132 + available * total / maximum,
+                y + 9,
+                text=f"{total} / {sold}",
+                anchor="w",
+                fill=MUTED,
+            )
+
+    def platform_view(self, result):
+        """Show event metrics with explicit record identifiers for drill-down."""
+        metrics = [
+            (label, value["数量"]) for label, value in result.items() if isinstance(value, dict)
+        ]
+        MetricCards(self.result, metrics, columns=3).pack(fill="x")
+        ttk.Label(self.result, text="统计明细索引", font=("Microsoft YaHei", 13)).pack(
+            anchor="w", pady=(14, 5)
+        )
+        self.platform_rows = [
+            (label, value) for label, value in result.items() if isinstance(value, dict)
+        ]
+        table = DataTable(
+            self.result,
+            [
+                ("metric", "统计指标", 290),
+                ("count", "事件数量", 110),
+                ("records", "明细记录编号", 480),
+            ],
+        )
+        table.pack(fill="both", expand=True, pady=8)
+        table.fill(
+            (index, (label, value["数量"], "、".join(map(str, value["明细编号"])) or "暂无记录"))
+            for index, (label, value) in enumerate(self.platform_rows)
+        )
+        table.tree.bind("<Double-1>", lambda event: self.platform_detail(table.selected()))
+        ttk.Label(
+            self.result,
+            text="各指标分别按自身事件时间计数；确认成交事件包含后续被更正的成交。"
+            "双击一行查看完整编号清单，便于在对应业务页面核对。",
+            wraplength=1000,
+            style="Sub.TLabel",
+        ).pack(anchor="w", pady=8)
+
+    def platform_detail(self, index):
+        """Open a readable list instead of dumping a result dictionary."""
+        label, value = self.platform_rows[index]
+        TextWindow(
+            self,
+            label,
+            {"统计指标": label, "事件数量": value["数量"], "明细记录编号": value["明细编号"]},
+        )
 
 
 class MaintenancePage(ttk.Frame):
@@ -296,7 +450,7 @@ class MaintenancePage(ttk.Frame):
                 ("object", "对象", 120),
                 ("result", "结果", 80),
                 ("reason", "原因", 250),
-                ("time", "时间（UTC）", 200),
+                ("time", "时间（北京时间）", 200),
             ],
         )
         self.table.pack(fill="both", expand=True)
@@ -313,11 +467,11 @@ class MaintenancePage(ttk.Frame):
                 (
                     row["id"],
                     row["actor_id"],
-                    row["action"],
-                    f"{row['object_type']}:{row['object_id']}",
-                    row["result"],
+                    display_value(row["action"]),
+                    f"{display_value(row['object_type'])} · {row['object_id'] or '—'}",
+                    display_value(row["result"]),
                     row["reason"],
-                    row["created_at"],
+                    display_value(row["created_at"], "created_at"),
                 ),
             )
             for row in rows
@@ -338,7 +492,15 @@ class MaintenancePage(ttk.Frame):
 
     def backup(self):
         """Create a backup using SQLite's consistent backup API."""
-        TextWindow(self, "备份已创建", str(create_backup(self.actor)))
+        TextWindow(
+            self,
+            "备份已创建",
+            {
+                "备份状态": "成功",
+                "保存位置": str(create_backup(self.actor)),
+                "备份内容": "数据库与商品图片",
+            },
+        )
         self.refresh()
 
     def verify(self):

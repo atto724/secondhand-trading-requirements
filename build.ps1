@@ -12,7 +12,7 @@ try {
     & $pythonPath -m unittest discover -s tests -v
     if ($LASTEXITCODE -ne 0) { throw 'Tests failed' }
     $sourceFiles = @(Get-ChildItem -File -Filter '*.py' | ForEach-Object FullName)
-    & $pythonPath -m black --check @sourceFiles tests
+    & $pythonPath (Join-Path $projectRoot "tools/check_format.py") @sourceFiles tests
     if ($LASTEXITCODE -ne 0) { throw 'Formatting check failed' }
     & $pythonPath -m pylint --persistent=n @sourceFiles
     if ($LASTEXITCODE -ne 0) { throw 'Pylint failed' }

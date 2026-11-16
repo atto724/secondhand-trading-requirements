@@ -1,0 +1,1 @@
+Seller/platform statistics: populated and empty ranges OK. Nested audit/snapshot, backup list, empty records and restore verification windows rendered without callback errors. Native seller statistics window inspected: cards, chart, table and definitions visible without overlaps.

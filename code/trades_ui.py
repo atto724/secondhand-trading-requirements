@@ -15,7 +15,7 @@ from trades import (
     respond_cancel,
     transaction_detail,
 )
-from ui_common import DataTable, TextWindow, guarded
+from ui_common import DataTable, TextWindow, display_value, guarded
 
 
 class ReservationsPage(ttk.Frame):
@@ -67,7 +67,7 @@ class ReservationsPage(ttk.Frame):
                 ("title", "预约时商品", 210),
                 ("buyer", "买家", 120),
                 ("status", "预约状态", 150),
-                ("created", "创建时间（UTC）", 200),
+                ("created", "创建时间（北京时间）", 200),
             ],
         )
         self.table.pack(fill="both", expand=True)
@@ -86,7 +86,7 @@ class ReservationsPage(ttk.Frame):
                     json.loads(row["snapshot"])["title"],
                     row["buyer_name"],
                     LABELS[row["status"]],
-                    row["created_at"],
+                    display_value(row["created_at"], "created_at"),
                 ),
             )
             for row in rows
@@ -109,7 +109,7 @@ class ReservationsPage(ttk.Frame):
             {
                 "预约编号": data["id"],
                 "状态": LABELS[data["status"]],
-                "创建时间（UTC）": data["created_at"],
+                "创建时间（北京时间）": data["created_at"],
                 "取消/处理原因": data["reason"],
                 "交付登记时间": data["delivered_at"],
                 "成交确认时间": data["completed_at"],

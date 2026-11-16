@@ -1,5 +1,6 @@
 """Seed an offline, versioned product gallery from user-provided photographs."""
 
+import hashlib
 import sys
 from contextlib import closing
 from pathlib import Path
@@ -7,7 +8,8 @@ from pathlib import Path
 import database
 import demo_assets
 from accounts import create_account
-from catalog import review_product, save_product, submit_review
+from catalog import product_detail, review_product, save_product, submit_review
+from core import has_live_reservations
 from governance import bootstrap_admin
 from products import list_categories
 
@@ -153,6 +155,70 @@ def seed_product(
     return product_id
 
 
+def supplement_images(accounts, assets):
+    """Apply each fixture photo upgrade once, preserving transactions and snapshots."""
+    with closing(database.connect_database()) as connection:
+        connection.execute(
+            "CREATE TABLE IF NOT EXISTS demo_photo_updates (sample_key TEXT PRIMARY KEY)"
+        )
+        connection.commit()
+        rows = connection.execute("SELECT sample_key,product_id FROM demo_items").fetchall()
+    for row in rows:
+        key, product_id = row
+        sources = sorted(assets.glob(f"{key}_detail_*.jpg"))
+        if not sources:
+            continue
+        with closing(database.connect_database()) as connection:
+            done = connection.execute(
+                "SELECT 1 FROM demo_photo_updates WHERE sample_key=?", (key,)
+            ).fetchone()
+            state = connection.execute(
+                "SELECT * FROM products WHERE id=?", (product_id,)
+            ).fetchone()
+            if done or not state or state["deleted"] or state["blocked"]:
+                continue
+            # A previous run may have stopped after saving files but before marking completion.
+            existing_hashes = {
+                hashlib.sha256((database.DATABASE_PATH.parent / image[0]).read_bytes()).hexdigest()
+                for image in connection.execute(
+                    "SELECT file_path FROM product_images WHERE product_id=?", (product_id,)
+                )
+                if (database.DATABASE_PATH.parent / image[0]).is_file()
+            }
+            if all(
+                hashlib.sha256(path.read_bytes()).hexdigest() in existing_hashes for path in sources
+            ):
+                with connection:
+                    connection.execute(
+                        "INSERT INTO demo_photo_updates(sample_key) VALUES(?)", (key,)
+                    )
+                continue
+            if state["status"] != "published" or has_live_reservations(connection, product_id):
+                print(f"图片补充暂缓：{key}（当前状态或有效预约限制）")
+                continue
+        item = product_detail(accounts["demo_seller"], product_id)
+        if len(item["images"]) + len(sources) > 5:
+            print(f"图片补充暂缓：{key}（超过五张上限）")
+            continue
+        save_product(
+            accounts["demo_seller"],
+            item["title"],
+            item["description"],
+            item["category_id"],
+            item["price_cents"],
+            [str(path) for path in sources],
+            product_id=product_id,
+            expected_version=item["version"],
+            condition=item["condition_label"],
+            shipping=item["shipping"],
+            negotiable=bool(item["negotiable"]),
+        )
+        review_product(accounts["demo_admin"], product_id, item["version"] + 1, True)
+        with closing(database.connect_database()) as connection:
+            with connection:
+                connection.execute("INSERT INTO demo_photo_updates(sample_key) VALUES(?)", (key,))
+
+
 def seed_demo(directory):
     """Populate a separate gallery database idempotently using original supplied images."""
     database.DATABASE_PATH = Path(directory).resolve() / "trading.db"
@@ -193,6 +259,7 @@ def seed_demo(directory):
         assets / "textbook.jpg",
         "draft",
     )
+    supplement_images(accounts, assets)
 
 
 def main():

@@ -16,7 +16,7 @@ Python + Tkinter + SQLite，基于实验一需求和实验二 UML 实现。源�
 .\code\.venv\Scripts\python.exe .\code\demo.py
 ```
 
-演示账号：`demo_admin`、`demo_seller`、`demo_buyer`、`demo_other`，密码均为 `DemoPass123!`。这些账号只存在于 `code/data/demo_gallery`，不修改原来的 `code/data/trading.db`。演示图片采用用户提供的15张商品图，价格和成色是教学样例设定。
+演示账号：`demo_admin`、`demo_seller`、`demo_buyer`、`demo_other`，密码均为 `DemoPass123!`。这些账号只存在于 `code/data/demo_gallery`，不修改原来的 `code/data/trading.db`。演示图片采用用户提供的27张商品图，价格和成色是教学样例设定。
 
 演示顺序：买家浏览并预约 → 卖家在“卖家预约”确认 → 卖家登记交付 → 买家确认完成。管理员在管理后台审核待审核示例，也可处理违规、争议、账号授权、更正成交和审计备份。
 
@@ -60,3 +60,5 @@ Python + Tkinter + SQLite，基于实验一需求和实验二 UML 实现。源�
 实验报告必须由学生独立书写；本 README 是程序操作说明，不是实验报告。
 
 新版演示图库位于 `code/data/demo_gallery`：15件带图可浏览商品、1件带图待审核商品、1件带图草稿。旧的 `code/data/demo` 目录保留，不清空已有演示交易。分类采用已确认的10类，启动时迁移旧分类。
+
+商品详情在当前主界面内打开，返回时保留列表筛选和页码。可点击缩略图、上一张/下一张或左右方向键切换图片，Esc返回；长描述支持滚动。7件样例增加详情图，新建演示库共29条图片关联（含待审核和草稿的封面复用）。已有有效预约、非已发布状态或超过5张上限的样例暂缓补图，解除限制后再次启动demo.py会重试，不清空交易数据。

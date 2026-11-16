@@ -16,7 +16,7 @@ from domain import PRODUCT_STATUS_LABELS, ProductStatus
 from editor_ui import ProductEditor
 from products import list_categories, list_my_products
 from trades import reserve
-from ui_common import ACCENT, BG, INK, PAPER, DataTable, Window, guarded, stored_image, thumbnail
+from ui_common import ACCENT, BG, INK, PAPER, DataTable, guarded, stored_image, thumbnail
 
 
 def status_label(value):
@@ -24,87 +24,181 @@ def status_label(value):
     return PRODUCT_STATUS_LABELS[ProductStatus(value)]
 
 
-class ProductDetail(Window):
-    """Show real product images and fields without revealing seller phone publicly."""
+class ProductDetail(tk.Frame):
+    """An in-page detail view that preserves the underlying list and filters."""
 
     def __init__(self, parent, actor, product_id):
         item = product_detail(actor, product_id)
-        super().__init__(parent, item["title"] or "商品详情", "980x700")
-        self.photos = []
-        self.actor = actor
-        self.item = item
-        frame = ttk.Frame(self, padding=24)
-        frame.pack(fill="both", expand=True)
-        left = ttk.Frame(frame)
-        left.pack(side="left", fill="both", expand=True, padx=(0, 24))
-        self.large = ttk.Label(left, text="暂无商品图片", anchor="center")
-        self.large.pack(fill="both", expand=True)
-        strip = ttk.Frame(left)
-        strip.pack(fill="x", pady=10)
-        for index, image in enumerate(item["images"]):
-            ttk.Button(
-                strip, text=str(index + 1), command=lambda current=image: self.show_image(current)
-            ).pack(side="left", padx=3)
-        if item["images"]:
-            self.show_image(item["images"][0])
-        right = ttk.Frame(frame)
-        right.pack(side="right", fill="both", expand=True)
-        ttk.Label(
-            right, text=item["title"] or "（未填写标题）", style="Title.TLabel", wraplength=400
-        ).pack(anchor="w", pady=10)
-        ttk.Label(
-            right,
-            text=f"¥ {price(item['price_cents'])}",
-            foreground=ACCENT,
-            font=("Microsoft YaHei", 23),
-        ).pack(anchor="w", pady=12)
-        tags = f"{status_label(item['status'])} · {item['condition_label']} · {item['shipping']}"
-        if item["negotiable"]:
-            tags += " · 可小刀"
-        ttk.Label(right, text=tags, wraplength=400).pack(anchor="w", pady=8)
-        text = tk.Text(
-            right, height=8, width=35, wrap="word", font=("Microsoft YaHei", 11), relief="flat"
+        super().__init__(parent, bg=BG)
+        self.actor, self.item = actor, item
+        self.photos, self.buttons, self.index = [], [], 0
+        self.place(x=0, y=0, relwidth=1, relheight=1)
+        self.lift()
+        tk.Button(
+            self,
+            text={"MyProductsPage": "← 返回我的商品", "ReviewPage": "← 返回审核列表"}.get(
+                type(parent).__name__, "← 返回商品列表"
+            ),
+            command=self.destroy,
+            bg=BG,
+            fg=ACCENT,
+            relief="flat",
+            cursor="hand2",
+        ).pack(anchor="w", padx=22, pady=14)
+        canvas = tk.Canvas(self, bg=BG, highlightthickness=0)
+        scroll = ttk.Scrollbar(self, orient="vertical", command=canvas.yview)
+        scroll.pack(side="right", fill="y")
+        canvas.pack(fill="both", expand=True)
+        canvas.configure(yscrollcommand=scroll.set)
+        card = tk.Frame(canvas, bg=PAPER, highlightbackground="#edcdb7", highlightthickness=1)
+        window = canvas.create_window(22, 0, window=card, anchor="nw")
+        canvas.bind(
+            "<Configure>",
+            lambda event: canvas.itemconfigure(window, width=max(700, event.width - 44)),
         )
-        text.insert("1.0", item["description"] or "（未填写描述）")
-        text.configure(state="disabled")
-        text.pack(fill="both", expand=True, pady=12)
-        ttk.Label(
+        card.bind("<Configure>", lambda event: canvas.configure(scrollregion=canvas.bbox("all")))
+        card.columnconfigure(1, weight=1)
+        left = tk.Frame(card, bg=PAPER)
+        left.grid(row=0, column=0, sticky="n", padx=24, pady=24)
+        self.large = tk.Label(left, bg="#f3ece3", text="暂无商品图片", width=1)
+        self.large.pack()
+        strip = tk.Frame(left, bg=PAPER)
+        strip.pack(pady=(12, 0))
+        for index, image in enumerate(item["images"]):
+            try:
+                photo = thumbnail(self, stored_image(image["file_path"]), (58, 58))
+                self.photos.append(photo)
+            except (OSError, ValueError):
+                photo = ""
+            button = tk.Button(
+                strip,
+                image=photo,
+                text=str(index + 1) if not photo else "",
+                command=lambda value=index: self.select_image(value),
+                bg=PAPER,
+                relief="flat",
+                borderwidth=2,
+                cursor="hand2",
+            )
+            button.pack(side="left", padx=3)
+            self.buttons.append(button)
+        navigation = tk.Frame(left, bg=PAPER)
+        navigation.pack(fill="x", pady=8)
+        self.previous = ttk.Button(
+            navigation, text="‹ 上一张", command=lambda: self.select_image(self.index - 1)
+        )
+        self.previous.pack(side="left")
+        self.counter = tk.Label(navigation, bg=PAPER)
+        self.counter.pack(side="left", expand=True)
+        self.next_button = ttk.Button(
+            navigation, text="下一张 ›", command=lambda: self.select_image(self.index + 1)
+        )
+        self.next_button.pack(side="right")
+        right = tk.Frame(card, bg=PAPER)
+        right.grid(row=0, column=1, sticky="nsew", padx=(12, 24), pady=24)
+
+        def label(text, **options):
+            widget = tk.Label(right, text=text, bg=PAPER, anchor="w", justify="left", **options)
+            widget.pack(anchor="w", fill="x", pady=6)
+            return widget
+
+        title = label(
+            item["title"] or "（未填写标题）", font=("Microsoft YaHei", 24), fg=INK, wraplength=420
+        )
+        label(item["category_name"] or "未分类", fg="#80634f")
+        price_row = tk.Frame(right, bg=PAPER)
+        price_row.pack(anchor="w", pady=8)
+        tk.Label(
+            price_row,
+            text=f"¥ {price(item['price_cents'])}",
+            bg=PAPER,
+            fg=ACCENT,
+            font=("Microsoft YaHei", 25),
+        ).pack(side="left")
+        if item["negotiable"]:
+            tk.Label(price_row, text=" 可小刀 ", bg=ACCENT, fg="white").pack(side="left", padx=18)
+        tags = tk.Frame(right, bg=PAPER)
+        tags.pack(anchor="w", pady=8)
+        for value in (status_label(item["status"]), item["condition_label"], item["shipping"]):
+            tk.Label(tags, text=value, bg="#fff0df", fg=ACCENT, padx=9, pady=5).pack(
+                side="left", padx=(0, 8)
+            )
+        description = label(item["description"] or "（未填写描述）", wraplength=420, fg=INK)
+        can_book = (
+            actor != item["seller_id"] and item["status"] == "published" and not item["blocked"]
+        )
+        ttk.Button(
             right,
-            text=f"卖家：{item['seller_name']}\n内容版本：{item['version']}",
-            style="Sub.TLabel",
-        ).pack(anchor="w", pady=8)
+            text=(
+                "发起预约"
+                if can_book
+                else "本人商品" if actor == item["seller_id"] else "当前不可预约"
+            ),
+            style="Accent.TButton",
+            state="normal" if can_book else "disabled",
+            command=lambda: guarded(self, self.book),
+        ).pack(anchor="w", pady=(12, 8))
+        label("提交后可在「我的预约」查看确认进度。", fg="#80634f", wraplength=420)
+        seller = tk.Frame(right, bg="#fffaf4", highlightbackground="#edcdb7", highlightthickness=1)
+        seller.pack(fill="x", pady=(22, 10))
+        tk.Label(
+            seller, text=f"卖家 · {item['seller_name']}", bg="#fffaf4", fg=INK, padx=14, pady=14
+        ).pack(anchor="w")
+        label("付款和交付在线下协商，平台记录预约及交易结果。", fg="#80634f", wraplength=420)
         if item["reviews"]:
             review = item["reviews"][0]
-            ttk.Label(
-                right,
-                text=f"最近审核：{'通过' if review['approved'] else '驳回'} {review['reason']}",
-                wraplength=400,
-            ).pack(anchor="w", pady=8)
-        if actor != item["seller_id"] and item["status"] == "published":
-            ttk.Button(
-                right,
-                text="发起预约",
-                style="Accent.TButton",
-                command=lambda: guarded(self, self.book),
-            ).pack(anchor="w", pady=12)
-        ttk.Label(
-            right,
-            text="付款和交付在线下协商，平台只记录预约及交易结果。",
-            wraplength=380,
-            style="Sub.TLabel",
-        ).pack(anchor="w", pady=8)
+            label(
+                f"最近审核：{'通过' if review['approved'] else '驳回'} {review['reason']}",
+                wraplength=420,
+            )
+        right.bind(
+            "<Configure>",
+            lambda event: [
+                widget.configure(wraplength=max(200, event.width))
+                for widget in (title, description)
+            ],
+        )
+        self.bind("<Left>", lambda event: self.select_image(self.index - 1))
+        self.bind("<Right>", lambda event: self.select_image(self.index + 1))
+        self.bind("<Escape>", lambda event: self.destroy())
+        for button in self.buttons:
+            button.bind("<Left>", lambda event: self.select_image(self.index - 1))
+            button.bind("<Right>", lambda event: self.select_image(self.index + 1))
+            button.bind("<Escape>", lambda event: self.destroy())
+        self.bind_wheel(self, canvas)
+        self.focus_set()
+        self.select_image(0)
 
-    def show_image(self, image):
-        """Load one picture with safe fallback if a file is missing."""
-        try:
-            photo = thumbnail(self, stored_image(image["file_path"]), (390, 390))
-            self.photos = [photo]
-            self.large.configure(image=photo, text="")
-        except (OSError, ValueError):
-            self.large.configure(image="", text="图片缺失，无法预览")
+    def bind_wheel(self, widget, canvas):
+        """Scroll long descriptions without binding events outside this page."""
+        widget.bind(
+            "<MouseWheel>", lambda event: canvas.yview_scroll(-int(event.delta / 120), "units")
+        )
+        for child in widget.winfo_children():
+            self.bind_wheel(child, canvas)
+
+    def select_image(self, index):
+        """Switch a real thumbnail; never wrap past either end of the gallery."""
+        images = self.item["images"]
+        self.index = max(0, min(index, len(images) - 1))
+        self.counter.configure(text=f"{self.index+1} / {len(images)}" if images else "暂无图片")
+        self.previous.configure(state="normal" if self.index > 0 else "disabled")
+        self.next_button.configure(state="normal" if self.index + 1 < len(images) else "disabled")
+        for position, button in enumerate(self.buttons):
+            button.configure(bg="#edcdb7" if position == self.index else PAPER)
+        if images:
+            try:
+                self.large.photo = thumbnail(
+                    self, stored_image(images[self.index]["file_path"]), (350, 350)
+                )
+                self.large.configure(image=self.large.photo, text="", width=350, height=350)
+            except (OSError, ValueError):
+                self.large.configure(image="", text="图片缺失，无法预览", width=35, height=18)
+        else:
+            self.large.configure(width=35, height=18)
 
     def book(self):
-        """Create or recover the current buyer's live reservation."""
+        """Keep booking authorization in the transactional service."""
         reservation_id = reserve(self.actor, self.item["id"])
         messagebox.showinfo(
             "预约已记录", f"预约编号：{reservation_id}\n请在“我的预约”查看进度。", parent=self

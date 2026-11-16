@@ -263,6 +263,10 @@ def product_detail(actor, product_id):
             raise ValueError("商品当前不可公开查看，请从预约记录查看历史快照。")
         result = dict(product)
         result["seller_name"] = seller["username"]
+        category = connection.execute(
+            "SELECT name FROM categories WHERE id=?", (product["category_id"],)
+        ).fetchone()
+        result["category_name"] = category[0] if category else None
         result["images"] = [
             dict(row)
             for row in connection.execute(

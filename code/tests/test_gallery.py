@@ -5,11 +5,13 @@ import unittest
 from contextlib import closing
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from PIL import Image
 
 import database
-from demo import SAMPLE_PRODUCTS, seed_demo
+from demo import SAMPLE_PRODUCTS, demo_accounts, seed_demo
+from trades import reserve, cancel_reservation
 from products import list_categories
 from schema import CATEGORY_NAMES
 
@@ -108,7 +110,7 @@ class GalleryTests(unittest.TestCase):
             self.assertEqual(len(public), len(SAMPLE_PRODUCTS))
             self.assertEqual({row["name"] for row in public}, set(CATEGORY_NAMES))
             pictures = connection.execute("SELECT file_path FROM product_images").fetchall()
-            self.assertEqual(len(pictures), 17)
+            self.assertEqual(len(pictures), 29)
             for row in pictures:
                 path = database.DATABASE_PATH.parent / row["file_path"]
                 self.assertTrue(path.is_file())
@@ -122,13 +124,67 @@ class GalleryTests(unittest.TestCase):
         with closing(database.connect_database()) as connection:
             self.assertEqual(connection.execute("SELECT COUNT(*) FROM products").fetchone()[0], 17)
             self.assertEqual(
-                connection.execute("SELECT COUNT(*) FROM product_images").fetchone()[0], 17
+                connection.execute("SELECT COUNT(*) FROM product_images").fetchone()[0], 29
             )
             self.assertEqual(
                 connection.execute(
                     "SELECT COUNT(*) FROM products WHERE title='审查者修改后的名称'"
                 ).fetchone()[0],
                 1,
+            )
+
+    def test_photo_upgrade_defers_live_booking_and_preserves_snapshot(self):
+        with patch("demo.supplement_images"):
+            seed_demo(self.root)
+        accounts = demo_accounts()
+        with closing(database.connect_database()) as connection:
+            product = connection.execute(
+                "SELECT product_id FROM demo_items WHERE sample_key='handbag'"
+            ).fetchone()[0]
+        booking = reserve(accounts["demo_buyer"], product)
+        with closing(database.connect_database()) as connection:
+            snapshot = connection.execute(
+                "SELECT snapshot FROM reservations WHERE id=?", (booking,)
+            ).fetchone()[0]
+        seed_demo(self.root)
+        with closing(database.connect_database()) as connection:
+            self.assertEqual(
+                connection.execute(
+                    "SELECT COUNT(*) FROM product_images WHERE product_id=?", (product,)
+                ).fetchone()[0],
+                1,
+            )
+        cancel_reservation(accounts["demo_buyer"], booking, "测试解除等待预约")
+        seed_demo(self.root)
+        with closing(database.connect_database()) as connection:
+            self.assertEqual(
+                connection.execute(
+                    "SELECT COUNT(*) FROM product_images WHERE product_id=?", (product,)
+                ).fetchone()[0],
+                3,
+            )
+            self.assertEqual(
+                connection.execute(
+                    "SELECT snapshot FROM reservations WHERE id=?", (booking,)
+                ).fetchone()[0],
+                snapshot,
+            )
+            self.assertEqual(
+                connection.execute("SELECT status FROM products WHERE id=?", (product,)).fetchone()[
+                    0
+                ],
+                "published",
+            )
+
+    def test_interrupted_photo_marker_does_not_duplicate_images(self):
+        seed_demo(self.root)
+        with closing(database.connect_database()) as connection:
+            with connection:
+                connection.execute("DELETE FROM demo_photo_updates")
+        seed_demo(self.root)
+        with closing(database.connect_database()) as connection:
+            self.assertEqual(
+                connection.execute("SELECT COUNT(*) FROM product_images").fetchone()[0], 29
             )
 
 

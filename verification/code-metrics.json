@@ -10,8 +10,8 @@
       "nonblank_noncomment_nondocstring": 450
     },
     "catalog.py": {
-      "physical_lines": 351,
-      "nonblank_noncomment_nondocstring": 325
+      "physical_lines": 355,
+      "nonblank_noncomment_nondocstring": 329
     },
     "core.py": {
       "physical_lines": 229,
@@ -46,8 +46,8 @@
       "nonblank_noncomment_nondocstring": 37
     },
     "market_ui.py": {
-      "physical_lines": 360,
-      "nonblank_noncomment_nondocstring": 318
+      "physical_lines": 454,
+      "nonblank_noncomment_nondocstring": 408
     },
     "operations.py": {
       "physical_lines": 267,
@@ -86,6 +86,7 @@
       "nonblank_noncomment_nondocstring": 346
     }
   },
-  "physical_total": 4248,
-  "nonblank_noncomment_nondocstring_total": 3651
+  "physical_total": 4346,
+  "nonblank_noncomment_nondocstring_total": 3745,
+  "checked_at": "2026-11-16"
 }

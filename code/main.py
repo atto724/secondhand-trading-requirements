@@ -18,7 +18,8 @@ from registration_ui import RegistrationWindow
 from seller_ui import SellerPage
 from trades import run_timeouts
 from trades_ui import ReservationsPage
-from ui_common import ACCENT, INK, PAPER, configure_style, guarded
+from ui_common import ACCENT, INK, PAPER, avatar_photo, configure_style, guarded
+from community import seller_profile
 
 
 class TradingApp:
@@ -31,6 +32,9 @@ class TradingApp:
         self.notebook = None
         self.pages = {}
         self.nav_items = {}
+        self.avatar_button = None
+        self.account_menu = None
+        self.login_hint = None
         self.entries = []
         self.username = tk.StringVar(master=root)
         self.password = tk.StringVar(master=root)
@@ -78,9 +82,10 @@ class TradingApp:
         ttk.Button(frame, text="注册普通账号", command=lambda: RegistrationWindow(self.root)).grid(
             row=5, column=0, columnspan=2, pady=6, sticky="ew"
         )
-        ttk.Label(
+        self.login_hint = ttk.Label(
             frame, text="先填写账号，Enter 跳到密码；密码框 Enter 登录。", style="Sub.TLabel"
-        ).grid(row=6, column=0, columnspan=2, pady=14)
+        )
+        self.login_hint.grid(row=6, column=0, columnspan=2, pady=14)
         self.entries[0].focus_set()
 
     def focus_password(self, _event):
@@ -121,10 +126,42 @@ class TradingApp:
         ttk.Label(header, text="二手交易", font=("Microsoft YaHei", 21), background=PAPER).pack(
             side="left"
         )
-        ttk.Button(header, text="退出登录", command=self.logout).pack(side="right")
-        ttk.Label(
-            header, text=f"{self.profile['username']} · 账号 {self.account_id}", background=PAPER
-        ).pack(side="right", padx=18)
+        identity = seller_profile(self.account_id, self.account_id)
+        self.avatar_button = tk.Button(
+            header,
+            command=self.show_account_menu,
+            bg=PAPER,
+            activebackground=PAPER,
+            relief="flat",
+            bd=0,
+            highlightthickness=0,
+            cursor="hand2",
+            takefocus=True,
+        )
+        self.avatar_button.photo = avatar_photo(
+            self.avatar_button, self.account_id, identity["avatar_path"], (44, 44), circular=True
+        )
+        self.avatar_button.configure(image=self.avatar_button.photo)
+        self.avatar_button.pack(side="right", padx=4)
+        self.avatar_button.bind("<Return>", lambda event: self.show_account_menu())
+        self.account_menu = tk.Menu(
+            self.avatar_button,
+            tearoff=False,
+            bg=PAPER,
+            fg=INK,
+            activebackground="#fff0e4",
+            activeforeground=ACCENT,
+            relief="solid",
+            bd=1,
+            font=("Microsoft YaHei", 11),
+        )
+        self.account_menu.add_command(
+            label=identity["nickname"] or identity["username"], state="disabled"
+        )
+        self.account_menu.add_separator()
+        self.account_menu.add_command(label="退出登录", command=self.logout)
+        self.account_menu.add_command(label="切换账号", command=self.switch_account)
+        self.account_menu.add_command(label="退出应用", command=self.exit_application)
         navigation = tk.Frame(self.container, bg=PAPER, padx=18)
         navigation.pack(fill="x")
         self.nav_items = {}
@@ -241,6 +278,35 @@ class TradingApp:
         notebook.bind("<<NotebookTabChanged>>", changed)
         return notebook
 
+    def show_account_menu(self):
+        """Anchor a dismissible menu beneath the circular account avatar."""
+        self.account_menu.update_idletasks()
+        left = (
+            self.avatar_button.winfo_rootx()
+            + self.avatar_button.winfo_width()
+            - self.account_menu.winfo_reqwidth()
+        )
+        top = self.avatar_button.winfo_rooty() + self.avatar_button.winfo_height() + 6
+        try:
+            self.account_menu.tk_popup(left, top)
+        finally:
+            if self.account_menu is not None:
+                self.account_menu.grab_release()
+
+    def switch_account(self):
+        """Forget the current session before requesting another account's password."""
+        self.logout()
+        self.login_hint.configure(text="请输入另一个账号，登录后即可切换。")
+        self.entries[0].focus_set()
+
+    def exit_application(self):
+        """Close the app without changing any stored accounts or transactions."""
+        self.account_id = None
+        self.profile = None
+        self.username.set("")
+        self.password.set("")
+        self.root.destroy()
+
     def logout(self):
         """Close account-specific windows and forget in-memory authentication state."""
         for widget in self.root.winfo_children():
@@ -251,6 +317,11 @@ class TradingApp:
         self.username.set("")
         self.password.set("")
         self.show_login()
+        self.pages = {}
+        self.nav_items = {}
+        self.notebook = None
+        self.account_menu = None
+        self.avatar_button = None
 
     def maintenance_tick(self):
         """Check expiry and daily backup only while this desktop process is running."""

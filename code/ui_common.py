@@ -9,7 +9,7 @@ from pathlib import Path
 
 from tkinter import messagebox, ttk
 
-from PIL import Image, ImageOps, ImageTk
+from PIL import Image, ImageDraw, ImageOps, ImageTk
 
 import database
 import demo_assets
@@ -71,15 +71,32 @@ def stored_image(relative):
     return path
 
 
-def avatar_photo(parent, account_id, relative="", size=(56, 56)):
-    """Load a stored avatar or a bundled default without relying on temporary files."""
+def avatar_photo(parent, account_id, relative="", size=(56, 56), circular=False):
+    """Render a stored or default avatar; circular masking changes only UI pixels."""
+    candidates = []
     if relative:
         try:
-            return thumbnail(parent, stored_image(relative), size)
-        except (OSError, ValueError):
+            candidates.append(stored_image(relative))
+        except ValueError:
             pass
-    default = Path(demo_assets.__file__).parent / f"avatar_{(account_id-1)%4+1}.jpg"
-    return thumbnail(parent, default, size)
+    candidates.append(Path(demo_assets.__file__).parent / f"avatar_{(account_id-1)%4+1}.jpg")
+    for path in candidates:
+        try:
+            if not circular:
+                return thumbnail(parent, path, size)
+            with Image.open(path) as source:
+                picture = ImageOps.fit(
+                    ImageOps.exif_transpose(source).convert("RGBA"),
+                    size,
+                    method=Image.Resampling.LANCZOS,
+                )
+            mask = Image.new("L", (size[0] * 4, size[1] * 4), 0)
+            ImageDraw.Draw(mask).ellipse((0, 0, mask.width - 1, mask.height - 1), fill=255)
+            picture.putalpha(mask.resize(size, Image.Resampling.LANCZOS))
+            return ImageTk.PhotoImage(picture, master=parent)
+        except (OSError, ValueError):
+            continue
+    raise ValueError("头像资源无法读取。")
 
 
 class Window(tk.Toplevel):

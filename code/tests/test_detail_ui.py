@@ -472,6 +472,67 @@ class DetailPageTests(unittest.TestCase):
         )
         self.root.withdraw()
 
+    def test_header_uses_transparent_circle_and_three_account_actions(self):
+        self.page.destroy()
+        self.page = None
+        app = TradingApp(self.root)
+        app.account_id = self.actor
+        app.profile = account_profile(self.actor)
+        app.show_home()
+        photo = app.avatar_button.photo
+        self.assertEqual(int(photo.width()), 44)
+        self.assertEqual(int(self.root.tk.call(str(photo), "transparency", "get", 0, 0)), 1)
+        self.assertEqual(int(self.root.tk.call(str(photo), "transparency", "get", 22, 22)), 0)
+        actions = [
+            app.account_menu.entrycget(index, "label")
+            for index in range(app.account_menu.index("end") + 1)
+            if app.account_menu.type(index) == "command"
+            and app.account_menu.entrycget(index, "state") != "disabled"
+        ]
+        self.assertEqual(actions, ["退出登录", "切换账号", "退出应用"])
+
+    def test_logout_and_switch_account_forget_credentials_and_old_pages(self):
+        self.page.destroy()
+        self.page = None
+        app = TradingApp(self.root)
+        for action in ("退出登录", "切换账号"):
+            app.account_id = self.actor
+            app.profile = account_profile(self.actor)
+            app.show_home()
+            old = app.notebook
+            app.username.set("旧账号")
+            app.password.set("不能保留的密码")
+            menu = app.account_menu
+            index = next(
+                index
+                for index in range(menu.index("end") + 1)
+                if menu.type(index) == "command" and menu.entrycget(index, "label") == action
+            )
+            menu.invoke(index)
+            self.root.update()
+            self.assertIsNone(app.account_id)
+            self.assertIsNone(app.profile)
+            self.assertEqual(app.username.get(), "")
+            self.assertEqual(app.password.get(), "")
+            self.assertFalse(old.winfo_exists())
+            self.assertEqual(app.pages, {})
+            self.assertIsNone(app.notebook)
+            if action == "切换账号":
+                self.assertIn("另一个账号", app.login_hint.cget("text"))
+
+    def test_exit_application_menu_closes_app_without_mutating_stored_account(self):
+        self.page.destroy()
+        self.page = None
+        app = TradingApp(self.root)
+        app.account_id = self.actor
+        app.profile = account_profile(self.actor)
+        app.show_home()
+        with patch.object(self.root, "destroy") as close:
+            app.account_menu.invoke(app.account_menu.index("end"))
+            close.assert_called_once()
+        self.assertIsNone(app.account_id)
+        self.assertEqual(account_profile(self.actor)["id"], self.actor)
+
 
 if __name__ == "__main__":
     unittest.main()

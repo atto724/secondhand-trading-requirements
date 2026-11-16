@@ -42,8 +42,8 @@
       "nonblank_noncomment_nondocstring": 51
     },
     "main.py": {
-      "physical_lines": 299,
-      "nonblank_noncomment_nondocstring": 261
+      "physical_lines": 370,
+      "nonblank_noncomment_nondocstring": 326
     },
     "manage.py": {
       "physical_lines": 45,
@@ -94,11 +94,11 @@
       "nonblank_noncomment_nondocstring": 550
     },
     "ui_common.py": {
-      "physical_lines": 594,
-      "nonblank_noncomment_nondocstring": 518
+      "physical_lines": 611,
+      "nonblank_noncomment_nondocstring": 535
     }
   },
-  "physical_total": 6405,
-  "nonblank_noncomment_nondocstring_total": 5579,
+  "physical_total": 6493,
+  "nonblank_noncomment_nondocstring_total": 5661,
   "checked_at": "2026-11-16"
 }

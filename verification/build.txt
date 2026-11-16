@@ -47,7 +47,9 @@ test_utc_timestamp_crosses_into_next_local_date (test_presentation.PresentationT
 test_categories_partition_all_states_and_blocked_product_hides_confirmation (test_reservation_ui.ReservationActionTests.test_categories_partition_all_states_and_blocked_product_hides_confirmation) ... ok
 test_each_state_has_only_meaningful_buyer_and_seller_actions (test_reservation_ui.ReservationActionTests.test_each_state_has_only_meaningful_buyer_and_seller_actions) ... ok
 test_card_uses_booking_snapshot_and_actions_target_the_clicked_record (test_reservation_ui.ReservationPageTests.test_card_uses_booking_snapshot_and_actions_target_the_clicked_record) ... ok
+test_combined_trading_cards_keep_distinct_progress_and_actions (test_reservation_ui.ReservationPageTests.test_combined_trading_cards_keep_distinct_progress_and_actions) ... ok
 test_group_selection_and_cancellation_direction_control_visible_buttons (test_reservation_ui.ReservationPageTests.test_group_selection_and_cancellation_direction_control_visible_buttons) ... ok
+test_issues_sort_actionable_requests_first_and_default_all_without_pending (test_reservation_ui.ReservationPageTests.test_issues_sort_actionable_requests_first_and_default_all_without_pending) ... ok
 test_refresh_removes_changed_record_and_stale_actions_without_resetting_category (test_reservation_ui.ReservationPageTests.test_refresh_removes_changed_record_and_stale_actions_without_resetting_category) ... ok
 test_admin_permissions_rechecked (test_workflows.WorkflowTests.test_admin_permissions_rechecked) ... ok
 test_audit_failure_and_export_are_recorded (test_workflows.WorkflowTests.test_audit_failure_and_export_are_recorded) ... ok
@@ -80,7 +82,7 @@ test_waiting_blocks_edit_and_delist (test_workflows.WorkflowTests.test_waiting_b
 test_zero_cohort_statistics_and_backup_restore (test_workflows.WorkflowTests.test_zero_cohort_statistics_and_backup_restore) ... ok
 
 ----------------------------------------------------------------------
-Ran 75 tests in 59.374s
+Ran 77 tests in 56.301s
 
 OK
 ͼƬ�����ݻ���handbag����ǰ״̬����ЧԤԼ���ƣ�
@@ -339,7 +341,7 @@ running install_egg_info
 Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
 running install_scripts
 creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
-creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-mk1l1q6g\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-21orartm\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
 adding 'accounts.py'
 adding 'admin_ui.py'
 adding 'benchmark.py'

@@ -1,7 +1,8 @@
 """Buyer and seller reservation progress views."""
 
 import json
-from tkinter import StringVar, messagebox, simpledialog, ttk
+import tkinter as tk
+from tkinter import messagebox, simpledialog, ttk
 
 from governance import correct_sale, resolve_dispute
 from trades import (
@@ -15,18 +16,31 @@ from trades import (
     respond_cancel,
     transaction_detail,
 )
-from ui_common import ProductRows, TextWindow, display_value, guarded
+from ui_common import ACCENT, BG, INK, ProductRows, TextWindow, display_value, guarded
 
 RESERVATION_GROUPS = (
-    ("waiting", "待确认预约", {"waiting"}),
-    ("confirmed", "待交付", {"confirmed"}),
-    ("delivered", "待买家确认完成", {"delivered"}),
-    ("cancel_requested", "取消协商中", {"cancel_requested"}),
-    ("manual", "待管理员处理", {"manual"}),
+    ("all", "全部", set(LABELS)),
+    ("waiting", "待确认", {"waiting"}),
+    ("trading", "交易中", {"confirmed", "delivered"}),
+    ("issues", "取消 / 争议", {"cancel_requested", "manual"}),
     ("completed", "已完成", {"completed"}),
-    ("ended", "已结束", {"cancelled", "rejected", "expired", "corrected"}),
-    ("all", "全部预约", set(LABELS)),
+    ("ended", "已关闭", {"cancelled", "rejected", "expired", "corrected"}),
 )
+
+
+def reservation_status(scope, actor, row):
+    """Keep precise, participant-relative progress visible within broad groups."""
+    if scope == "admin":
+        return LABELS[row["status"]]
+    if row["status"] == "cancel_requested":
+        return "等待对方回复" if row["cancel_by"] == actor else "待我处理"
+    labels = {
+        "waiting": "待我确认" if scope == "seller" else "待卖家确认",
+        "confirmed": "待交付" if scope == "seller" else "待收货",
+        "delivered": "待买家确认" if scope == "seller" else "待确认完成",
+        "manual": "管理员处理中",
+    }
+    return labels.get(row["status"], LABELS[row["status"]])
 
 
 def reservation_actions(scope, actor, row):
@@ -72,17 +86,11 @@ class ReservationsPage(ttk.Frame):
         self.rows = {}
         title = {"buyer": "我的预约", "seller": "卖家预约管理", "admin": "交易争议与更正"}[scope]
         ttk.Label(self, text=title, style="Title.TLabel").pack(anchor="w", pady=(0, 12))
-        self.group_key = "waiting"
-        self.group_text = StringVar(master=self)
-        self.group_options = {}
+        self.group_key = "all"
+        self.group_buttons = {}
+        self.initialized = False
         filters = ttk.Frame(self)
         filters.pack(fill="x", pady=8)
-        ttk.Label(filters, text="按预约状态查看：").pack(side="left")
-        self.group_box = ttk.Combobox(
-            filters, textvariable=self.group_text, state="readonly", width=30
-        )
-        self.group_box.pack(side="left", padx=8)
-        self.group_box.bind("<<ComboboxSelected>>", self.choose_group)
         ttk.Button(filters, text="刷新", command=lambda: guarded(self, self.refresh)).pack(
             side="left", padx=6
         )
@@ -93,6 +101,30 @@ class ReservationsPage(ttk.Frame):
             command=lambda: guarded(self, self.detail),
         )
         self.detail_button.pack(side="left")
+        categories = ttk.Frame(self)
+        categories.pack(fill="x", pady=(6, 14))
+        for key, label, _ in RESERVATION_GROUPS:
+            item = tk.Frame(categories, bg=BG)
+            item.pack(side="left", padx=(0, 16))
+            button = tk.Button(
+                item,
+                text=label,
+                command=lambda value=key: self.choose_group(value),
+                font=("Microsoft YaHei", 12),
+                bg=BG,
+                fg=INK,
+                activebackground=BG,
+                relief="flat",
+                bd=0,
+                padx=7,
+                pady=8,
+                cursor="hand2",
+            )
+            button.pack()
+            underline = tk.Frame(item, height=2, bg=BG)
+            underline.pack(fill="x")
+            self.group_buttons[key] = (button, underline)
+
         self.action_hint = ttk.Label(
             self, text="先选择状态分类，再选中一条预约查看可用操作。", style="Sub.TLabel"
         )
@@ -110,33 +142,33 @@ class ReservationsPage(ttk.Frame):
     def refresh(self):
         """Refresh states/counts and retain the selected classification."""
         rows = list_reservations(self.actor, self.scope)
-        first_load = not self.group_options
         self.rows = {row["id"]: row for row in rows}
-        options = []
-        for key, label, states in RESERVATION_GROUPS:
-            count = sum(row["status"] in states for row in rows)
-            text = f"{label}（{count}）"
-            options.append(text)
-            self.group_options[text] = key
-        self.group_box.configure(values=options)
-        if first_load:
+        if not self.initialized:
             self.group_key = next(
                 (
                     key
                     for key, _, states in RESERVATION_GROUPS
-                    if any(row["status"] in states for row in rows)
+                    if key not in ("all", "completed", "ended")
+                    and any(row["status"] in states for row in rows)
                 ),
-                "waiting",
+                "all",
             )
-        self.group_options = dict(zip(options, (group[0] for group in RESERVATION_GROUPS)))
-        self.group_text.set(
-            next(text for text, key in self.group_options.items() if key == self.group_key)
-        )
+            self.initialized = True
+        for key, label, states in RESERVATION_GROUPS:
+            count = sum(row["status"] in states for row in rows)
+            button, underline = self.group_buttons[key]
+            button.configure(text=f"{label} {count}", fg=ACCENT if key == self.group_key else INK)
+            underline.configure(bg=ACCENT if key == self.group_key else BG)
         self.fill_group()
 
-    def choose_group(self, _event=None):
-        """Filter cached rows without mixing statuses or retaining stale actions."""
-        self.group_key = self.group_options[self.group_text.get()]
+    def choose_group(self, key):
+        """Switch simplified visual categories without changing transaction states."""
+        if key not in self.group_buttons:
+            raise ValueError("预约分类无效。")
+        self.group_key = key
+        for value, (button, underline) in self.group_buttons.items():
+            button.configure(fg=ACCENT if value == key else INK)
+            underline.configure(bg=ACCENT if value == key else BG)
         self.fill_group()
 
     def fill_group(self):
@@ -145,6 +177,17 @@ class ReservationsPage(ttk.Frame):
         selected = selection[0] if selection else None
         states = next(states for key, _, states in RESERVATION_GROUPS if key == self.group_key)
         rows = [row for row in self.rows.values() if row["status"] in states]
+        if self.group_key == "issues":
+            rows.sort(
+                key=lambda row: (
+                    (
+                        0
+                        if row["status"] == "cancel_requested" and row["cancel_by"] != self.actor
+                        else 1 if row["status"] == "cancel_requested" else 2
+                    ),
+                    -row["id"],
+                )
+            )
         handlers = self.operation_handlers()
         cards = []
         for row in rows:
@@ -169,7 +212,7 @@ class ReservationsPage(ttk.Frame):
                     "title": snapshot["title"],
                     "image": cover,
                     "price": snapshot.get("price_cents"),
-                    "status": LABELS[row["status"]],
+                    "status": reservation_status(self.scope, self.actor, row),
                     "subtitle": (
                         f"预约编号 {row['id']} · 买家 {row['buyer_name']} · "
                         f"{display_value(row['created_at'],'created_at')}\n{note}"
@@ -192,7 +235,7 @@ class ReservationsPage(ttk.Frame):
         actions = reservation_actions(self.scope, self.actor, row)
         hint = "选中一条预约后，显示该预约当前可用的操作。"
         if row:
-            hint = f"当前状态：{LABELS[row['status']]}。"
+            hint = f"当前状态：{reservation_status(self.scope,self.actor,row)}。"
             if row["status"] == "cancel_requested" and row["cancel_by"] == self.actor:
                 hint += "你已申请取消，等待对方处理。"
             elif not actions:

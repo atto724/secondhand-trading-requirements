@@ -92,10 +92,7 @@ class ReservationPageTests(unittest.TestCase):
         gc.collect()
 
     def select_group(self, key):
-        self.page.group_text.set(
-            next(text for text, value in self.page.group_options.items() if value == key)
-        )
-        self.page.choose_group()
+        self.page.choose_group(key)
 
     def buttons(self):
         if not self.page.table.selection():
@@ -116,7 +113,7 @@ class ReservationPageTests(unittest.TestCase):
         self.assertEqual(self.buttons(), [])
         self.select(1)
         self.assertEqual(self.buttons(), ["确认预约", "拒绝预约"])
-        self.select_group("cancel_requested")
+        self.select_group("issues")
         self.assertEqual(set(self.page.table.keys()), {"2", "3"})
         self.assertEqual(self.buttons(), [])
         self.select(2)
@@ -138,7 +135,7 @@ class ReservationPageTests(unittest.TestCase):
         self.assertEqual(self.buttons(), [])
         self.assertTrue(self.page.detail_button.instate(["disabled"]))
         self.assertIn("暂无预约", self.page.action_hint.cget("text"))
-        self.select_group("confirmed")
+        self.select_group("trading")
         self.select(1)
         self.assertEqual(self.buttons(), ["登记交付", "申请取消"])
 
@@ -161,10 +158,41 @@ class ReservationPageTests(unittest.TestCase):
             "respond",
             side_effect=lambda agree: calls.append((self.page.table.selected(), agree)),
         ):
-            self.select_group("cancel_requested")
+            self.select_group("issues")
             buttons = self.page.table.cards["2"]["buttons"]
             next(button for button in buttons if button.cget("text") == "同意取消").invoke()
         self.assertEqual(calls, [(2, True)])
+
+    def test_combined_trading_cards_keep_distinct_progress_and_actions(self):
+        self.records += [fixture(6, "confirmed"), fixture(7, "delivered")]
+        self.page.refresh()
+        self.select_group("trading")
+        self.assertEqual(set(self.page.table.keys()), {"6", "7"})
+        self.assertEqual(self.page.table.cards["6"]["data"]["status"], "待交付")
+        self.assertEqual(self.page.table.cards["7"]["data"]["status"], "待买家确认")
+        self.select(6)
+        self.assertEqual(self.buttons(), ["登记交付", "申请取消"])
+        self.select(7)
+        self.assertEqual(self.buttons(), ["申请取消"])
+        self.assertEqual(self.page.group_buttons["trading"][0].cget("text"), "交易中 2")
+
+    def test_issues_sort_actionable_requests_first_and_default_all_without_pending(self):
+        self.records.append(fixture(6, "manual"))
+        self.page.refresh()
+        self.select_group("issues")
+        self.assertEqual(self.page.table.keys(), ("2", "3", "6"))
+        self.assertEqual(
+            [card["data"]["status"] for card in self.page.table.cards.values()],
+            ["待我处理", "等待对方回复", "管理员处理中"],
+        )
+        self.records = [fixture(8, "completed"), fixture(9, "expired")]
+        page = ReservationsPage(self.root, 1, "buyer")
+        self.assertEqual(page.group_key, "all")
+        self.assertEqual(set(page.table.keys()), {"8", "9"})
+        self.assertEqual(
+            [label for _, label, _ in RESERVATION_GROUPS],
+            ["全部", "待确认", "交易中", "取消 / 争议", "已完成", "已关闭"],
+        )
 
 
 if __name__ == "__main__":

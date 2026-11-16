@@ -86,15 +86,15 @@
       "nonblank_noncomment_nondocstring": 384
     },
     "trades_ui.py": {
-      "physical_lines": 303,
-      "nonblank_noncomment_nondocstring": 260
+      "physical_lines": 346,
+      "nonblank_noncomment_nondocstring": 299
     },
     "ui_common.py": {
       "physical_lines": 594,
       "nonblank_noncomment_nondocstring": 518
     }
   },
-  "physical_total": 5559,
-  "nonblank_noncomment_nondocstring_total": 4808,
+  "physical_total": 5602,
+  "nonblank_noncomment_nondocstring_total": 4847,
   "checked_at": "2026-11-16"
 }

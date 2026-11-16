@@ -15,6 +15,7 @@ from core import money, price
 from domain import PRODUCT_STATUS_LABELS, ProductStatus
 from editor_ui import ProductEditor
 from products import list_categories, list_my_products
+from seller_ui import SellerPage
 from trades import reserve
 from ui_common import ACCENT, BG, INK, PAPER, DataTable, guarded, stored_image, thumbnail
 
@@ -36,9 +37,11 @@ class ProductDetail(tk.Frame):
         self.lift()
         tk.Button(
             self,
-            text={"MyProductsPage": "← 返回我的商品", "ReviewPage": "← 返回审核列表"}.get(
-                type(parent).__name__, "← 返回商品列表"
-            ),
+            text={
+                "MyProductsPage": "← 返回我的商品",
+                "SellerPage": "← 返回卖家主页",
+                "ReviewPage": "← 返回审核列表",
+            }.get(type(parent).__name__, "← 返回商品列表"),
             command=self.destroy,
             bg=BG,
             fg=ACCENT,
@@ -144,6 +147,23 @@ class ProductDetail(tk.Frame):
         tk.Label(
             seller, text=f"卖家 · {item['seller_name']}", bg="#fffaf4", fg=INK, padx=14, pady=14
         ).pack(anchor="w")
+
+        def open_seller(_event=None):
+            return guarded(
+                self,
+                lambda: SellerPage(
+                    self, self.actor, self.item["seller_id"], detail_factory=ProductDetail
+                ),
+            )
+
+        seller.configure(cursor="hand2")
+        seller.bind("<Button-1>", open_seller)
+        for widget in seller.winfo_children():
+            widget.configure(cursor="hand2")
+            widget.bind("<Button-1>", open_seller)
+        ttk.Button(seller, text="进入卖家主页 →", command=open_seller).pack(
+            anchor="e", padx=12, pady=(0, 10)
+        )
         label("付款和交付在线下协商，平台记录预约及交易结果。", fg="#80634f", wraplength=420)
         if item["reviews"]:
             review = item["reviews"][0]

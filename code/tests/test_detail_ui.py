@@ -1,6 +1,7 @@
 """Native Tk regression checks for in-place navigation and multi-image details."""
 
 import tkinter as tk
+from tkinter import ttk
 import unittest
 from contextlib import closing
 from pathlib import Path
@@ -9,6 +10,9 @@ from tempfile import TemporaryDirectory
 import database
 from demo import demo_accounts, seed_demo
 from market_ui import CatalogPage, ProductDetail
+from seller_ui import ChatPanel, SellerPage, InboxPage
+from community import send_direct_message, inbox, seller_profile
+from unittest.mock import patch
 from ui_common import configure_style
 
 
@@ -63,6 +67,63 @@ class DetailPageTests(unittest.TestCase):
         view.select_image(-1)
         self.assertEqual(view.index, 0)
         self.assertTrue(view.previous.instate(["disabled"]))
+
+    def test_seller_box_opens_inline_store_and_keeps_messages_unread_until_chat(self):
+        seller = demo_accounts()["demo_seller"]
+        send_direct_message(seller, self.actor, "询问商品")
+        detail = ProductDetail(self.page, self.actor, self.product)
+
+        def descendants(widget):
+            for child in widget.winfo_children():
+                yield child
+                yield from descendants(child)
+
+        button = next(
+            widget
+            for widget in descendants(detail)
+            if isinstance(widget, ttk.Button) and widget.cget("text") == "进入卖家主页 →"
+        )
+        button.invoke()
+        store = next(widget for widget in detail.winfo_children() if isinstance(widget, SellerPage))
+        self.root.update()
+        self.assertEqual(store.winfo_toplevel(), self.root)
+        self.assertEqual(inbox(self.actor)[0]["unread"], 1)
+        self.assertEqual(len(store.table.tree.get_children()), 8)
+        store.table.tree.selection_set(store.table.tree.get_children()[0])
+        store.open_product()
+        child = next(
+            widget for widget in store.winfo_children() if isinstance(widget, ProductDetail)
+        )
+        child.destroy()
+        store.destroy()
+        self.assertTrue(detail.winfo_exists())
+
+    def test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox(self):
+        seller = demo_accounts()["demo_seller"]
+        panel = ChatPanel(self.page, self.actor, seller)
+        panel.editor.insert("1.0", "想了解这件商品")
+        with patch("seller_ui.send_direct_message", side_effect=ValueError("保存失败")):
+            with self.assertRaises(ValueError):
+                panel.send_message()
+        self.assertEqual(panel.editor.get("1.0", "end-1c"), "想了解这件商品")
+        panel.send_message()
+        self.assertEqual(panel.editor.get("1.0", "end-1c"), "")
+        messages = InboxPage(self.page, seller)
+        messages.table.tree.selection_set(str(self.actor))
+        messages.open_chat()
+        reply = next(
+            widget for widget in messages.slot.winfo_children() if isinstance(widget, ChatPanel)
+        )
+        reply.editor.insert("1.0", "可以的，请问想了解什么？")
+        reply.send_message()
+        panel.refresh()
+        self.assertIn("请问想了解", panel.history.get("1.0", "end"))
+
+    def test_owner_profile_can_be_saved_without_a_product(self):
+        owner = SellerPage(self.page, self.actor, self.actor)
+        owner.fields[0].insert(0, "买家的昵称")
+        owner.save_profile()
+        self.assertEqual(seller_profile(self.actor, self.actor)["nickname"], "买家的昵称")
 
 
 if __name__ == "__main__":

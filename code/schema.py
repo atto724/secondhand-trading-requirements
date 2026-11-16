@@ -1,6 +1,24 @@
 """Additive schema migrations for reservations, governance and audit."""
 
 SQL = """
+CREATE TABLE IF NOT EXISTS public_profiles (
+    account_id INTEGER PRIMARY KEY REFERENCES accounts(id),
+    nickname TEXT NOT NULL DEFAULT '',
+    bio TEXT NOT NULL DEFAULT '',
+    region TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS direct_messages (
+    id INTEGER PRIMARY KEY,
+    sender_id INTEGER NOT NULL REFERENCES accounts(id),
+    receiver_id INTEGER NOT NULL REFERENCES accounts(id),
+    content TEXT NOT NULL CHECK(length(content) BETWEEN 1 AND 1000),
+    created_at TEXT NOT NULL,
+    is_read INTEGER NOT NULL DEFAULT 0 CHECK(is_read IN (0,1)),
+    CHECK(sender_id != receiver_id)
+);
+CREATE INDEX IF NOT EXISTS dm_sender_receiver ON direct_messages(sender_id,receiver_id,id);
+CREATE INDEX IF NOT EXISTS dm_receiver_sender ON direct_messages(receiver_id,sender_id,id);
 CREATE TABLE IF NOT EXISTS reservations (
     id INTEGER PRIMARY KEY,
     product_id INTEGER NOT NULL REFERENCES products(id),

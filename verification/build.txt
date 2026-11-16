@@ -8,8 +8,16 @@ test_registration_assigns_ordinary_roles (test_accounts.AccountTests.test_regist
 New accounts receive buyer and seller roles only. ... ok
 test_valid_login (test_accounts.AccountTests.test_valid_login)
 Correct credentials return the account ID. ... ok
+test_bidirectional_messages_unread_and_third_party_isolation (test_community.CommunityTests.test_bidirectional_messages_unread_and_third_party_isolation) ... ok
+test_cursor_pagination_does_not_mark_unseen_older_messages_read (test_community.CommunityTests.test_cursor_pagination_does_not_mark_unseen_older_messages_read) ... ok
+test_invalid_or_disabled_sender_and_receiver_cannot_send (test_community.CommunityTests.test_invalid_or_disabled_sender_and_receiver_cannot_send) ... ok
+test_public_allowlist_zero_cohort_and_self_profile_update (test_community.CommunityTests.test_public_allowlist_zero_cohort_and_self_profile_update) ... ok
+test_public_inventory_and_rate_have_distinct_historical_scope (test_community.CommunityTests.test_public_inventory_and_rate_have_distinct_historical_scope) ... ok
+test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox (test_detail_ui.DetailPageTests.test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox) ... ok
 test_gallery_boundaries_and_real_thumbnail_switching (test_detail_ui.DetailPageTests.test_gallery_boundaries_and_real_thumbnail_switching) ... ok
+test_owner_profile_can_be_saved_without_a_product (test_detail_ui.DetailPageTests.test_owner_profile_can_be_saved_without_a_product) ... ok
 test_return_preserves_list_state_without_secondary_window (test_detail_ui.DetailPageTests.test_return_preserves_list_state_without_secondary_window) ... ok
+test_seller_box_opens_inline_store_and_keeps_messages_unread_until_chat (test_detail_ui.DetailPageTests.test_seller_box_opens_inline_store_and_keeps_messages_unread_until_chat) ... ok
 test_duplicate_legacy_category_merges_without_losing_products (test_gallery.GalleryTests.test_duplicate_legacy_category_merges_without_losing_products) ... ok
 test_gallery_images_classification_and_idempotency (test_gallery.GalleryTests.test_gallery_images_classification_and_idempotency) ... ok
 test_interrupted_photo_marker_does_not_duplicate_images (test_gallery.GalleryTests.test_interrupted_photo_marker_does_not_duplicate_images) ... ok
@@ -52,11 +60,11 @@ test_waiting_blocks_edit_and_delist (test_workflows.WorkflowTests.test_waiting_b
 test_zero_cohort_statistics_and_backup_restore (test_workflows.WorkflowTests.test_zero_cohort_statistics_and_backup_restore) ... ok
 
 ----------------------------------------------------------------------
-Ran 47 tests in 15.202s
+Ran 55 tests in 30.380s
 
 OK
 ͼƬ�����ݻ���handbag����ǰ״̬����ЧԤԼ���ƣ�
-Black formatting: 28 files passed
+Black formatting: 31 files passed
 
 ------------------------------------
 Your code has been rated at 10.00/10
@@ -91,6 +99,7 @@ copying accounts.py -> secondhand_trading_desktop-0.3.0
 copying admin_ui.py -> secondhand_trading_desktop-0.3.0
 copying benchmark.py -> secondhand_trading_desktop-0.3.0
 copying catalog.py -> secondhand_trading_desktop-0.3.0
+copying community.py -> secondhand_trading_desktop-0.3.0
 copying core.py -> secondhand_trading_desktop-0.3.0
 copying database.py -> secondhand_trading_desktop-0.3.0
 copying demo.py -> secondhand_trading_desktop-0.3.0
@@ -108,6 +117,7 @@ copying pyproject.toml -> secondhand_trading_desktop-0.3.0
 copying registration_ui.py -> secondhand_trading_desktop-0.3.0
 copying schema.py -> secondhand_trading_desktop-0.3.0
 copying security.py -> secondhand_trading_desktop-0.3.0
+copying seller_ui.py -> secondhand_trading_desktop-0.3.0
 copying trades.py -> secondhand_trading_desktop-0.3.0
 copying trades_ui.py -> secondhand_trading_desktop-0.3.0
 copying ui_common.py -> secondhand_trading_desktop-0.3.0
@@ -147,6 +157,7 @@ copying secondhand_trading_desktop.egg-info\entry_points.txt -> secondhand_tradi
 copying secondhand_trading_desktop.egg-info\requires.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
 copying secondhand_trading_desktop.egg-info\top_level.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
 copying tests\test_accounts.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_community.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_detail_ui.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_gallery.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_presentation.py -> secondhand_trading_desktop-0.3.0\tests
@@ -172,6 +183,7 @@ creating build\lib
 copying accounts.py -> build\lib
 copying admin_ui.py -> build\lib
 copying catalog.py -> build\lib
+copying community.py -> build\lib
 copying core.py -> build\lib
 copying database.py -> build\lib
 copying demo.py -> build\lib
@@ -187,6 +199,7 @@ copying products.py -> build\lib
 copying products_ui.py -> build\lib
 copying registration_ui.py -> build\lib
 copying schema.py -> build\lib
+copying seller_ui.py -> build\lib
 copying security.py -> build\lib
 copying trades.py -> build\lib
 copying trades_ui.py -> build\lib
@@ -238,6 +251,7 @@ copying build\lib\accounts.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\admin_ui.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\benchmark.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\catalog.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\community.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\core.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\database.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\demo.py -> build\bdist.win-amd64\wheel\.
@@ -284,6 +298,7 @@ copying build\lib\products_ui.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\registration_ui.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\schema.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\security.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\seller_ui.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\trades.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\trades_ui.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\ui_common.py -> build\bdist.win-amd64\wheel\.
@@ -291,11 +306,12 @@ running install_egg_info
 Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
 running install_scripts
 creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
-creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-5ookd47_\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-kjf3rw0h\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
 adding 'accounts.py'
 adding 'admin_ui.py'
 adding 'benchmark.py'
 adding 'catalog.py'
+adding 'community.py'
 adding 'core.py'
 adding 'database.py'
 adding 'demo.py'
@@ -312,6 +328,7 @@ adding 'products_ui.py'
 adding 'registration_ui.py'
 adding 'schema.py'
 adding 'security.py'
+adding 'seller_ui.py'
 adding 'trades.py'
 adding 'trades_ui.py'
 adding 'ui_common.py'

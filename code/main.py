@@ -11,9 +11,10 @@ import database
 from accounts import authenticate
 from admin_ui import AccountsPage, MaintenancePage, MessagesPage, ReportsPage, ReviewPage
 from governance import account_profile
-from market_ui import CatalogPage, MyProductsPage
+from market_ui import CatalogPage, MyProductsPage, ProductDetail
 from operations import backup_status, create_backup
 from registration_ui import RegistrationWindow
+from seller_ui import InboxPage, SellerPage
 from trades import run_timeouts
 from trades_ui import ReservationsPage
 from ui_common import configure_style, guarded
@@ -128,7 +129,17 @@ class TradingApp:
             ("我的商品", lambda parent: MyProductsPage(parent, self.account_id)),
             ("我的预约", lambda parent: ReservationsPage(parent, self.account_id)),
             ("卖家预约", lambda parent: ReservationsPage(parent, self.account_id, "seller")),
-            ("消息中心", lambda parent: MessagesPage(parent, self.account_id)),
+            ("消息中心", self.message_center),
+            (
+                "个人主页",
+                lambda parent: SellerPage(
+                    parent,
+                    self.account_id,
+                    self.account_id,
+                    overlay=False,
+                    detail_factory=ProductDetail,
+                ),
+            ),
             ("我的统计", lambda parent: ReportsPage(parent, self.account_id)),
         ]
         if "admin" in self.profile["roles"]:
@@ -154,6 +165,14 @@ class TradingApp:
             page.pack(fill="both", expand=True)
 
         guarded(self.root, build)
+
+    def message_center(self, parent):
+        """Keep system notifications and private conversations distinctly labeled."""
+        notebook = ttk.Notebook(parent)
+        for label, factory in (("系统通知", MessagesPage), ("私信会话", InboxPage)):
+            page = factory(notebook, self.account_id)
+            notebook.add(page, text=label)
+        return notebook
 
     def admin_workspace(self, parent):
         """Keep privileged component pages in a dedicated secondary tab set."""

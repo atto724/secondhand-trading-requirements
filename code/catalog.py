@@ -299,6 +299,7 @@ def search_products(
     page_size=8,
     scope="public",
     status="",
+    seller_id=None,
 ):
     """Apply combined filters and real pagination without exposing private drafts."""
     if isinstance(page, bool) or not isinstance(page, int) or page < 1 or not 1 <= page_size <= 100:
@@ -324,6 +325,9 @@ def search_products(
             admin(connection, actor)
         else:
             raise ValueError("查询范围无效。")
+        if seller_id is not None:
+            clauses.append("p.seller_id=?")
+            values.append(seller_id)
         if keyword.strip():
             clauses.append("(instr(p.title,?)>0 OR instr(p.description,?)>0)")
             values += [keyword.strip(), keyword.strip()]

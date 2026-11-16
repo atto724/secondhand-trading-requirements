@@ -17,7 +17,7 @@ from registration_ui import RegistrationWindow
 from seller_ui import InboxPage, SellerPage
 from trades import run_timeouts
 from trades_ui import ReservationsPage
-from ui_common import configure_style, guarded
+from ui_common import ACCENT, INK, PAPER, configure_style, guarded
 
 
 class TradingApp:
@@ -29,6 +29,7 @@ class TradingApp:
         self.profile = None
         self.notebook = None
         self.pages = {}
+        self.nav_items = {}
         self.entries = []
         self.username = tk.StringVar(master=root)
         self.password = tk.StringVar(master=root)
@@ -114,14 +115,29 @@ class TradingApp:
     def show_home(self):
         """Expose ordinary navigation and a separate administrator workspace."""
         self.clear_page()
-        header = ttk.Frame(self.container, padding=(22, 14))
+        header = tk.Frame(self.container, bg=PAPER, padx=26, pady=16)
         header.pack(fill="x")
-        ttk.Label(header, text="二手交易", font=("Microsoft YaHei", 19)).pack(side="left")
-        ttk.Button(header, text="退出登录", command=self.logout).pack(side="right")
-        ttk.Label(header, text=f"{self.profile['username']} · 账号 {self.account_id}").pack(
-            side="right", padx=18
+        ttk.Label(header, text="二手交易", font=("Microsoft YaHei", 21), background=PAPER).pack(
+            side="left"
         )
-        self.notebook = ttk.Notebook(self.container)
+        ttk.Button(header, text="退出登录", command=self.logout).pack(side="right")
+        ttk.Label(
+            header, text=f"{self.profile['username']} · 账号 {self.account_id}", background=PAPER
+        ).pack(side="right", padx=18)
+        navigation = tk.Frame(self.container, bg=PAPER, padx=18)
+        navigation.pack(fill="x")
+        self.nav_items = {}
+        style = ttk.Style(self.root)
+        style.layout("Main.TNotebook.Tab", [])
+        style.configure(
+            "Main.TNotebook",
+            borderwidth=0,
+            background=PAPER,
+            bordercolor=PAPER,
+            lightcolor=PAPER,
+            darkcolor=PAPER,
+        )
+        self.notebook = ttk.Notebook(self.container, style="Main.TNotebook")
         self.notebook.pack(fill="both", expand=True, padx=12, pady=(0, 12))
         self.pages = {}
         definitions = [
@@ -148,6 +164,27 @@ class TradingApp:
             holder = ttk.Frame(self.notebook)
             self.notebook.add(holder, text=label)
             self.pages[str(holder)] = (holder, factory)
+            item = tk.Frame(navigation, bg=PAPER)
+            item.pack(side="left", padx=7)
+            button = tk.Button(
+                item,
+                text=label,
+                bg=PAPER,
+                fg=INK,
+                activebackground=PAPER,
+                activeforeground=ACCENT,
+                relief="flat",
+                bd=0,
+                font=("Microsoft YaHei", 13),
+                padx=8,
+                pady=12,
+                cursor="hand2",
+                command=lambda page=holder: self.notebook.select(page),
+            )
+            button.pack()
+            underline = tk.Frame(item, height=3, bg=PAPER)
+            underline.pack(fill="x")
+            self.nav_items[str(holder)] = (button, underline)
         self.notebook.bind("<<NotebookTabChanged>>", self.open_tab)
         self.open_tab()
 
@@ -156,6 +193,9 @@ class TradingApp:
         selected = self.notebook.select()
         if not selected:
             return
+        for key, (button, underline) in self.nav_items.items():
+            button.configure(fg=ACCENT if key == selected else INK)
+            underline.configure(bg=ACCENT if key == selected else PAPER)
         holder, factory = self.pages[selected]
         for child in holder.winfo_children():
             child.destroy()

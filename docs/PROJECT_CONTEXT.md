@@ -91,3 +91,7 @@ D-018生效：ReservationsPage上方状态下拉分类显示各类数量，当�
 ## 当前消息中心与回执
 
 D-019：MessagesPage使用页内详情，不再TextWindow；系统通知和InboxPage使用Treeview图片列红点。operations.mark_all_messages_read仅修改当前receiver_id的两类入站消息。community.latest_read_message只查询当前账号最新发送消息，BubbleHistory只对该条展示已读，ChatPanel局部定时刷新并在销毁时取消。对方未读时无提示，发送新消息回执隐藏。71项测试、Black32文件、Pylint10/10及构建通过。
+
+## 当前排版：无框主导航与横向卡片
+
+D-020生效。main.py保留Notebook页面路由，隐藏原页签，以放大文字和选中下划线作为主导航，内容与权限入口不变。ui_common.ProductRows提供可滚动横向卡片、缩略图、选择和行内动作；MyProductsPage及ReservationsPage使用卡片而非Treeview。我的商品增加状态筛选和数量，活动预约限制编辑/下架；预约仍按原状态分组和事务校验，卡片从不可变snapshot读商品信息。75项测试、Black32文件、Pylint10/10及构建通过，computer-use实际预览了文字导航及我的商品卡片。

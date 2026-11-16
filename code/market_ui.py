@@ -22,7 +22,7 @@ from ui_common import (
     BG,
     INK,
     PAPER,
-    DataTable,
+    ProductRows,
     avatar_photo,
     guarded,
     stored_image,
@@ -413,56 +413,97 @@ class MyProductsPage(ttk.Frame):
         ttk.Label(self, text="我的商品", style="Title.TLabel").pack(anchor="w", pady=(0, 12))
         toolbar = ttk.Frame(self)
         toolbar.pack(fill="x", pady=8)
-        for label, action in [
-            ("创建草稿", self.create),
-            ("编辑 / 补全旧草稿", self.edit),
-            ("查看详情", self.detail),
-            ("提交审核", self.submit),
-            ("自行下架", self.delist),
-            ("删除草稿", self.delete),
-            ("刷新", self.refresh),
-        ]:
-            ttk.Button(
-                toolbar, text=label, command=lambda function=action: guarded(self, function)
-            ).pack(side="left", padx=3)
-        ttk.Label(
-            self,
-            text="有等待或已确认预约时不能修改或自行下架；旧空草稿需补全后审核，或直接删除。",
-            style="Sub.TLabel",
-        ).pack(anchor="w", pady=8)
-        self.table = DataTable(
-            self,
-            [
-                ("id", "编号", 60),
-                ("title", "商品标题", 240),
-                ("category", "分类", 100),
-                ("price", "价格（元）", 100),
-                ("status", "状态", 100),
-                ("version", "版本", 60),
-            ],
+        ttk.Button(
+            toolbar,
+            text="＋ 创建草稿",
+            style="Accent.TButton",
+            command=lambda: guarded(self, self.create),
+        ).pack(side="right")
+        ttk.Button(toolbar, text="刷新", command=lambda: guarded(self, self.refresh)).pack(
+            side="right", padx=10
         )
+        self.filter_bar = ttk.Frame(self)
+        self.filter_bar.pack(fill="x", pady=10)
+        self.filter_key = "all"
+        self.table = ProductRows(self, on_open=lambda key: self.detail())
         self.table.pack(fill="both", expand=True)
-        self.table.tree.bind("<Double-1>", lambda event: guarded(self, self.detail))
+        self.count = ttk.Label(self, style="Sub.TLabel", anchor="center")
+        self.count.pack(fill="x", pady=8)
         self.refresh()
 
     def refresh(self):
-        """Load every owned product state."""
-        rows = list_my_products(self.actor)
-        self.rows = {row["id"]: row for row in rows}
-        self.table.fill(
-            (
-                row["id"],
-                (
-                    row["id"],
-                    row["title"] or "（待补全标题）",
-                    row["category_name"] or "（待选择分类）",
-                    price(row["price_cents"]),
-                    status_label(row["status"]),
-                    row["version"],
-                ),
+        """Render owner product states without hiding historical or legacy drafts."""
+        self.rows = {row["id"]: row for row in list_my_products(self.actor)}
+        self.fill_products()
+
+    def set_filter(self, key):
+        """Keep state filtering local to this owner page."""
+        self.filter_key = key
+        self.fill_products()
+
+    def fill_products(self):
+        """Match the prototype's image, information, status and inline-action rows."""
+        for widget in self.filter_bar.winfo_children():
+            widget.destroy()
+        for key, label in [("all", "全部")] + [
+            (state.value, label) for state, label in PRODUCT_STATUS_LABELS.items()
+        ]:
+            count = sum(key in ("all", row["status"]) for row in self.rows.values())
+            tk.Button(
+                self.filter_bar,
+                text=f"{label} {count}",
+                command=lambda value=key: self.set_filter(value),
+                bg=ACCENT if key == self.filter_key else BG,
+                fg="white" if key == self.filter_key else INK,
+                relief="flat",
+                bd=0,
+                padx=10,
+                pady=7,
+                cursor="hand2",
+            ).pack(side="left", padx=(0, 5))
+        cards = []
+        for row in self.rows.values():
+            if self.filter_key not in ("all", row["status"]):
+                continue
+            actions = [("查看详情", self.detail)]
+            editable = not row["blocked"] and not row["has_live"]
+            if editable and row["status"] in ("draft", "pending_review", "published", "delisted"):
+                actions.append(("编辑 / 补全", self.edit))
+            if editable and row["status"] in ("draft", "delisted"):
+                actions.append(("提交审核", self.submit))
+            if editable and row["status"] == "published":
+                actions.append(("自行下架", self.delist))
+            if editable and row["status"] == "draft":
+                actions.append(("删除草稿", self.delete))
+            description = (
+                "有有效预约，暂时无法修改或下架"
+                if row["has_live"]
+                else {
+                    "draft": "仅自己可见，完善信息后可提交审核",
+                    "pending_review": "已提交，等待管理员审核",
+                    "published": "已发布，可供买家浏览预约",
+                    "reserved": "已确认买家，等待交易推进",
+                    "sold": "交易已完成",
+                    "delisted": "已自行下架，可编辑后重新审核",
+                    "violation": "违规限制中，请查看处理记录",
+                }.get(row["status"], "")
             )
-            for row in rows
-        )
+            cards.append(
+                {
+                    "id": row["id"],
+                    "title": row["title"] or "（待补全标题）",
+                    "image": row["cover"],
+                    "price": row["price_cents"],
+                    "status": status_label(row["status"]),
+                    "subtitle": (
+                        f"{row['category_name'] or '未分类'} · 编号 {row['id']} · "
+                        f"版本 {row['version']}\n{description}"
+                    ),
+                    "actions": actions,
+                }
+            )
+        self.table.fill(cards)
+        self.count.configure(text=f"共 {len(cards)} 件商品")
 
     def create(self):
         """Open an empty create form."""

@@ -22,10 +22,13 @@ test_chat_long_text_wraps_and_refresh_keeps_one_bubble_per_message (test_detail_
 test_chat_receipt_only_appears_after_latest_outgoing_is_read (test_detail_ui.DetailPageTests.test_chat_receipt_only_appears_after_latest_outgoing_is_read) ... ok
 test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox (test_detail_ui.DetailPageTests.test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox) ... ok
 test_gallery_boundaries_and_real_thumbnail_switching (test_detail_ui.DetailPageTests.test_gallery_boundaries_and_real_thumbnail_switching) ... ok
+test_my_products_cards_filter_and_bind_actions_to_each_product (test_detail_ui.DetailPageTests.test_my_products_cards_filter_and_bind_actions_to_each_product) ... ok
 test_owner_profile_can_be_saved_without_a_product (test_detail_ui.DetailPageTests.test_owner_profile_can_be_saved_without_a_product) ... ok
+test_plain_primary_navigation_preserves_labels_and_switches_pages (test_detail_ui.DetailPageTests.test_plain_primary_navigation_preserves_labels_and_switches_pages) ... ok
 test_private_composer_visible_at_minimum_window_size (test_detail_ui.DetailPageTests.test_private_composer_visible_at_minimum_window_size) ... ok
 test_private_inbox_dots_clear_after_read_or_mark_all (test_detail_ui.DetailPageTests.test_private_inbox_dots_clear_after_read_or_mark_all) ... ok
 test_private_message_button_opens_only_conversation_and_returns_to_detail (test_detail_ui.DetailPageTests.test_private_message_button_opens_only_conversation_and_returns_to_detail) ... ok
+test_product_card_with_waiting_reservation_hides_edit_and_delist (test_detail_ui.DetailPageTests.test_product_card_with_waiting_reservation_hides_edit_and_delist) ... ok
 test_return_preserves_list_state_without_secondary_window (test_detail_ui.DetailPageTests.test_return_preserves_list_state_without_secondary_window) ... ok
 test_seller_box_opens_profile_without_reading_private_messages (test_detail_ui.DetailPageTests.test_seller_box_opens_profile_without_reading_private_messages) ... ok
 test_sent_and_received_bubbles_are_visible_and_align_by_sender (test_detail_ui.DetailPageTests.test_sent_and_received_bubbles_are_visible_and_align_by_sender) ... ok
@@ -43,6 +46,7 @@ test_roles_and_state_are_localized (test_presentation.PresentationTests.test_rol
 test_utc_timestamp_crosses_into_next_local_date (test_presentation.PresentationTests.test_utc_timestamp_crosses_into_next_local_date) ... ok
 test_categories_partition_all_states_and_blocked_product_hides_confirmation (test_reservation_ui.ReservationActionTests.test_categories_partition_all_states_and_blocked_product_hides_confirmation) ... ok
 test_each_state_has_only_meaningful_buyer_and_seller_actions (test_reservation_ui.ReservationActionTests.test_each_state_has_only_meaningful_buyer_and_seller_actions) ... ok
+test_card_uses_booking_snapshot_and_actions_target_the_clicked_record (test_reservation_ui.ReservationPageTests.test_card_uses_booking_snapshot_and_actions_target_the_clicked_record) ... ok
 test_group_selection_and_cancellation_direction_control_visible_buttons (test_reservation_ui.ReservationPageTests.test_group_selection_and_cancellation_direction_control_visible_buttons) ... ok
 test_refresh_removes_changed_record_and_stale_actions_without_resetting_category (test_reservation_ui.ReservationPageTests.test_refresh_removes_changed_record_and_stale_actions_without_resetting_category) ... ok
 test_admin_permissions_rechecked (test_workflows.WorkflowTests.test_admin_permissions_rechecked) ... ok
@@ -76,7 +80,7 @@ test_waiting_blocks_edit_and_delist (test_workflows.WorkflowTests.test_waiting_b
 test_zero_cohort_statistics_and_backup_restore (test_workflows.WorkflowTests.test_zero_cohort_statistics_and_backup_restore) ... ok
 
 ----------------------------------------------------------------------
-Ran 71 tests in 49.145s
+Ran 75 tests in 59.374s
 
 OK
 ͼƬ�����ݻ���handbag����ǰ״̬����ЧԤԼ���ƣ�
@@ -335,7 +339,7 @@ running install_egg_info
 Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
 running install_scripts
 creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
-creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-kcefp8lx\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-mk1l1q6g\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
 adding 'accounts.py'
 adding 'admin_ui.py'
 adding 'benchmark.py'

@@ -98,19 +98,26 @@ class ReservationPageTests(unittest.TestCase):
         self.page.choose_group()
 
     def buttons(self):
-        return [button.cget("text") for button in self.page.action_bar.winfo_children()]
+        if not self.page.table.selection():
+            return []
+        card = self.page.table.cards[self.page.table.selection()[0]]
+        return [
+            button.cget("text")
+            for button in card["buttons"]
+            if button.cget("text") != "预约详情 / 快照"
+        ]
 
     def select(self, key):
-        self.page.table.tree.selection_set(str(key))
+        self.page.table.select(key)
         self.page.show_actions()
 
     def test_group_selection_and_cancellation_direction_control_visible_buttons(self):
-        self.assertEqual(self.page.table.tree.get_children(), ("1",))
+        self.assertEqual(self.page.table.keys(), ("1",))
         self.assertEqual(self.buttons(), [])
         self.select(1)
         self.assertEqual(self.buttons(), ["确认预约", "拒绝预约"])
         self.select_group("cancel_requested")
-        self.assertEqual(set(self.page.table.tree.get_children()), {"2", "3"})
+        self.assertEqual(set(self.page.table.keys()), {"2", "3"})
         self.assertEqual(self.buttons(), [])
         self.select(2)
         self.assertEqual(self.buttons(), ["同意取消", "不同意，转人工"])
@@ -127,13 +134,37 @@ class ReservationPageTests(unittest.TestCase):
         self.records[0] = fixture(1, "confirmed")
         self.page.refresh()
         self.assertEqual(self.page.group_key, "waiting")
-        self.assertEqual(self.page.table.tree.get_children(), ())
+        self.assertEqual(self.page.table.keys(), ())
         self.assertEqual(self.buttons(), [])
         self.assertTrue(self.page.detail_button.instate(["disabled"]))
         self.assertIn("暂无预约", self.page.action_hint.cget("text"))
         self.select_group("confirmed")
         self.select(1)
         self.assertEqual(self.buttons(), ["登记交付", "申请取消"])
+
+    def test_card_uses_booking_snapshot_and_actions_target_the_clicked_record(self):
+        snapshot = {
+            "title": "预约当时的标题",
+            "price_cents": 1990,
+            "images": ["images/original.jpg"],
+        }
+        self.records[0]["snapshot"] = json.dumps(snapshot)
+        self.records[0]["current_title"] = "后来改名"
+        self.page.refresh()
+        card = self.page.table.cards["1"]
+        self.assertEqual(card["data"]["title"], "预约当时的标题")
+        self.assertEqual(card["data"]["price"], 1990)
+        self.assertEqual(card["data"]["image"], "images/original.jpg")
+        calls = []
+        with patch.object(
+            self.page,
+            "respond",
+            side_effect=lambda agree: calls.append((self.page.table.selected(), agree)),
+        ):
+            self.select_group("cancel_requested")
+            buttons = self.page.table.cards["2"]["buttons"]
+            next(button for button in buttons if button.cget("text") == "同意取消").invoke()
+        self.assertEqual(calls, [(2, True)])
 
 
 if __name__ == "__main__":

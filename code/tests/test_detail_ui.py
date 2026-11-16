@@ -10,10 +10,13 @@ from tempfile import TemporaryDirectory
 
 import database
 from demo import demo_accounts, seed_demo
-from market_ui import CatalogPage, ProductDetail
+from market_ui import CatalogPage, MyProductsPage, ProductDetail
 from admin_ui import MessagesPage
 from community import conversation
 from operations import mark_all_messages_read
+from main import TradingApp
+from governance import account_profile
+from trades import reserve
 from seller_ui import ChatPage, ChatPanel, SellerPage, InboxPage
 from community import send_direct_message, inbox, seller_profile
 from unittest.mock import patch
@@ -272,6 +275,58 @@ class DetailPageTests(unittest.TestCase):
         self.assertEqual(
             panel.history.receipt.master, next(reversed(panel.history.bubbles.values())).master
         )
+
+    def test_my_products_cards_filter_and_bind_actions_to_each_product(self):
+        seller = demo_accounts()["demo_seller"]
+        page = MyProductsPage(self.page, seller)
+        self.assertEqual(len(page.table.cards), 17)
+        self.assertTrue(all(card["data"]["image"] for card in page.table.cards.values()))
+        seen = []
+        with patch.object(page, "detail", side_effect=lambda: seen.append(page.table.selected())):
+            page.refresh()
+            keys = list(page.table.cards)[:2]
+            for key in keys:
+                page.table.cards[key]["buttons"][0].invoke()
+            self.assertEqual(seen, [int(key) for key in keys])
+        page.set_filter("draft")
+        self.assertEqual(len(page.table.cards), 1)
+        card = next(iter(page.table.cards.values()))
+        self.assertEqual(card["data"]["status"], "草稿")
+        self.assertIn("提交审核", [button.cget("text") for button in card["buttons"]])
+
+    def test_product_card_with_waiting_reservation_hides_edit_and_delist(self):
+        reserve(self.actor, self.product)
+        page = MyProductsPage(self.page, demo_accounts()["demo_seller"])
+        card = page.table.cards[str(self.product)]
+        self.assertEqual([button.cget("text") for button in card["buttons"]], ["查看详情"])
+        self.assertIn("暂时无法修改", card["data"]["subtitle"])
+
+    def test_plain_primary_navigation_preserves_labels_and_switches_pages(self):
+        self.page.destroy()
+        self.page = None
+        app = TradingApp(self.root)
+        app.account_id = self.actor
+        app.profile = account_profile(self.actor)
+        app.show_home()
+        self.root.geometry("1080x740")
+        self.root.deiconify()
+        self.root.update()
+        self.assertEqual(
+            [app.notebook.tab(key, "text") for key in app.notebook.tabs()],
+            ["浏览商品", "我的商品", "我的预约", "卖家预约", "消息中心", "个人主页", "我的统计"],
+        )
+        target = next(key for key in app.nav_items if app.notebook.tab(key, "text") == "我的商品")
+        app.nav_items[target][0].invoke()
+        self.root.update()
+        self.assertEqual(app.notebook.select(), target)
+        self.assertEqual(app.nav_items[target][1].cget("background"), "#ad4326")
+        for button, _ in app.nav_items.values():
+            self.assertEqual(button.cget("relief"), "flat")
+            self.assertLessEqual(
+                button.winfo_rootx() + button.winfo_width(),
+                self.root.winfo_rootx() + self.root.winfo_width(),
+            )
+        self.root.withdraw()
 
 
 if __name__ == "__main__":

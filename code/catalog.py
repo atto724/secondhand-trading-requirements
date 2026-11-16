@@ -351,6 +351,8 @@ def search_products(
         count = connection.execute("SELECT COUNT(*)" + base, values).fetchone()[0]
         rows = connection.execute(
             "SELECT p.*,c.name AS category_name,a.username AS seller_name,"
+            "EXISTS(SELECT 1 FROM reservations r WHERE r.product_id=p.id AND r.status IN "
+            "('waiting','confirmed','delivered','cancel_requested','manual')) AS has_live,"
             "(SELECT file_path FROM product_images WHERE product_id=p.id "
             "ORDER BY display_order LIMIT 1) AS cover"
             + base

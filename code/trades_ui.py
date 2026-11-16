@@ -15,7 +15,7 @@ from trades import (
     respond_cancel,
     transaction_detail,
 )
-from ui_common import DataTable, TextWindow, display_value, guarded
+from ui_common import ProductRows, TextWindow, display_value, guarded
 
 RESERVATION_GROUPS = (
     ("waiting", "待确认预约", {"waiting"}),
@@ -93,8 +93,6 @@ class ReservationsPage(ttk.Frame):
             command=lambda: guarded(self, self.detail),
         )
         self.detail_button.pack(side="left")
-        self.action_bar = ttk.Frame(self)
-        self.action_bar.pack(fill="x", pady=8)
         self.action_hint = ttk.Label(
             self, text="先选择状态分类，再选中一条预约查看可用操作。", style="Sub.TLabel"
         )
@@ -104,19 +102,9 @@ class ReservationsPage(ttk.Frame):
             text="以创建预约时的商品快照为准。确认预约后才能查看交易电话；取消和争议均保留记录。",
             style="Sub.TLabel",
         ).pack(anchor="w", pady=8)
-        self.table = DataTable(
-            self,
-            [
-                ("id", "预约编号", 70),
-                ("title", "预约时商品", 210),
-                ("buyer", "买家", 120),
-                ("status", "预约状态", 150),
-                ("created", "创建时间（北京时间）", 200),
-            ],
-        )
+        self.table = ProductRows(self, on_open=lambda key: self.detail())
         self.table.pack(fill="both", expand=True)
-        self.table.tree.bind("<Double-1>", lambda event: guarded(self, self.detail))
-        self.table.tree.bind("<<TreeviewSelect>>", self.show_actions)
+        self.table.bind("<<CardSelected>>", self.show_actions)
         self.refresh()
 
     def refresh(self):
@@ -153,38 +141,67 @@ class ReservationsPage(ttk.Frame):
 
     def fill_group(self):
         """Classify reservations; all ended states retain their precise row labels."""
-        selection = self.table.tree.selection()
+        selection = self.table.selection()
         selected = selection[0] if selection else None
         states = next(states for key, _, states in RESERVATION_GROUPS if key == self.group_key)
         rows = [row for row in self.rows.values() if row["status"] in states]
-        self.table.fill(
-            (
-                row["id"],
-                (
-                    row["id"],
-                    json.loads(row["snapshot"])["title"],
-                    row["buyer_name"],
-                    LABELS[row["status"]],
-                    display_value(row["created_at"], "created_at"),
-                ),
+        handlers = self.operation_handlers()
+        cards = []
+        for row in rows:
+            snapshot = json.loads(row["snapshot"])
+            images = snapshot.get("images", [])
+            cover = images[0] if images else None
+            if isinstance(cover, dict):
+                cover = cover.get("file_path")
+            actions = [("预约详情 / 快照", self.detail)]
+            actions += [
+                (label, handlers[key])
+                for label, key in reservation_actions(self.scope, self.actor, row)
+            ]
+            note = (
+                "你已申请取消，等待对方处理。"
+                if row["status"] == "cancel_requested" and row["cancel_by"] == self.actor
+                else LABELS[row["status"]]
             )
-            for row in rows
-        )
-        if selected in self.table.tree.get_children():
-            self.table.tree.selection_set(selected)
+            cards.append(
+                {
+                    "id": row["id"],
+                    "title": snapshot["title"],
+                    "image": cover,
+                    "price": snapshot.get("price_cents"),
+                    "status": LABELS[row["status"]],
+                    "subtitle": (
+                        f"预约编号 {row['id']} · 买家 {row['buyer_name']} · "
+                        f"{display_value(row['created_at'],'created_at')}\n{note}"
+                    ),
+                    "actions": actions,
+                }
+            )
+        self.table.fill(cards)
+        if selected in self.table.keys():
+            self.table.select(selected)
         self.show_actions()
         if not rows:
             self.action_hint.configure(text="该分类暂无预约，可切换其他状态查看。")
 
     def show_actions(self, _event=None):
         """Rebuild only the selected reservation's valid action controls."""
-        for child in self.action_bar.winfo_children():
-            child.destroy()
-        selection = self.table.tree.selection()
+        selection = self.table.selection()
         row = self.rows.get(int(selection[0])) if selection else None
         self.detail_button.configure(state="normal" if row else "disabled")
         actions = reservation_actions(self.scope, self.actor, row)
-        handlers = {
+        hint = "选中一条预约后，显示该预约当前可用的操作。"
+        if row:
+            hint = f"当前状态：{LABELS[row['status']]}。"
+            if row["status"] == "cancel_requested" and row["cancel_by"] == self.actor:
+                hint += "你已申请取消，等待对方处理。"
+            elif not actions:
+                hint += "当前无需操作，可查看预约详情。"
+        self.action_hint.configure(text=hint)
+
+    def operation_handlers(self):
+        """Share existing transactional handlers between inline card actions."""
+        return {
             "confirm": self.confirm,
             "reject": self.reject,
             "cancel": self.cancel,
@@ -196,20 +213,6 @@ class ReservationsPage(ttk.Frame):
             "resolve_continue": lambda: self.resolve(False),
             "correct": self.correct,
         }
-        for label, key in actions:
-            ttk.Button(
-                self.action_bar,
-                text=label,
-                command=lambda function=handlers[key]: guarded(self, function),
-            ).pack(side="left", padx=(0, 8))
-        hint = "选中一条预约后，显示该预约当前可用的操作。"
-        if row:
-            hint = f"当前状态：{LABELS[row['status']]}。"
-            if row["status"] == "cancel_requested" and row["cancel_by"] == self.actor:
-                hint += "你已申请取消，等待对方处理。"
-            elif not actions:
-                hint += "当前无需操作，可查看预约详情。"
-        self.action_hint.configure(text=hint)
 
     def reason(self, title):
         """Ask for a required reason; cancellation leaves the operation untouched."""

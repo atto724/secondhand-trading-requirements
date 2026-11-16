@@ -129,6 +129,177 @@ class DataTable(ttk.Frame):
         return int(selection[0])
 
 
+class ProductRows(ttk.Frame):
+    """Scrollable horizontal product cards with keyed selection and inline actions."""
+
+    def __init__(self, parent, on_open=None):
+        super().__init__(parent)
+        self.on_open = on_open
+        self.current = None
+        self.cards = {}
+        self.canvas = tk.Canvas(self, bg=BG, highlightthickness=0)
+        scrollbar = ttk.Scrollbar(self, command=self.canvas.yview)
+        scrollbar.pack(side="right", fill="y")
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.canvas.configure(yscrollcommand=scrollbar.set)
+        self.body = tk.Frame(self.canvas, bg=BG)
+        self.window = self.canvas.create_window(0, 0, window=self.body, anchor="nw")
+        self.body.bind(
+            "<Configure>", lambda event: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+        self.canvas.bind("<Configure>", self.resize)
+        self.canvas.bind("<MouseWheel>", self.wheel)
+
+    def resize(self, event):
+        """Keep descriptions and controls inside the available viewport."""
+        self.canvas.itemconfigure(self.window, width=event.width)
+        for card in self.cards.values():
+            for label in card["labels"]:
+                label.configure(wraplength=max(120, event.width - 400))
+
+    def wheel(self, event):
+        """Scroll cards without installing application-wide bindings."""
+        self.canvas.yview_scroll(-int(event.delta / 120), "units")
+        return "break"
+
+    def selection(self):
+        """Expose the selected key without depending on a hidden tree widget."""
+        return (self.current,) if self.current in self.cards else ()
+
+    def keys(self):
+        """Return displayed keys in their visual order."""
+        return tuple(self.cards)
+
+    def selected(self):
+        """Require explicit selection before a transaction action."""
+        if not self.selection():
+            raise ValueError("请先选择一条记录。")
+        return int(self.current)
+
+    def select(self, key):
+        """Highlight a card and notify its host when it becomes selected."""
+        key = str(key)
+        if key not in self.cards:
+            return
+        self.current = key
+        for identity, card in self.cards.items():
+            card["frame"].configure(highlightbackground=ACCENT if identity == key else "#edcdb7")
+        self.event_generate("<<CardSelected>>")
+
+    def invoke(self, key, function):
+        """Bind each inline action to that specific record before calling the host."""
+        self.select(key)
+        guarded(self, function)
+
+    def fill(self, rows):
+        """Replace cards while retaining a still-visible selection."""
+        previous = self.current
+        for widget in self.body.winfo_children():
+            widget.destroy()
+        self.cards = {}
+        for item in rows:
+            key = str(item["id"])
+            card = tk.Frame(
+                self.body,
+                bg=PAPER,
+                highlightbackground="#edcdb7",
+                highlightthickness=1,
+                padx=14,
+                pady=12,
+            )
+            card.pack(fill="x", pady=(0, 12))
+            image = tk.Label(card, text="暂无图片", bg="#f3ece3", fg=MUTED, width=10, height=5)
+            if item.get("image"):
+                try:
+                    image.photo = thumbnail(self, stored_image(item["image"]), (88, 88))
+                    image.configure(image=image.photo, text="", width=88, height=88)
+                except (OSError, ValueError):
+                    image.configure(text="图片缺失")
+            image.pack(side="left", anchor="n", padx=(0, 16))
+            actions = tk.Frame(card, bg=PAPER, width=240)
+            actions.pack(side="right", anchor="ne", padx=(12, 0))
+            tk.Label(actions, text=item["status"], bg="#fbe9d8", fg=ACCENT, padx=12, pady=5).grid(
+                row=0, column=0, columnspan=2, sticky="e", pady=(0, 8)
+            )
+            buttons = []
+            for index, (text, function) in enumerate(item.get("actions", [])):
+                button = tk.Button(
+                    actions,
+                    text=text,
+                    command=lambda identity=key, action=function: self.invoke(identity, action),
+                    bg="#fffaf4",
+                    fg=ACCENT,
+                    activebackground="#fbe9d8",
+                    relief="flat",
+                    bd=0,
+                    highlightthickness=1,
+                    highlightbackground="#edcdb7",
+                    highlightcolor=ACCENT,
+                    padx=12,
+                    pady=5,
+                    cursor="hand2",
+                    font=("Microsoft YaHei", 10),
+                )
+                button.grid(row=1 + index // 2, column=index % 2, padx=(6, 0), pady=3, sticky="e")
+                buttons.append(button)
+            info = tk.Frame(card, bg=PAPER)
+            info.pack(side="left", fill="both", expand=True)
+            title = tk.Label(
+                info,
+                text=item["title"],
+                font=("Microsoft YaHei", 14),
+                bg=PAPER,
+                fg=INK,
+                anchor="w",
+                justify="left",
+                wraplength=400,
+            )
+            title.pack(fill="x")
+            cents = item.get("price")
+            tk.Label(
+                info,
+                text=f"¥ {cents/100:.2f}" if cents is not None else "价格未记录",
+                font=("Microsoft YaHei", 12),
+                bg=PAPER,
+                fg=ACCENT,
+                anchor="w",
+            ).pack(fill="x", pady=3)
+            subtitle = tk.Label(
+                info,
+                text=item.get("subtitle", ""),
+                bg=PAPER,
+                fg=MUTED,
+                anchor="w",
+                justify="left",
+                wraplength=400,
+            )
+            subtitle.pack(fill="x")
+            self.cards[key] = {
+                "frame": card,
+                "labels": [title, subtitle],
+                "buttons": buttons,
+                "data": item,
+            }
+            for widget in (card, image, info, title, subtitle):
+                widget.bind("<Button-1>", lambda event, identity=key: self.select(identity))
+                widget.bind("<MouseWheel>", self.wheel)
+                if self.on_open:
+                    widget.bind(
+                        "<Double-1>",
+                        lambda event, identity=key: self.invoke(
+                            identity, lambda: self.on_open(int(identity))
+                        ),
+                    )
+        if not self.cards:
+            tk.Label(
+                self.body, text="该分类暂无记录", bg=BG, fg=MUTED, font=("Microsoft YaHei", 12)
+            ).pack(pady=48)
+        self.current = previous if previous in self.cards else None
+        if self.current:
+            self.select(self.current)
+        self.canvas.yview_moveto(0)
+
+
 def enable_unread_dots(table):
     """Use a real red image indicator without recoloring message text."""
     table.unread_dot = tk.PhotoImage(master=table, width=10, height=10)

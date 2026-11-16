@@ -11,20 +11,25 @@ Correct credentials return the account ID. ... ok
 test_avatar_database_failure_cleans_copy (test_community.CommunityTests.test_avatar_database_failure_cleans_copy) ... ok
 test_avatar_is_owner_scoped_and_survives_source_removal (test_community.CommunityTests.test_avatar_is_owner_scoped_and_survives_source_removal) ... ok
 test_bidirectional_messages_unread_and_third_party_isolation (test_community.CommunityTests.test_bidirectional_messages_unread_and_third_party_isolation) ... ok
+test_bulk_read_is_idempotent_and_scoped_to_incoming_messages (test_community.CommunityTests.test_bulk_read_is_idempotent_and_scoped_to_incoming_messages) ... ok
 test_cursor_pagination_does_not_mark_unseen_older_messages_read (test_community.CommunityTests.test_cursor_pagination_does_not_mark_unseen_older_messages_read) ... ok
 test_invalid_or_disabled_sender_and_receiver_cannot_send (test_community.CommunityTests.test_invalid_or_disabled_sender_and_receiver_cannot_send) ... ok
+test_latest_read_receipt_is_cleared_by_a_new_unread_message (test_community.CommunityTests.test_latest_read_receipt_is_cleared_by_a_new_unread_message) ... ok
 test_public_allowlist_zero_cohort_and_self_profile_update (test_community.CommunityTests.test_public_allowlist_zero_cohort_and_self_profile_update) ... ok
 test_public_inventory_and_rate_have_distinct_historical_scope (test_community.CommunityTests.test_public_inventory_and_rate_have_distinct_historical_scope) ... ok
 test_all_accounts_have_default_avatar_and_owner_can_replace (test_detail_ui.DetailPageTests.test_all_accounts_have_default_avatar_and_owner_can_replace) ... ok
 test_chat_long_text_wraps_and_refresh_keeps_one_bubble_per_message (test_detail_ui.DetailPageTests.test_chat_long_text_wraps_and_refresh_keeps_one_bubble_per_message) ... ok
+test_chat_receipt_only_appears_after_latest_outgoing_is_read (test_detail_ui.DetailPageTests.test_chat_receipt_only_appears_after_latest_outgoing_is_read) ... ok
 test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox (test_detail_ui.DetailPageTests.test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox) ... ok
 test_gallery_boundaries_and_real_thumbnail_switching (test_detail_ui.DetailPageTests.test_gallery_boundaries_and_real_thumbnail_switching) ... ok
 test_owner_profile_can_be_saved_without_a_product (test_detail_ui.DetailPageTests.test_owner_profile_can_be_saved_without_a_product) ... ok
 test_private_composer_visible_at_minimum_window_size (test_detail_ui.DetailPageTests.test_private_composer_visible_at_minimum_window_size) ... ok
+test_private_inbox_dots_clear_after_read_or_mark_all (test_detail_ui.DetailPageTests.test_private_inbox_dots_clear_after_read_or_mark_all) ... ok
 test_private_message_button_opens_only_conversation_and_returns_to_detail (test_detail_ui.DetailPageTests.test_private_message_button_opens_only_conversation_and_returns_to_detail) ... ok
 test_return_preserves_list_state_without_secondary_window (test_detail_ui.DetailPageTests.test_return_preserves_list_state_without_secondary_window) ... ok
 test_seller_box_opens_profile_without_reading_private_messages (test_detail_ui.DetailPageTests.test_seller_box_opens_profile_without_reading_private_messages) ... ok
 test_sent_and_received_bubbles_are_visible_and_align_by_sender (test_detail_ui.DetailPageTests.test_sent_and_received_bubbles_are_visible_and_align_by_sender) ... ok
+test_system_notification_opens_inline_and_dot_disappears (test_detail_ui.DetailPageTests.test_system_notification_opens_inline_and_dot_disappears) ... ok
 test_duplicate_legacy_category_merges_without_losing_products (test_gallery.GalleryTests.test_duplicate_legacy_category_merges_without_losing_products) ... ok
 test_gallery_images_classification_and_idempotency (test_gallery.GalleryTests.test_gallery_images_classification_and_idempotency) ... ok
 test_interrupted_photo_marker_does_not_duplicate_images (test_gallery.GalleryTests.test_interrupted_photo_marker_does_not_duplicate_images) ... ok
@@ -71,7 +76,7 @@ test_waiting_blocks_edit_and_delist (test_workflows.WorkflowTests.test_waiting_b
 test_zero_cohort_statistics_and_backup_restore (test_workflows.WorkflowTests.test_zero_cohort_statistics_and_backup_restore) ... ok
 
 ----------------------------------------------------------------------
-Ran 66 tests in 41.100s
+Ran 71 tests in 49.145s
 
 OK
 ͼƬ�����ݻ���handbag����ǰ״̬����ЧԤԼ���ƣ�
@@ -330,7 +335,7 @@ running install_egg_info
 Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
 running install_scripts
 creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
-creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-bt7eq5fi\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-kcefp8lx\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
 adding 'accounts.py'
 adding 'admin_ui.py'
 adding 'benchmark.py'

@@ -138,6 +138,17 @@ def conversation(actor, peer, before=None):
         }
 
 
+def latest_read_message(actor, peer):
+    """Return an ID only when the latest outgoing message was marked read."""
+    with closing(connect_database()) as connection:
+        active(connection, actor)
+        row = connection.execute(
+            "SELECT id,is_read FROM direct_messages WHERE sender_id=? AND receiver_id=? ORDER BY id DESC LIMIT 1",
+            (actor, peer),
+        ).fetchone()
+        return row["id"] if row and row["is_read"] else None
+
+
 def inbox(actor):
     """List caller-owned conversations and incoming unread counts only."""
     with closing(connect_database()) as connection:

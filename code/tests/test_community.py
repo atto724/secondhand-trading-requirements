@@ -9,9 +9,11 @@ from PIL import Image
 
 import database
 from accounts import create_account
+from operations import mark_all_messages_read, messages
 from catalog import search_products
 from community import (
     update_avatar,
+    latest_read_message,
     conversation,
     inbox,
     seller_profile,
@@ -163,6 +165,35 @@ class CommunityTests(unittest.TestCase):
                 update_avatar(self.seller, source)
         self.assertEqual(seller_profile(self.buyer, self.seller)["avatar_path"], "")
         self.assertEqual(list((database.DATABASE_PATH.parent / "images").glob("*")), [])
+
+    def test_latest_read_receipt_is_cleared_by_a_new_unread_message(self):
+        first = send_direct_message(self.buyer, self.seller, "第一条")
+        self.assertIsNone(latest_read_message(self.buyer, self.seller))
+        conversation(self.seller, self.buyer)
+        self.assertEqual(latest_read_message(self.buyer, self.seller), first)
+        newest = send_direct_message(self.buyer, self.seller, "最新一条")
+        self.assertIsNone(latest_read_message(self.buyer, self.seller))
+        self.assertIsNone(latest_read_message(self.other, self.seller))
+        mark_all_messages_read(self.seller)
+        self.assertEqual(latest_read_message(self.buyer, self.seller), newest)
+
+    def test_bulk_read_is_idempotent_and_scoped_to_incoming_messages(self):
+        send_direct_message(self.buyer, self.seller, "给卖家")
+        send_direct_message(self.seller, self.buyer, "给买家")
+        with closing(database.connect_database()) as connection:
+            with connection:
+                for receiver in (self.buyer, self.seller):
+                    connection.execute(
+                        "INSERT INTO messages(receiver_id,event_type,content,created_at) VALUES(?,'test','通知','2026-11-16T00:00:00Z')",
+                        (receiver,),
+                    )
+        mark_all_messages_read(self.seller)
+        mark_all_messages_read(self.seller)
+        self.assertEqual(messages(self.seller)[0]["is_read"], 1)
+        self.assertEqual(messages(self.buyer)[0]["is_read"], 0)
+        self.assertEqual(inbox(self.seller)[0]["unread"], 0)
+        self.assertEqual(inbox(self.buyer)[0]["unread"], 1)
+        self.assertEqual(len(conversation(self.seller, self.buyer)["rows"]), 2)
 
 
 if __name__ == "__main__":

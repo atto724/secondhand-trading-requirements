@@ -172,6 +172,14 @@ class TradingApp:
         for label, factory in (("系统通知", MessagesPage), ("私信会话", InboxPage)):
             page = factory(notebook, self.account_id)
             notebook.add(page, text=label)
+
+        def refresh_section(_event=None):
+            selected = notebook.select()
+            if selected:
+                page = notebook.nametowidget(selected)
+                guarded(page, page.refresh)
+
+        notebook.bind("<<NotebookTabChanged>>", refresh_section)
         return notebook
 
     def admin_workspace(self, parent):

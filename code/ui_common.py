@@ -129,6 +129,23 @@ class DataTable(ttk.Frame):
         return int(selection[0])
 
 
+def enable_unread_dots(table):
+    """Use a real red image indicator without recoloring message text."""
+    table.unread_dot = tk.PhotoImage(master=table, width=10, height=10)
+    for y in range(10):
+        for x in range(10):
+            if (x - 4.5) ** 2 + (y - 4.5) ** 2 <= 20:
+                table.unread_dot.put("#ed4141", (x, y))
+    table.tree.configure(show=("tree", "headings"))
+    table.tree.column("#0", width=26, minwidth=26, stretch=False)
+    table.tree.heading("#0", text="")
+
+
+def set_unread_dot(table, key, unread):
+    """Removing the image leaves no 'read/unread' text or numeric badge."""
+    table.tree.item(str(key), image=table.unread_dot if unread else "")
+
+
 FIELD_LABELS = {
     "id": "编号",
     "name": "名称",

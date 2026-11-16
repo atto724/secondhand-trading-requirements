@@ -1,6 +1,7 @@
 """In-page seller storefront, voluntary profiles and private-message views."""
 
 import tkinter as tk
+import sqlite3
 from datetime import datetime, timedelta, timezone
 from tkinter import filedialog, ttk
 
@@ -8,13 +9,25 @@ from catalog import search_products
 from community import (
     conversation,
     inbox,
+    latest_read_message,
     seller_profile,
     send_direct_message,
     update_avatar,
     update_profile,
 )
 from core import price
-from ui_common import ACCENT, BG, INK, PAPER, DataTable, avatar_photo, guarded
+from operations import mark_all_messages_read
+from ui_common import (
+    ACCENT,
+    BG,
+    INK,
+    PAPER,
+    DataTable,
+    avatar_photo,
+    guarded,
+    enable_unread_dots,
+    set_unread_dot,
+)
 
 
 def local_time(value):
@@ -42,6 +55,7 @@ class BubbleHistory(ttk.Frame):
         self.window = self.canvas.create_window(0, 0, window=self.content, anchor="nw")
         self.messages = []
         self.bubbles = {}
+        self.receipt = None
         self.content.bind("<Configure>", self.update_region)
         self.canvas.bind("<Configure>", self.resize)
         self.canvas.bind("<MouseWheel>", self.wheel)
@@ -61,6 +75,21 @@ class BubbleHistory(ttk.Frame):
         self.canvas.yview_scroll(-int(event.delta / 120), "units")
         return "break"
 
+    def show_receipt(self, message_id):
+        """Show 'read' only beneath the latest outgoing bubble; otherwise stay blank."""
+        if self.receipt is not None and self.receipt.winfo_exists():
+            self.receipt.destroy()
+        self.receipt = None
+        if message_id in self.bubbles:
+            self.receipt = tk.Label(
+                self.bubbles[message_id].master,
+                text="已读",
+                bg="#ededed",
+                fg="#888888",
+                font=("Microsoft YaHei", 8),
+            )
+            self.receipt.pack(anchor="e", pady=(3, 0))
+
     def render(self, rows, actor, peer_name, avatars, older=False):
         """Show actual persisted messages and keep the reading position on older loads."""
         old_height = max(1, self.content.winfo_height())
@@ -73,6 +102,7 @@ class BubbleHistory(ttk.Frame):
         for widget in self.content.winfo_children():
             widget.destroy()
         self.bubbles.clear()
+        self.receipt = None
         if not self.messages:
             tk.Label(
                 self.content, text="暂无消息，向卖家打个招呼吧", bg="#ededed", fg="#888888"
@@ -131,8 +161,9 @@ class BubbleHistory(ttk.Frame):
 class ChatPanel(ttk.Frame):
     """Read and send one participant-scoped conversation, with explicit refresh."""
 
-    def __init__(self, parent, actor, peer):
+    def __init__(self, parent, actor, peer, on_read=None):
         super().__init__(parent, padding=12)
+        self.on_read = on_read
         self.actor, self.peer, self.before = actor, peer, None
         toolbar = ttk.Frame(self)
         toolbar.pack(fill="x", pady=(0, 8))
@@ -166,17 +197,36 @@ class ChatPanel(ttk.Frame):
         self.send_button.pack(anchor="e", pady=8)
         self.history.pack(fill="both", expand=True)
         self.refresh()
+        self.receipt_timer = self.after(2000, self.poll_receipt)
+        self.bind("<Destroy>", self.stop_poll)
+
+    def stop_poll(self, event):
+        """Release the page-local timer when navigating away."""
+        if event.widget == self and self.receipt_timer is not None:
+            self.after_cancel(self.receipt_timer)
+            self.receipt_timer = None
+
+    def poll_receipt(self):
+        """Observe read receipts without marking unopened messages read."""
+        try:
+            self.history.show_receipt(latest_read_message(self.actor, self.peer))
+        except (ValueError, sqlite3.Error):
+            return
+        self.receipt_timer = self.after(2000, self.poll_receipt)
 
     def refresh(self, older=False):
         """Load the newest or preceding 100 rows without discarding an unsent draft."""
         data = conversation(self.actor, self.peer, self.before if older else None)
         rows = data["rows"]
         self.history.render(rows, self.actor, data["peer_name"], data["avatars"], older)
+        self.history.show_receipt(latest_read_message(self.actor, self.peer))
         if rows:
             self.before = rows[0]["id"]
         self.older.configure(state="normal" if len(rows) == 100 else "disabled")
         self.send_button.configure(state="normal" if data["can_send"] else "disabled")
         self.status.configure(text="" if data["can_send"] else "对方账号不可用，历史消息仍可查看。")
+        if self.on_read:
+            self.on_read()
 
     def send_message(self):
         """Clear the draft only after successful persistence."""
@@ -228,15 +278,18 @@ class InboxPage(ttk.Frame):
         ttk.Button(self, text="刷新会话", command=lambda: guarded(self, self.refresh)).pack(
             anchor="w", pady=6
         )
+        ttk.Button(self, text="全部已读", command=lambda: guarded(self, self.read_all)).pack(
+            anchor="w", pady=6
+        )
         self.table = DataTable(
             self,
             [
                 ("name", "联系人", 160),
-                ("unread", "未读", 60),
                 ("content", "最近消息", 400),
                 ("time", "时间", 150),
             ],
         )
+        enable_unread_dots(self.table)
         self.table.pack(fill="x")
         self.table.tree.configure(height=4)
         self.table.tree.bind("<<TreeviewSelect>>", lambda event: guarded(self, self.open_chat))
@@ -246,31 +299,46 @@ class InboxPage(ttk.Frame):
 
     def refresh(self):
         """Refresh only the list; opening a conversation marks its incoming rows read."""
+        rows = inbox(self.actor)
         self.table.fill(
             [
                 (
                     row["peer_id"],
                     (
                         row["username"],
-                        row["unread"],
                         row["content"][:60],
                         local_time(row["created_at"]),
                     ),
                 )
-                for row in inbox(self.actor)
+                for row in rows
             ]
         )
+
+        for row in rows:
+            set_unread_dot(self.table, row["peer_id"], row["unread"] > 0)
+
+    def read_all(self):
+        """Explicitly clear all incoming dots, without pretending to open each chat."""
+        mark_all_messages_read(self.actor)
+        self.refresh()
+
+    def update_dots(self):
+        """Keep older unloaded unread messages represented until read or cleared."""
+        for row in inbox(self.actor):
+            if self.table.tree.exists(str(row["peer_id"])):
+                set_unread_dot(self.table, row["peer_id"], row["unread"] > 0)
 
     def open_chat(self):
         """Never supply an unrelated sender/recipient pair from UI state."""
         if not self.table.tree.selection():
             return
         peer = self.table.selected()
-        panel = ChatPanel(self.slot, self.actor, peer)
+        panel = ChatPanel(self.slot, self.actor, peer, on_read=self.update_dots)
         for widget in self.slot.winfo_children():
             if widget != panel:
                 widget.destroy()
         panel.pack(fill="both", expand=True)
+        self.update_dots()
 
 
 class SellerPage(tk.Frame):

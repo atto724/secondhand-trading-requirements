@@ -87,3 +87,7 @@ ChatPanel采用BubbleHistory画布及实际子Frame显示消息，移除原Text�
 D-018生效：ReservationsPage上方状态下拉分类显示各类数量，当前分类列表中选中一条才生成适用操作。reservation_actions集中描述买家/卖家操作矩阵、取消申请发起方向；trades.list_reservations返回当前商品状态及违规标记供显示判断。历史保留，原有事务授权不变。新增4项回归覆盖全部状态和两种身份、分类互斥、违规商品确认隐藏、取消双方按钮、刷新后移除过时操作。
 
 本轮最终验证：66项测试、Black32文件、配置后Pylint10/10与wheel/源码包构建通过；生产源码统计已更新verification/code-metrics.json。
+
+## 当前消息中心与回执
+
+D-019：MessagesPage使用页内详情，不再TextWindow；系统通知和InboxPage使用Treeview图片列红点。operations.mark_all_messages_read仅修改当前receiver_id的两类入站消息。community.latest_read_message只查询当前账号最新发送消息，BubbleHistory只对该条展示已读，ChatPanel局部定时刷新并在销毁时取消。对方未读时无提示，发送新消息回执隐藏。71项测试、Black32文件、Pylint10/10及构建通过。

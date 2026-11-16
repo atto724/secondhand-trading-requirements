@@ -12,6 +12,7 @@ from operations import (
     create_backup,
     export_audit,
     mark_read,
+    mark_all_messages_read,
     messages,
     platform_statistics,
     query_audit,
@@ -26,6 +27,8 @@ from ui_common import (
     MetricCards,
     TextWindow,
     display_value,
+    enable_unread_dots,
+    set_unread_dot,
     guarded,
 )
 
@@ -192,19 +195,28 @@ class MessagesPage(ttk.Frame):
         ttk.Button(toolbar, text="刷新", command=lambda: guarded(self, self.refresh)).pack(
             side="left"
         )
-        ttk.Button(toolbar, text="查看并标为已读", command=lambda: guarded(self, self.read)).pack(
+        ttk.Button(toolbar, text="查看消息", command=lambda: guarded(self, self.read)).pack(
             side="left", padx=8
         )
+        ttk.Button(toolbar, text="全部已读", command=lambda: guarded(self, self.read_all)).pack(
+            side="left", padx=8
+        )
+        detail = ttk.LabelFrame(self, text="消息详情", padding=12)
+        detail.pack(side="bottom", fill="x", pady=(10, 0))
+        self.message_body = tk.Text(
+            detail, height=6, wrap="word", relief="flat", bg=PAPER, state="disabled"
+        )
+        self.message_body.pack(fill="both", expand=True)
         self.table = DataTable(
             self,
             [
                 ("id", "编号", 60),
-                ("read", "阅读", 65),
                 ("type", "事件", 100),
                 ("content", "消息内容", 550),
                 ("date", "发送时间（北京时间）", 200),
             ],
         )
+        enable_unread_dots(self.table)
         self.table.pack(fill="both", expand=True)
         self.table.tree.bind("<Double-1>", lambda event: guarded(self, self.read))
         self.refresh()
@@ -218,7 +230,6 @@ class MessagesPage(ttk.Frame):
                 row["id"],
                 (
                     row["id"],
-                    "已读" if row["is_read"] else "未读",
                     display_value(row["event_type"]),
                     row["content"],
                     display_value(row["created_at"], "created_at"),
@@ -227,11 +238,28 @@ class MessagesPage(ttk.Frame):
             for row in rows
         )
 
+        for row in rows:
+            set_unread_dot(self.table, row["id"], not row["is_read"])
+
     def read(self):
-        """Display message linkage to real product/reservation records."""
+        """Read the selected notification in this page rather than a new window."""
         key = self.table.selected()
-        TextWindow(self, "站内消息", self.rows[key])
         mark_read(self.actor, key)
+        row = self.rows[key]
+        text = (
+            f"{display_value(row['event_type'])}  ·  {display_value(row['created_at'],'created_at')}\n\n"
+            f"{row['content']}\n\n商品编号：{row['product_id'] or '无'}    预约编号：{row['reservation_id'] or '无'}"
+        )
+        self.message_body.configure(state="normal")
+        self.message_body.delete("1.0", "end")
+        self.message_body.insert("1.0", text)
+        self.message_body.configure(state="disabled")
+        self.refresh()
+        self.table.tree.selection_set(str(key))
+
+    def read_all(self):
+        """Clear this account's red dots across both message-center sections."""
+        mark_all_messages_read(self.actor)
         self.refresh()
 
 

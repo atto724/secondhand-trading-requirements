@@ -37,6 +37,16 @@ def mark_read(actor, message_id):
             raise ValueError("消息不存在或无权操作。")
 
 
+def mark_all_messages_read(actor):
+    """Mark only this account's incoming notifications and private messages read."""
+    with transaction() as connection:
+        active(connection, actor)
+        for table in ("messages", "direct_messages"):
+            connection.execute(
+                f"UPDATE {table} SET is_read=1 WHERE receiver_id=? AND is_read=0", (actor,)
+            )
+
+
 def date_range(start, end):
     """Interpret inclusive local dates as a half-open UTC interval."""
     local = timezone(timedelta(hours=8))

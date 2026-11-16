@@ -11,6 +11,9 @@ from tempfile import TemporaryDirectory
 import database
 from demo import demo_accounts, seed_demo
 from market_ui import CatalogPage, ProductDetail
+from admin_ui import MessagesPage
+from community import conversation
+from operations import mark_all_messages_read
 from seller_ui import ChatPage, ChatPanel, SellerPage, InboxPage
 from community import send_direct_message, inbox, seller_profile
 from unittest.mock import patch
@@ -221,6 +224,54 @@ class DetailPageTests(unittest.TestCase):
         self.assertTrue(chat.chat.history.bubbles)
         chat.destroy()
         self.assertTrue(detail.winfo_exists())
+
+    def test_system_notification_opens_inline_and_dot_disappears(self):
+        with closing(database.connect_database()) as connection:
+            with connection:
+                key = connection.execute(
+                    "INSERT INTO messages(receiver_id,event_type,content,created_at) VALUES(?,'test','应在页面内显示的消息','2026-11-16T00:00:00Z')",
+                    (self.actor,),
+                ).lastrowid
+        page = MessagesPage(self.page, self.actor)
+        self.assertTrue(page.table.tree.item(str(key), "image"))
+        page.table.tree.selection_set(str(key))
+        with patch("admin_ui.TextWindow", side_effect=AssertionError("不能弹新窗口")):
+            page.read()
+        self.assertIn("应在页面内显示", page.message_body.get("1.0", "end"))
+        self.assertFalse(page.table.tree.item(str(key), "image"))
+        self.assertNotIn("read", page.table.tree.cget("columns"))
+
+    def test_private_inbox_dots_clear_after_read_or_mark_all(self):
+        seller = demo_accounts()["demo_seller"]
+        send_direct_message(seller, self.actor, "未读消息")
+        page = InboxPage(self.page, self.actor)
+        self.assertTrue(page.table.tree.item(str(seller), "image"))
+        page.table.tree.selection_set(str(seller))
+        page.open_chat()
+        self.assertFalse(page.table.tree.item(str(seller), "image"))
+        send_direct_message(seller, self.actor, "第二条未读")
+        page.refresh()
+        self.assertTrue(page.table.tree.item(str(seller), "image"))
+        page.read_all()
+        self.assertFalse(page.table.tree.item(str(seller), "image"))
+
+    def test_chat_receipt_only_appears_after_latest_outgoing_is_read(self):
+        seller = demo_accounts()["demo_seller"]
+        panel = ChatPanel(self.page, self.actor, seller)
+        panel.editor.insert("1.0", "第一条")
+        panel.send_message()
+        self.assertIsNone(panel.history.receipt)
+        conversation(seller, self.actor)
+        panel.refresh()
+        self.assertEqual(panel.history.receipt.cget("text"), "已读")
+        panel.editor.insert("1.0", "最新一条")
+        panel.send_message()
+        self.assertIsNone(panel.history.receipt)
+        mark_all_messages_read(seller)
+        panel.refresh()
+        self.assertEqual(
+            panel.history.receipt.master, next(reversed(panel.history.bubbles.values())).master
+        )
 
 
 if __name__ == "__main__":

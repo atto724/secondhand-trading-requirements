@@ -292,7 +292,14 @@ class ProductRows(ttk.Frame):
         self.select(key)
         guarded(self, function)
 
-    def fill(self, rows):
+    def fill(
+        self,
+        rows,
+        empty_title="暂无记录",
+        empty_description="可以调整筛选条件后再试。",
+        empty_action=None,
+        empty_action_label="",
+    ):
         """Replace cards while retaining a still-visible selection."""
         previous = self.current
         for widget in self.body.winfo_children():
@@ -392,9 +399,9 @@ class ProductRows(ttk.Frame):
                         ),
                     )
         if not self.cards:
-            tk.Label(
-                self.body, text="该分类暂无记录", bg=BG, fg=MUTED, font=("Microsoft YaHei", 12)
-            ).pack(pady=48)
+            empty_state(
+                self.body, empty_title, empty_description, empty_action, empty_action_label
+            ).pack(fill="x", pady=16)
         self.current = previous if previous in self.cards else None
         if self.current:
             self.select(self.current)
@@ -693,3 +700,37 @@ class TextWindow(Window):
                 ttk.Label(section, text=f"图片 {index + 1} 缺失或不可读取").grid(
                     row=index // 4, column=index % 4, padx=5, pady=5
                 )
+
+
+def navigate_to(widget, label):
+    """Select an existing application destination without creating duplicate pages."""
+    parent = widget
+    while parent is not None:
+        if isinstance(parent, ttk.Notebook):
+            for tab in parent.tabs():
+                if parent.tab(tab, "text") == label:
+                    parent.select(tab)
+                    return
+        parent = parent.master
+
+
+def empty_state(parent, title, description, action=None, action_label="", background=BG):
+    """Explain an empty result and offer one relevant next step."""
+    frame = tk.Frame(parent, bg=background, padx=24, pady=32)
+    tk.Label(frame, text=title, bg=background, fg=INK, font=("Microsoft YaHei", 15, "bold")).pack(
+        pady=(0, 10)
+    )
+    tk.Label(
+        frame,
+        text=description,
+        bg=background,
+        fg=MUTED,
+        font=("Microsoft YaHei", 10),
+        wraplength=540,
+        justify="center",
+    ).pack(pady=(0, 18))
+    if action:
+        ttk.Button(
+            frame, text=action_label, style="Accent.TButton", command=lambda: guarded(frame, action)
+        ).pack()
+    return frame

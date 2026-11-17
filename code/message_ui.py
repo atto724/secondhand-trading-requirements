@@ -8,7 +8,7 @@ from community import inbox
 from domain import PRODUCT_STATUS_LABELS
 from operations import mark_all_messages_read, mark_read, messages
 from seller_ui import ChatPage, local_time
-from ui_common import ACCENT, BG, INK, MUTED, PAPER, avatar_photo, guarded
+from ui_common import ACCENT, BG, INK, MUTED, PAPER, avatar_photo, guarded, empty_state, navigate_to
 
 
 def notification_group(event):
@@ -259,13 +259,14 @@ class MessageCenter(ttk.Frame):
         for entry in entries:
             self.draw_entry(entry)
         if not entries:
-            tk.Label(
+            empty_state(
                 self.body,
-                text="还没有消息，去商品详情联系卖家吧。",
-                bg=PAPER,
-                fg=MUTED,
-                font=("Microsoft YaHei", 12),
-            ).pack(pady=60)
+                "还没有消息",
+                "遇到喜欢的商品，可以在详情页私信卖家；交易进度通知也会显示在这里。",
+                lambda: navigate_to(self, "浏览商品"),
+                "去浏览商品",
+                PAPER,
+            ).pack(fill="x", pady=30)
         self.update_idletasks()
         self.canvas.yview_moveto(position)
 

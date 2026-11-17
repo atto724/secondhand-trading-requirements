@@ -23,6 +23,7 @@ from ui_common import (
     PAPER,
     MUTED,
     ProductRows,
+    navigate_to,
     display_value,
     guarded,
     stored_image,
@@ -501,7 +502,27 @@ class ReservationsPage(ttk.Frame):
                     "actions": actions,
                 }
             )
-        self.table.fill(cards)
+        self.table.fill(
+            cards,
+            "暂时没有预约" if not self.rows else "该分类暂无预约",
+            (
+                "浏览喜欢的商品后，可以在详情页发起预约。"
+                if self.scope == "buyer"
+                else "收到买家预约后，会在这里显示；也可以先管理自己的商品。"
+            ),
+            (
+                (lambda: self.choose_group("all"))
+                if self.rows
+                else (
+                    lambda: navigate_to(self, "浏览商品" if self.scope == "buyer" else "我的商品")
+                )
+            ),
+            (
+                "查看全部预约"
+                if self.rows
+                else ("去浏览商品" if self.scope == "buyer" else "管理我的商品")
+            ),
+        )
         if selected in self.table.keys():
             self.table.select(selected)
         self.show_actions()

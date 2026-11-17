@@ -121,6 +121,10 @@ def migrate(connection):
             "ALTER TABLE public_profiles ADD COLUMN avatar_path TEXT NOT NULL DEFAULT ''"
         )
         connection.commit()
+    message_columns = {row[1] for row in connection.execute("PRAGMA table_info(direct_messages)")}
+    if "product_snapshot" not in message_columns:
+        connection.execute("ALTER TABLE direct_messages ADD COLUMN product_snapshot TEXT")
+        connection.commit()
     migrate_categories(connection)
 
 

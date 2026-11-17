@@ -1,5 +1,6 @@
 """In-page seller storefront, voluntary profiles and private-message views."""
 
+import json
 import tkinter as tk
 import sqlite3
 from datetime import datetime, timedelta, timezone
@@ -12,6 +13,7 @@ from community import (
     latest_read_message,
     seller_profile,
     send_direct_message,
+    send_product_message,
     update_avatar,
     update_profile,
 )
@@ -27,6 +29,8 @@ from ui_common import (
     guarded,
     enable_unread_dots,
     set_unread_dot,
+    thumbnail,
+    stored_image,
 )
 
 
@@ -114,11 +118,62 @@ class RoundedBubble(tk.Canvas):
         return self.value if key == "text" else super().cget(key)
 
 
+class ProductMessageCard(tk.Frame):
+    """Keep the sent title/price/image visible even when current content changes."""
+
+    def __init__(self, parent, snapshot, mine, on_open):
+        color = OUTGOING if mine else PAPER
+        super().__init__(parent, bg=color, padx=12, pady=10, cursor="hand2", takefocus=True)
+        self.snapshot = snapshot
+        self.title = tk.Label(
+            self,
+            text=snapshot["title"],
+            bg=color,
+            fg=INK,
+            font=("Microsoft YaHei", 11, "bold"),
+            wraplength=260,
+            justify="left",
+        )
+        self.title.pack(anchor="w")
+        image = tk.Label(self, text="暂无商品图片", bg=color, fg="#8c969f")
+        if snapshot.get("image"):
+            try:
+                image.photo = thumbnail(self, stored_image(snapshot["image"]), (180, 110))
+                image.configure(image=image.photo, text="")
+            except (OSError, ValueError):
+                image.configure(text="图片暂不可用")
+        image.pack(anchor="w", pady=6)
+        tk.Label(self, text="¥ " + price(snapshot["price_cents"]), bg=color, fg=ACCENT).pack(
+            anchor="w"
+        )
+        tk.Label(
+            self,
+            text="发送时的商品信息 · 点击查看当前详情",
+            bg=color,
+            fg="#8c969f",
+            font=("Microsoft YaHei", 8),
+            wraplength=260,
+        ).pack(anchor="w", pady=(6, 0))
+        for widget in [self] + self.winfo_children():
+            widget.bind("<Button-1>", lambda event: on_open(snapshot["id"]) if on_open else None)
+        self.bind("<Return>", lambda event: on_open(snapshot["id"]) if on_open else None)
+
+    def configure(self, cnf=None, **options):
+        """Follow the same responsive sizing interface as text bubbles."""
+        width = options.pop("wraplength", None)
+        if width is not None:
+            for widget in self.winfo_children():
+                if isinstance(widget, tk.Label):
+                    widget.configure(wraplength=min(260, width))
+        return super().configure(cnf, **options)
+
+
 class BubbleHistory(ttk.Frame):
     """Scrollable, correctly parented message rows with left/right speech bubbles."""
 
     def __init__(self, parent):
         super().__init__(parent)
+        self.on_product = None
         self.canvas = tk.Canvas(
             self, background=CHAT_BG, highlightthickness=0, width=260, height=120
         )
@@ -186,7 +241,7 @@ class BubbleHistory(ttk.Frame):
         self.receipt = None
         if not self.messages:
             tk.Label(
-                self.content, text="暂无消息，向卖家打个招呼吧", bg=CHAT_BG, fg="#888888"
+                self.content, text="还没有聊天记录，向对方打个招呼吧", bg=CHAT_BG, fg="#888888"
             ).pack(pady=25)
         previous_time = None
         for row in self.messages:
@@ -215,12 +270,16 @@ class BubbleHistory(ttk.Frame):
                 tk.Label(
                     group, text=peer_name, bg=CHAT_BG, fg="#8c969f", font=("Microsoft YaHei", 9)
                 ).pack(anchor="w", pady=(0, 5))
-            bubble = RoundedBubble(
-                group,
-                row["content"],
-                mine,
-                max(80, int(min(self.canvas.winfo_width(), 880) * 0.68) - 80),
-            )
+            if row.get("product_snapshot"):
+                snapshot = json.loads(row["product_snapshot"])
+                bubble = ProductMessageCard(group, snapshot, mine, self.on_product)
+            else:
+                bubble = RoundedBubble(
+                    group,
+                    row["content"],
+                    mine,
+                    max(80, int(min(self.canvas.winfo_width(), 880) * 0.68) - 80),
+                )
             bubble.pack(anchor="e" if mine else "w")
             self.bubbles[row["id"]] = bubble
             for widget in (avatar, group, line, bubble):
@@ -382,7 +441,14 @@ class ChatPage(tk.Frame):
     """A dedicated in-page conversation, independent of the seller storefront."""
 
     def __init__(
-        self, parent, actor, peer, product_title="", back_label="← 返回商品详情", on_back=None
+        self,
+        parent,
+        actor,
+        peer,
+        product_title="",
+        back_label="← 返回商品详情",
+        on_back=None,
+        product_id=None,
     ):
         # Validate before mounting the overlay; ChatPanel rechecks participant access.
         data = conversation(actor, peer)
@@ -433,9 +499,33 @@ class ChatPage(tk.Frame):
         tools.pack(side="right")
         tk.Frame(self, height=1, bg="#e8edf1").pack(fill="x")
         self.chat = ChatPanel(self, actor, peer, tools_parent=tools)
+        self.chat.history.on_product = self.open_product_card
+        self.chat.refresh()
+        if product_id is not None:
+            self.product_button = tk.Button(
+                header,
+                text="发送此商品",
+                bg=OUTGOING,
+                fg=ACCENT,
+                relief="flat",
+                command=lambda: guarded(self, lambda: self.send_product(actor, peer, product_id)),
+            )
+            self.product_button.pack(side="right", padx=10)
         self.chat.pack(fill="both", expand=True)
         self.chat.editor.focus_set()
         self.bind("<Escape>", lambda event: self.go_back())
+
+    def send_product(self, actor, peer, product_id):
+        """Persist a card without consuming any unsent text draft."""
+        send_product_message(actor, peer, product_id)
+        self.chat.refresh()
+
+    def open_product_card(self, product_id):
+        """Resolve current visibility again; never expose private content from a snapshot."""
+        # Deferred import avoids the market/storefront module dependency cycle.
+        from market_ui import ProductDetail  # pylint: disable=import-outside-toplevel,cyclic-import
+
+        guarded(self, lambda: ProductDetail(self, self.chat.actor, product_id))
 
     def go_back(self):
         """Return to the caller and refresh its unread indicators."""

@@ -58,6 +58,11 @@ test_money_is_shown_in_yuan (test_presentation.PresentationTests.test_money_is_s
 test_password_material_is_not_displayed (test_presentation.PresentationTests.test_password_material_is_not_displayed) ... ok
 test_roles_and_state_are_localized (test_presentation.PresentationTests.test_roles_and_state_are_localized) ... ok
 test_utc_timestamp_crosses_into_next_local_date (test_presentation.PresentationTests.test_utc_timestamp_crosses_into_next_local_date) ... ok
+test_empty_state_actions_restore_filters_and_offer_navigation (test_product_messages.ProductMessageTests.test_empty_state_actions_restore_filters_and_offer_navigation) ... ok
+test_explicit_send_card_render_click_and_text_draft (test_product_messages.ProductMessageTests.test_explicit_send_card_render_click_and_text_draft) ... ok
+test_migration_preserves_plain_text_and_is_repeatable (test_product_messages.ProductMessageTests.test_migration_preserves_plain_text_and_is_repeatable) ... ok
+test_reject_wrong_seller_private_product_and_disabled_sender (test_product_messages.ProductMessageTests.test_reject_wrong_seller_private_product_and_disabled_sender) ... ok
+test_snapshot_survives_product_change_and_is_participant_scoped (test_product_messages.ProductMessageTests.test_snapshot_survives_product_change_and_is_participant_scoped) ... ok
 test_categories_partition_all_states_and_blocked_product_hides_confirmation (test_reservation_ui.ReservationActionTests.test_categories_partition_all_states_and_blocked_product_hides_confirmation) ... ok
 test_each_state_has_only_meaningful_buyer_and_seller_actions (test_reservation_ui.ReservationActionTests.test_each_state_has_only_meaningful_buyer_and_seller_actions) ... ok
 test_card_uses_booking_snapshot_and_actions_target_the_clicked_record (test_reservation_ui.ReservationPageTests.test_card_uses_booking_snapshot_and_actions_target_the_clicked_record) ... ok
@@ -96,11 +101,11 @@ test_waiting_blocks_edit_and_delist (test_workflows.WorkflowTests.test_waiting_b
 test_zero_cohort_statistics_and_backup_restore (test_workflows.WorkflowTests.test_zero_cohort_statistics_and_backup_restore) ... ok
 
 ----------------------------------------------------------------------
-Ran 91 tests in 156.071s
+Ran 96 tests in 171.672s
 
 OK
 ͼƬ�����ݻ���handbag����ǰ״̬����ЧԤԼ���ƣ�
-Black formatting: 34 files passed
+Black formatting: 35 files passed
 
 ------------------------------------
 Your code has been rated at 10.00/10
@@ -203,6 +208,7 @@ copying tests\test_community.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_detail_ui.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_gallery.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_presentation.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_product_messages.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_reservation_ui.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_workflows.py -> secondhand_trading_desktop-0.3.0\tests
 Writing secondhand_trading_desktop-0.3.0\setup.cfg
@@ -359,7 +365,7 @@ running install_egg_info
 Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
 running install_scripts
 creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
-creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-bs99ifnw\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-ldzp27by\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
 adding 'accounts.py'
 adding 'admin_ui.py'
 adding 'benchmark.py'

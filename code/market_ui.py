@@ -27,6 +27,7 @@ from ui_common import (
     guarded,
     stored_image,
     thumbnail,
+    empty_state,
 )
 
 
@@ -51,6 +52,7 @@ class ProductDetail(tk.Frame):
                 "MyProductsPage": "← 返回我的商品",
                 "SellerPage": "← 返回卖家主页",
                 "ReviewPage": "← 返回审核列表",
+                "ChatPage": "← 返回对话",
             }.get(type(parent).__name__, "← 返回商品列表"),
             command=self.destroy,
             bg=BG,
@@ -184,7 +186,10 @@ class ProductDetail(tk.Frame):
                 text="私信卖家 / 咨询商品",
                 style="Accent.TButton",
                 command=lambda: guarded(
-                    self, lambda: ChatPage(self, self.actor, item["seller_id"], item["title"])
+                    self,
+                    lambda: ChatPage(
+                        self, self.actor, item["seller_id"], item["title"], product_id=item["id"]
+                    ),
                 ),
             ).pack(anchor="w", pady=8)
         label("付款和交付在线下协商，平台记录预约及交易结果。", fg="#80634f", wraplength=420)
@@ -317,6 +322,15 @@ class CatalogPage(ttk.Frame):
         ttk.Button(footer, text="下一页", command=lambda: self.turn(1)).pack(side="left")
         self.query()
 
+    def reset_filters(self):
+        """Return to the unfiltered first page."""
+        self.keyword.set("")
+        self.category.set("全部分类")
+        self.minimum.set("")
+        self.maximum.set("")
+        self.sort.set("最新发布")
+        self.query()
+
     def query(self):
         """Reset pagination when filters change."""
         self.page = 1
@@ -341,11 +355,13 @@ class CatalogPage(ttk.Frame):
         for column in range(4):
             self.cards.columnconfigure(column, weight=1, uniform="card")
         if not rows:
-            ttk.Label(
+            empty_state(
                 self.cards,
-                text="暂无符合条件的商品。可先创建草稿并由管理员审核发布。",
-                wraplength=700,
-            ).grid(row=0, column=0, columnspan=4, pady=60)
+                "暂时没有找到商品",
+                "试试更换关键词或放宽价格、分类条件。",
+                self.reset_filters,
+                "清除筛选，查看全部",
+            ).grid(row=0, column=0, columnspan=4, sticky="ew", pady=30)
         for index, item in enumerate(rows):
             card = tk.Frame(
                 self.cards,
@@ -502,7 +518,17 @@ class MyProductsPage(ttk.Frame):
                     "actions": actions,
                 }
             )
-        self.table.fill(cards)
+        self.table.fill(
+            cards,
+            "还没有发布商品" if not self.rows else "该分类暂无商品",
+            (
+                "填写商品信息、保存草稿，再提交审核。"
+                if not self.rows
+                else "其他状态下可能还有你的商品。"
+            ),
+            self.create if not self.rows else lambda: self.set_filter("all"),
+            "新建第一件商品" if not self.rows else "查看全部商品",
+        )
         self.count.configure(text=f"共 {len(cards)} 件商品")
 
     def create(self):

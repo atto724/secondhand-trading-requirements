@@ -5,7 +5,7 @@ from contextlib import closing
 import database
 from images import copy_image
 
-from core import active, audit, now, transaction
+from core import active, audit, now, transaction, product_row, json_text
 from database import connect_database
 
 
@@ -171,3 +171,33 @@ def inbox(actor):
                 (actor, actor, actor, actor),
             )
         ]
+
+
+def send_product_message(actor, receiver, product_id):
+    """Send a public seller-owned product snapshot only after an explicit action."""
+    if actor == receiver:
+        raise ValueError("不能给自己发送商品消息。")
+    with transaction() as connection:
+        active(connection, actor)
+        active(connection, receiver)
+        product = product_row(connection, product_id)
+        if product["seller_id"] != receiver:
+            raise ValueError("该商品不属于当前咨询的卖家。")
+        if product["status"] != "published" or product["blocked"]:
+            raise ValueError("商品当前不可咨询，请刷新商品详情。")
+        image = connection.execute(
+            "SELECT file_path FROM product_images WHERE product_id=? ORDER BY display_order LIMIT 1",
+            (product_id,),
+        ).fetchone()
+        snapshot = {
+            "id": product_id,
+            "title": product["title"],
+            "price_cents": product["price_cents"],
+            "image": image[0] if image else None,
+        }
+        cursor = connection.execute(
+            "INSERT INTO direct_messages(sender_id,receiver_id,content,created_at,product_snapshot) VALUES(?,?,?,?,?)",
+            (actor, receiver, "[商品] " + product["title"], now(), json_text(snapshot)),
+        )
+        audit(connection, actor, "send_product_message", "direct_message", cursor.lastrowid)
+        return cursor.lastrowid

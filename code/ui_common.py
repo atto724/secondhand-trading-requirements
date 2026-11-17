@@ -9,7 +9,7 @@ from pathlib import Path
 
 from tkinter import messagebox, ttk
 
-from PIL import Image, ImageDraw, ImageOps, ImageTk
+from ui_runtime import cached_photo, install_scrolling
 
 import database
 import demo_assets
@@ -23,6 +23,7 @@ MUTED = "#80634f"
 
 def configure_style(root):
     """Apply the warm palette from the experiment-two UI prototypes."""
+    install_scrolling(root)
     root.configure(bg=BG)
     style = ttk.Style(root)
     style.theme_use("clam")
@@ -54,12 +55,7 @@ def guarded(parent, function):
 
 def thumbnail(parent, path, size=(170, 150)):
     """Return a correctly oriented thumbnail while keeping originals unchanged."""
-    with Image.open(path) as source:
-        picture = ImageOps.exif_transpose(source).convert("RGB")
-        picture.thumbnail(size)
-        canvas = Image.new("RGB", size, "#f3ece3")
-        canvas.paste(picture, ((size[0] - picture.width) // 2, (size[1] - picture.height) // 2))
-        return ImageTk.PhotoImage(canvas, master=parent)
+    return cached_photo(parent, path, size)
 
 
 def stored_image(relative):
@@ -84,16 +80,7 @@ def avatar_photo(parent, account_id, relative="", size=(56, 56), circular=False)
         try:
             if not circular:
                 return thumbnail(parent, path, size)
-            with Image.open(path) as source:
-                picture = ImageOps.fit(
-                    ImageOps.exif_transpose(source).convert("RGBA"),
-                    size,
-                    method=Image.Resampling.LANCZOS,
-                )
-            mask = Image.new("L", (size[0] * 4, size[1] * 4), 0)
-            ImageDraw.Draw(mask).ellipse((0, 0, mask.width - 1, mask.height - 1), fill=255)
-            picture.putalpha(mask.resize(size, Image.Resampling.LANCZOS))
-            return ImageTk.PhotoImage(picture, master=parent)
+            return cached_photo(parent, path, size, circular=True)
         except (OSError, ValueError):
             continue
     raise ValueError("头像资源无法读取。")
@@ -238,6 +225,7 @@ class ProductRows(ttk.Frame):
         self.on_open = on_open
         self.current = None
         self.cards = {}
+        self.rendered_rows = None
         self.canvas = tk.Canvas(self, bg=BG, highlightthickness=0)
         scrollbar = ttk.Scrollbar(self, command=self.canvas.yview)
         scrollbar.pack(side="right", fill="y")
@@ -301,6 +289,10 @@ class ProductRows(ttk.Frame):
         empty_action_label="",
     ):
         """Replace cards while retaining a still-visible selection."""
+        rows = list(rows)
+        if rows and rows == getattr(self, "rendered_rows", None):
+            return
+        self.rendered_rows = rows
         previous = self.current
         for widget in self.body.winfo_children():
             widget.destroy()

@@ -75,6 +75,13 @@ test_combined_trading_cards_keep_distinct_progress_and_actions (test_reservation
 test_group_selection_and_cancellation_direction_control_visible_buttons (test_reservation_ui.ReservationPageTests.test_group_selection_and_cancellation_direction_control_visible_buttons) ... ok
 test_issues_sort_actionable_requests_first_and_default_all_without_pending (test_reservation_ui.ReservationPageTests.test_issues_sort_actionable_requests_first_and_default_all_without_pending) ... ok
 test_refresh_removes_changed_record_and_stale_actions_without_resetting_category (test_reservation_ui.ReservationPageTests.test_refresh_removes_changed_record_and_stale_actions_without_resetting_category) ... ok
+test_async_login_ignores_duplicates_and_stale_session_result (test_ui_runtime.RuntimeTests.test_async_login_ignores_duplicates_and_stale_session_result) ... ok
+test_background_work_keeps_ui_alive_and_delivers_on_main_thread (test_ui_runtime.RuntimeTests.test_background_work_keeps_ui_alive_and_delivers_on_main_thread) ... ok
+test_image_cache_reuses_pixels_invalidates_changes_and_is_bounded (test_ui_runtime.RuntimeTests.test_image_cache_reuses_pixels_invalidates_changes_and_is_bounded) ... ok
+test_maintenance_uses_one_background_job (test_ui_runtime.RuntimeTests.test_maintenance_uses_one_background_job) ... ok
+test_touchpad_over_product_image_and_button_scrolls_only_its_canvas (test_ui_runtime.RuntimeTests.test_touchpad_over_product_image_and_button_scrolls_only_its_canvas) ... ok
+test_unchanged_card_refresh_keeps_existing_widgets (test_ui_runtime.RuntimeTests.test_unchanged_card_refresh_keeps_existing_widgets) ... ok
+test_wheel_coalesces_and_preserves_native_editor_scrolling (test_ui_runtime.RuntimeTests.test_wheel_coalesces_and_preserves_native_editor_scrolling) ... ok
 test_admin_permissions_rechecked (test_workflows.WorkflowTests.test_admin_permissions_rechecked) ... ok
 test_audit_failure_and_export_are_recorded (test_workflows.WorkflowTests.test_audit_failure_and_export_are_recorded) ... ok
 test_bilateral_cancel_restores_publication (test_workflows.WorkflowTests.test_bilateral_cancel_restores_publication) ... ok
@@ -106,30 +113,11 @@ test_waiting_blocks_edit_and_delist (test_workflows.WorkflowTests.test_waiting_b
 test_zero_cohort_statistics_and_backup_restore (test_workflows.WorkflowTests.test_zero_cohort_statistics_and_backup_restore) ... ok
 
 ----------------------------------------------------------------------
-Ran 101 tests in 630.548s
+Ran 108 tests in 198.126s
 
 OK
 ͼƬ�����ݻ���handbag����ǰ״̬����ЧԤԼ���ƣ�
-Black formatting: 36 files passed
-************* Module main
-main.py:23:0: C0412: Imports from package ui_common are not grouped (ungrouped-imports)
-
-------------------------------------
-Your code has been rated at 10.00/10
-
-
---- Final focused regression, corrected style and rebuilt packages ---
-test_admin_subpages_preserve_inputs_and_revoke_clears_cache (test_page_state.PageStateTests.test_admin_subpages_preserve_inputs_and_revoke_clears_cache) ... ok
-test_chat_draft_survives_tabs_back_and_isolated_peers (test_page_state.PageStateTests.test_chat_draft_survives_tabs_back_and_isolated_peers) ... ok
-test_lists_refresh_live_data_without_resetting_filter (test_page_state.PageStateTests.test_lists_refresh_live_data_without_resetting_filter) ... ok
-test_logout_switch_and_disabled_account_clear_drafts_and_pages (test_page_state.PageStateTests.test_logout_switch_and_disabled_account_clear_drafts_and_pages) ... ok
-test_search_pagination_overlay_and_scroll_survive_navigation (test_page_state.PageStateTests.test_search_pagination_overlay_and_scroll_survive_navigation) ... ok
-
-----------------------------------------------------------------------
-Ran 5 tests in 67.759s
-
-OK
-Black formatting: 36 files passed
+Black formatting: 38 files passed
 
 ------------------------------------
 Your code has been rated at 10.00/10
@@ -187,6 +175,7 @@ copying seller_ui.py -> secondhand_trading_desktop-0.3.0
 copying trades.py -> secondhand_trading_desktop-0.3.0
 copying trades_ui.py -> secondhand_trading_desktop-0.3.0
 copying ui_common.py -> secondhand_trading_desktop-0.3.0
+copying ui_runtime.py -> secondhand_trading_desktop-0.3.0
 copying demo_assets\README.md -> secondhand_trading_desktop-0.3.0\demo_assets
 copying demo_assets\__init__.py -> secondhand_trading_desktop-0.3.0\demo_assets
 copying demo_assets\avatar_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
@@ -235,6 +224,7 @@ copying tests\test_page_state.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_presentation.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_product_messages.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_reservation_ui.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_ui_runtime.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_workflows.py -> secondhand_trading_desktop-0.3.0\tests
 Writing secondhand_trading_desktop-0.3.0\setup.cfg
 Creating tar archive
@@ -279,6 +269,7 @@ copying security.py -> build\lib
 copying trades.py -> build\lib
 copying trades_ui.py -> build\lib
 copying ui_common.py -> build\lib
+copying ui_runtime.py -> build\lib
 copying benchmark.py -> build\lib
 creating build\lib\demo_assets
 copying demo_assets\__init__.py -> build\lib\demo_assets
@@ -386,11 +377,12 @@ copying build\lib\seller_ui.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\trades.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\trades_ui.py -> build\bdist.win-amd64\wheel\.
 copying build\lib\ui_common.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\ui_runtime.py -> build\bdist.win-amd64\wheel\.
 running install_egg_info
 Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
 running install_scripts
 creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
-creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-d9zk1l2i\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-mciphoke\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
 adding 'accounts.py'
 adding 'admin_ui.py'
 adding 'benchmark.py'
@@ -417,6 +409,355 @@ adding 'seller_ui.py'
 adding 'trades.py'
 adding 'trades_ui.py'
 adding 'ui_common.py'
+adding 'ui_runtime.py'
+adding 'demo_assets/README.md'
+adding 'demo_assets/__init__.py'
+adding 'demo_assets/avatar_1.jpg'
+adding 'demo_assets/avatar_2.jpg'
+adding 'demo_assets/avatar_3.jpg'
+adding 'demo_assets/avatar_4.jpg'
+adding 'demo_assets/backpack.jpg'
+adding 'demo_assets/backpack_detail_1.jpg'
+adding 'demo_assets/badminton.jpg'
+adding 'demo_assets/bear_light.jpg'
+adding 'demo_assets/bear_light_detail_1.jpg'
+adding 'demo_assets/bear_light_detail_2.jpg'
+adding 'demo_assets/board_game.jpg'
+adding 'demo_assets/board_game_detail_1.jpg'
+adding 'demo_assets/chair.jpg'
+adding 'demo_assets/desk_lamp.jpg'
+adding 'demo_assets/foundation.jpg'
+adding 'demo_assets/foundation_detail_1.jpg'
+adding 'demo_assets/foundation_detail_2.jpg'
+adding 'demo_assets/handbag.jpg'
+adding 'demo_assets/handbag_detail_1.jpg'
+adding 'demo_assets/handbag_detail_2.jpg'
+adding 'demo_assets/jacket.jpg'
+adding 'demo_assets/laptop.jpg'
+adding 'demo_assets/laptop_detail_1.jpg'
+adding 'demo_assets/laptop_detail_2.jpg'
+adding 'demo_assets/pet_carrier.jpg'
+adding 'demo_assets/scooter.jpg'
+adding 'demo_assets/shoes.jpg'
+adding 'demo_assets/stroller.jpg'
+adding 'demo_assets/stroller_detail_1.jpg'
+adding 'demo_assets/stroller_detail_2.jpg'
+adding 'demo_assets/textbook.jpg'
+adding 'secondhand_trading_desktop-0.3.0.dist-info/METADATA'
+adding 'secondhand_trading_desktop-0.3.0.dist-info/WHEEL'
+adding 'secondhand_trading_desktop-0.3.0.dist-info/entry_points.txt'
+adding 'secondhand_trading_desktop-0.3.0.dist-info/top_level.txt'
+adding 'secondhand_trading_desktop-0.3.0.dist-info/RECORD'
+removing build\bdist.win-amd64\wheel
+Successfully built secondhand_trading_desktop-0.3.0.tar.gz and secondhand_trading_desktop-0.3.0-py3-none-any.whl
+
+--- Final hover-routing regression and rebuilt packages ---
+test_async_login_ignores_duplicates_and_stale_session_result (test_ui_runtime.RuntimeTests.test_async_login_ignores_duplicates_and_stale_session_result) ... ok
+test_background_work_keeps_ui_alive_and_delivers_on_main_thread (test_ui_runtime.RuntimeTests.test_background_work_keeps_ui_alive_and_delivers_on_main_thread) ... ok
+test_image_cache_reuses_pixels_invalidates_changes_and_is_bounded (test_ui_runtime.RuntimeTests.test_image_cache_reuses_pixels_invalidates_changes_and_is_bounded) ... ok
+test_maintenance_uses_one_background_job (test_ui_runtime.RuntimeTests.test_maintenance_uses_one_background_job) ... ok
+test_touchpad_over_product_image_and_button_scrolls_only_its_canvas (test_ui_runtime.RuntimeTests.test_touchpad_over_product_image_and_button_scrolls_only_its_canvas) ... ok
+test_unchanged_card_refresh_keeps_existing_widgets (test_ui_runtime.RuntimeTests.test_unchanged_card_refresh_keeps_existing_widgets) ... ok
+test_wheel_coalesces_and_preserves_native_editor_scrolling (test_ui_runtime.RuntimeTests.test_wheel_coalesces_and_preserves_native_editor_scrolling) ... ok
+test_wheel_uses_hover_when_keyboard_focus_is_in_header (test_ui_runtime.RuntimeTests.test_wheel_uses_hover_when_keyboard_focus_is_in_header) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 28.663s
+
+OK
+Black formatting: 38 files passed
+
+------------------------------------
+Your code has been rated at 10.00/10
+
+* Getting build dependencies for sdist...
+running egg_info
+writing secondhand_trading_desktop.egg-info\PKG-INFO
+writing dependency_links to secondhand_trading_desktop.egg-info\dependency_links.txt
+writing entry points to secondhand_trading_desktop.egg-info\entry_points.txt
+writing requirements to secondhand_trading_desktop.egg-info\requires.txt
+writing top-level names to secondhand_trading_desktop.egg-info\top_level.txt
+reading manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+writing manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+* Building sdist...
+running sdist
+running egg_info
+writing secondhand_trading_desktop.egg-info\PKG-INFO
+writing dependency_links to secondhand_trading_desktop.egg-info\dependency_links.txt
+writing entry points to secondhand_trading_desktop.egg-info\entry_points.txt
+writing requirements to secondhand_trading_desktop.egg-info\requires.txt
+writing top-level names to secondhand_trading_desktop.egg-info\top_level.txt
+reading manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+writing manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+running check
+creating secondhand_trading_desktop-0.3.0
+creating secondhand_trading_desktop-0.3.0\demo_assets
+creating secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+creating secondhand_trading_desktop-0.3.0\tests
+copying files to secondhand_trading_desktop-0.3.0...
+copying README.md -> secondhand_trading_desktop-0.3.0
+copying accounts.py -> secondhand_trading_desktop-0.3.0
+copying admin_ui.py -> secondhand_trading_desktop-0.3.0
+copying benchmark.py -> secondhand_trading_desktop-0.3.0
+copying catalog.py -> secondhand_trading_desktop-0.3.0
+copying community.py -> secondhand_trading_desktop-0.3.0
+copying core.py -> secondhand_trading_desktop-0.3.0
+copying database.py -> secondhand_trading_desktop-0.3.0
+copying demo.py -> secondhand_trading_desktop-0.3.0
+copying domain.py -> secondhand_trading_desktop-0.3.0
+copying editor_ui.py -> secondhand_trading_desktop-0.3.0
+copying governance.py -> secondhand_trading_desktop-0.3.0
+copying images.py -> secondhand_trading_desktop-0.3.0
+copying main.py -> secondhand_trading_desktop-0.3.0
+copying manage.py -> secondhand_trading_desktop-0.3.0
+copying market_ui.py -> secondhand_trading_desktop-0.3.0
+copying message_ui.py -> secondhand_trading_desktop-0.3.0
+copying operations.py -> secondhand_trading_desktop-0.3.0
+copying products.py -> secondhand_trading_desktop-0.3.0
+copying products_ui.py -> secondhand_trading_desktop-0.3.0
+copying pyproject.toml -> secondhand_trading_desktop-0.3.0
+copying registration_ui.py -> secondhand_trading_desktop-0.3.0
+copying schema.py -> secondhand_trading_desktop-0.3.0
+copying security.py -> secondhand_trading_desktop-0.3.0
+copying seller_ui.py -> secondhand_trading_desktop-0.3.0
+copying trades.py -> secondhand_trading_desktop-0.3.0
+copying trades_ui.py -> secondhand_trading_desktop-0.3.0
+copying ui_common.py -> secondhand_trading_desktop-0.3.0
+copying ui_runtime.py -> secondhand_trading_desktop-0.3.0
+copying demo_assets\README.md -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\__init__.py -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\avatar_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\avatar_2.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\avatar_3.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\avatar_4.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\backpack.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\backpack_detail_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\badminton.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\bear_light.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\bear_light_detail_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\bear_light_detail_2.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\board_game.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\board_game_detail_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\chair.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\desk_lamp.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\foundation.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\foundation_detail_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\foundation_detail_2.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\handbag.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\handbag_detail_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\handbag_detail_2.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\jacket.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\laptop.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\laptop_detail_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\laptop_detail_2.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\pet_carrier.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\scooter.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\shoes.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\stroller.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\stroller_detail_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\stroller_detail_2.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\textbook.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying secondhand_trading_desktop.egg-info\PKG-INFO -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying secondhand_trading_desktop.egg-info\SOURCES.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying secondhand_trading_desktop.egg-info\dependency_links.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying secondhand_trading_desktop.egg-info\entry_points.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying secondhand_trading_desktop.egg-info\requires.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying secondhand_trading_desktop.egg-info\top_level.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying tests\test_accounts.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_admin_presentation.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_community.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_detail_ui.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_gallery.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_page_state.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_presentation.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_product_messages.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_reservation_ui.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_ui_runtime.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_workflows.py -> secondhand_trading_desktop-0.3.0\tests
+Writing secondhand_trading_desktop-0.3.0\setup.cfg
+Creating tar archive
+removing 'secondhand_trading_desktop-0.3.0' (and everything under it)
+* Building wheel from sdist
+* Getting build dependencies for wheel...
+running egg_info
+writing secondhand_trading_desktop.egg-info\PKG-INFO
+writing dependency_links to secondhand_trading_desktop.egg-info\dependency_links.txt
+writing entry points to secondhand_trading_desktop.egg-info\entry_points.txt
+writing requirements to secondhand_trading_desktop.egg-info\requires.txt
+writing top-level names to secondhand_trading_desktop.egg-info\top_level.txt
+reading manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+writing manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+* Building wheel...
+running bdist_wheel
+running build
+running build_py
+creating build\lib
+copying accounts.py -> build\lib
+copying admin_ui.py -> build\lib
+copying catalog.py -> build\lib
+copying community.py -> build\lib
+copying core.py -> build\lib
+copying database.py -> build\lib
+copying demo.py -> build\lib
+copying domain.py -> build\lib
+copying editor_ui.py -> build\lib
+copying governance.py -> build\lib
+copying images.py -> build\lib
+copying main.py -> build\lib
+copying manage.py -> build\lib
+copying market_ui.py -> build\lib
+copying message_ui.py -> build\lib
+copying operations.py -> build\lib
+copying products.py -> build\lib
+copying products_ui.py -> build\lib
+copying registration_ui.py -> build\lib
+copying schema.py -> build\lib
+copying seller_ui.py -> build\lib
+copying security.py -> build\lib
+copying trades.py -> build\lib
+copying trades_ui.py -> build\lib
+copying ui_common.py -> build\lib
+copying ui_runtime.py -> build\lib
+copying benchmark.py -> build\lib
+creating build\lib\demo_assets
+copying demo_assets\__init__.py -> build\lib\demo_assets
+running egg_info
+writing secondhand_trading_desktop.egg-info\PKG-INFO
+writing dependency_links to secondhand_trading_desktop.egg-info\dependency_links.txt
+writing entry points to secondhand_trading_desktop.egg-info\entry_points.txt
+writing requirements to secondhand_trading_desktop.egg-info\requires.txt
+writing top-level names to secondhand_trading_desktop.egg-info\top_level.txt
+reading manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+writing manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+copying demo_assets\README.md -> build\lib\demo_assets
+copying demo_assets\avatar_1.jpg -> build\lib\demo_assets
+copying demo_assets\avatar_2.jpg -> build\lib\demo_assets
+copying demo_assets\avatar_3.jpg -> build\lib\demo_assets
+copying demo_assets\avatar_4.jpg -> build\lib\demo_assets
+copying demo_assets\backpack.jpg -> build\lib\demo_assets
+copying demo_assets\backpack_detail_1.jpg -> build\lib\demo_assets
+copying demo_assets\badminton.jpg -> build\lib\demo_assets
+copying demo_assets\bear_light.jpg -> build\lib\demo_assets
+copying demo_assets\bear_light_detail_1.jpg -> build\lib\demo_assets
+copying demo_assets\bear_light_detail_2.jpg -> build\lib\demo_assets
+copying demo_assets\board_game.jpg -> build\lib\demo_assets
+copying demo_assets\board_game_detail_1.jpg -> build\lib\demo_assets
+copying demo_assets\chair.jpg -> build\lib\demo_assets
+copying demo_assets\desk_lamp.jpg -> build\lib\demo_assets
+copying demo_assets\foundation.jpg -> build\lib\demo_assets
+copying demo_assets\foundation_detail_1.jpg -> build\lib\demo_assets
+copying demo_assets\foundation_detail_2.jpg -> build\lib\demo_assets
+copying demo_assets\handbag.jpg -> build\lib\demo_assets
+copying demo_assets\handbag_detail_1.jpg -> build\lib\demo_assets
+copying demo_assets\handbag_detail_2.jpg -> build\lib\demo_assets
+copying demo_assets\jacket.jpg -> build\lib\demo_assets
+copying demo_assets\laptop.jpg -> build\lib\demo_assets
+copying demo_assets\laptop_detail_1.jpg -> build\lib\demo_assets
+copying demo_assets\laptop_detail_2.jpg -> build\lib\demo_assets
+copying demo_assets\pet_carrier.jpg -> build\lib\demo_assets
+copying demo_assets\scooter.jpg -> build\lib\demo_assets
+copying demo_assets\shoes.jpg -> build\lib\demo_assets
+copying demo_assets\stroller.jpg -> build\lib\demo_assets
+copying demo_assets\stroller_detail_1.jpg -> build\lib\demo_assets
+copying demo_assets\stroller_detail_2.jpg -> build\lib\demo_assets
+copying demo_assets\textbook.jpg -> build\lib\demo_assets
+installing to build\bdist.win-amd64\wheel
+running install
+running install_lib
+creating build\bdist.win-amd64\wheel
+copying build\lib\accounts.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\admin_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\benchmark.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\catalog.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\community.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\core.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\database.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\demo.py -> build\bdist.win-amd64\wheel\.
+creating build\bdist.win-amd64\wheel\demo_assets
+copying build\lib\demo_assets\avatar_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\avatar_2.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\avatar_3.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\avatar_4.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\backpack.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\backpack_detail_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\badminton.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\bear_light.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\bear_light_detail_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\bear_light_detail_2.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\board_game.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\board_game_detail_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\chair.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\desk_lamp.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\foundation.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\foundation_detail_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\foundation_detail_2.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\handbag.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\handbag_detail_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\handbag_detail_2.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\jacket.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\laptop.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\laptop_detail_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\laptop_detail_2.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\pet_carrier.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\README.md -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\scooter.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\shoes.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\stroller.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\stroller_detail_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\stroller_detail_2.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\textbook.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\__init__.py -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\domain.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\editor_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\governance.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\images.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\main.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\manage.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\market_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\message_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\operations.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\products.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\products_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\registration_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\schema.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\security.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\seller_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\trades.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\trades_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\ui_common.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\ui_runtime.py -> build\bdist.win-amd64\wheel\.
+running install_egg_info
+Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
+running install_scripts
+creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-hbbe703p\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+adding 'accounts.py'
+adding 'admin_ui.py'
+adding 'benchmark.py'
+adding 'catalog.py'
+adding 'community.py'
+adding 'core.py'
+adding 'database.py'
+adding 'demo.py'
+adding 'domain.py'
+adding 'editor_ui.py'
+adding 'governance.py'
+adding 'images.py'
+adding 'main.py'
+adding 'manage.py'
+adding 'market_ui.py'
+adding 'message_ui.py'
+adding 'operations.py'
+adding 'products.py'
+adding 'products_ui.py'
+adding 'registration_ui.py'
+adding 'schema.py'
+adding 'security.py'
+adding 'seller_ui.py'
+adding 'trades.py'
+adding 'trades_ui.py'
+adding 'ui_common.py'
+adding 'ui_runtime.py'
 adding 'demo_assets/README.md'
 adding 'demo_assets/__init__.py'
 adding 'demo_assets/avatar_1.jpg'

@@ -177,6 +177,7 @@ class MessageCenter(ttk.Frame):
         super().__init__(parent, padding=20)
         self.actor = actor
         self.entries = {}
+        self.rendered_entries = None
         self.rows = {}
         self.preview_font = tkfont.Font(family="Microsoft YaHei", size=11)
         header = ttk.Frame(self)
@@ -256,6 +257,9 @@ class MessageCenter(ttk.Frame):
         entries.sort(
             key=lambda row: datetime.fromisoformat(row["time"].replace("Z", "+00:00")), reverse=True
         )
+        if entries == getattr(self, "rendered_entries", None):
+            return
+        self.rendered_entries = entries
         self.entries = {row["key"]: row for row in entries}
         for widget in self.body.winfo_children():
             widget.destroy()

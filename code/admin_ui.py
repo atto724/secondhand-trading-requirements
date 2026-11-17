@@ -246,8 +246,11 @@ class AccountsPage(ttk.Frame):
     def refresh(self):
         """Remove privileged controls if this account lost administrator access."""
         try:
-            self.rows = {row["id"]: row for row in list_accounts(self.actor)}
+            rows = {row["id"]: row for row in list_accounts(self.actor)}
             self.notice.configure(text="")
+            if rows == self.rows and self.cards:
+                return
+            self.rows = rows
         except ValueError:
             self.rows = {}
             self.panel.close()

@@ -20,6 +20,7 @@ from trades import run_timeouts
 from trades_ui import ReservationsPage
 from ui_common import ACCENT, INK, PAPER, avatar_photo, configure_style, guarded, resume_view
 from community import seller_profile
+from ui_runtime import BackgroundJob, log_background_error
 
 
 class TradingApp:
@@ -28,6 +29,9 @@ class TradingApp:
     def __init__(self, root):
         self.root = root
         self.root.chat_drafts = {}
+        self.login_job = BackgroundJob(root)
+        self.maintenance_job = BackgroundJob(root)
+        self.session_generation = 0
         self.active_tab = None
         self.account_id = None
         self.profile = None
@@ -47,7 +51,7 @@ class TradingApp:
         self.container = ttk.Frame(root)
         self.container.pack(fill="both", expand=True)
         self.show_login()
-        root.after(1000, self.maintenance_tick)
+        root.after(30_000, self.maintenance_tick)
 
     def clear_page(self):
         """Dispose of old controls and their widget-specific key bindings."""
@@ -75,12 +79,13 @@ class TradingApp:
             self.entries.append(entry)
         self.entries[0].bind("<Return>", self.focus_password)
         self.entries[1].bind("<Return>", self.keyboard_login)
-        ttk.Button(
+        self.login_button = ttk.Button(
             frame,
             text="登录",
             style="Accent.TButton",
             command=lambda: guarded(self.root, self.login),
-        ).grid(row=4, column=0, columnspan=2, pady=14, sticky="ew")
+        )
+        self.login_button.grid(row=4, column=0, columnspan=2, pady=14, sticky="ew")
         ttk.Button(frame, text="注册普通账号", command=lambda: RegistrationWindow(self.root)).grid(
             row=5, column=0, columnspan=2, pady=6, sticky="ew"
         )
@@ -106,19 +111,45 @@ class TradingApp:
 
     def login(self):
         """Check missing fields before authenticating credentials."""
+        if self.login_job.busy:
+            return
         if not self.username.get().strip():
             self.entries[0].focus_set()
             raise ValueError("请先填写登录名。")
         if not self.password.get():
             self.entries[1].focus_set()
             raise ValueError("请填写密码。")
-        try:
-            actor = authenticate(self.username.get(), self.password.get())
+        username, password = self.username.get(), self.password.get()
+        generation = self.session_generation
+        self.password.set("")
+        self.login_button.configure(text="正在登录…", state="disabled")
+        self.login_hint.configure(text="正在校验账号，请稍候。")
+
+        def finish(actor):
+            if generation != self.session_generation:
+                return
             self.profile = account_profile(actor)
             self.account_id = actor
             self.show_home()
-        finally:
-            self.password.set("")
+
+        def failed(error):
+            if generation != self.session_generation:
+                return
+            self.login_button.configure(text="登录", state="normal")
+            self.login_hint.configure(text="请检查账号和密码后重试。")
+            messagebox.showerror("登录失败", str(error), parent=self.root)
+            self.entries[1].focus_set()
+
+        def complete(actor):
+            try:
+                finish(actor)
+            except Exception as error:
+                logging.exception("Login view failed")
+                self.account_id, self.profile = None, None
+                self.show_login()
+                failed(error)
+
+        self.login_job.run(lambda: authenticate(username, password), complete, failed)
 
     def show_home(self):
         """Expose ordinary navigation and a separate administrator workspace."""
@@ -377,7 +408,10 @@ class TradingApp:
         self.profile = None
         self.username.set("")
         self.password.set("")
+        self.session_generation += 1
         self.root.chat_drafts.clear()
+        if hasattr(self.root, "photo_cache"):
+            self.root.photo_cache.clear()
         self.root.destroy()
 
     def logout(self):
@@ -389,8 +423,11 @@ class TradingApp:
         self.profile = None
         self.username.set("")
         self.password.set("")
+        self.session_generation += 1
         self.show_login()
         self.root.chat_drafts.clear()
+        if hasattr(self.root, "photo_cache"):
+            self.root.photo_cache.clear()
         self.active_tab = None
         self.pages = {}
         self.nav_items = {}
@@ -400,10 +437,12 @@ class TradingApp:
 
     def maintenance_tick(self):
         """Check expiry and daily backup only while this desktop process is running."""
-        try:
+        actor = self.account_id
+
+        def work():
             run_timeouts()
-            if self.account_id and "admin" in account_profile(self.account_id)["roles"]:
-                runs = backup_status(self.account_id)
+            if actor and "admin" in account_profile(actor)["roles"]:
+                runs = backup_status(actor)
                 today = datetime.now(timezone(timedelta(hours=8))).date()
                 successful = [row for row in runs if row["result"] == "success"]
                 last = (
@@ -416,9 +455,9 @@ class TradingApp:
                     else None
                 )
                 if last != today:
-                    create_backup(self.account_id)
-        except Exception:
-            logging.exception("Background maintenance failed")
+                    create_backup(actor)
+
+        self.maintenance_job.run(work, lambda result: None, log_background_error)
         self.root.after(60_000, self.maintenance_tick)
 
 

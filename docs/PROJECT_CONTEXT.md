@@ -125,3 +125,7 @@ D-027最终验证：96项测试、Black35文件、Pylint10/10及构建通过。�
 2026-11-17 D-028：主/管理员二级导航缓存会话页面，列表通过on_resume/resume_view更新而不丢失表单与滚动；详情及聊天覆盖页保留。root.chat_drafts仅存内存中的(账号,联系人)草稿；退出/切换清除。导航检查有效账号及管理员权限，后台缓存可被撤销。最终验证见verification/page-state.txt。
 
 D-028验证：全量101项测试通过；最终增强的5项页面回归、Black36文件、Pylint10/10及安装包构建通过。首次导入风格失败与修正后的完整记录保留在verification/build.txt。
+
+2026-11-17 D-029：ui_runtime提供图片LRU缓存、按鼠标位置路由的高精度滚动及后台任务；登录和自动维护不在Tk线程做密码哈希/维护IO，显示层跳过未变化的数据重建。图片缓存/任务与会话退出处理兼容D-028。优化前后本机同脚本单次测量见verification/ui-performance-before.json和ui-performance-after.json；不等同于物理触控板或所有机器的响应保证。
+
+D-029验证：完整108项回归及最终8项专项回归通过，Black38文件、Pylint10/10和构建通过。新增按鼠标位置路由场景后重新构建；物理触控板手感待用户确认。详细方法及限制见verification/ui-performance.txt。

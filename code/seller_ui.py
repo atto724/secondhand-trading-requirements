@@ -184,6 +184,7 @@ class BubbleHistory(ttk.Frame):
         self.content = tk.Frame(self.canvas, bg=CHAT_BG)
         self.window = self.canvas.create_window(0, 0, window=self.content, anchor="nw")
         self.messages = []
+        self.render_signature = None
         self.bubbles = {}
         self.receipt = None
         self.content.bind("<Configure>", self.update_region)
@@ -228,6 +229,10 @@ class BubbleHistory(ttk.Frame):
 
     def render(self, rows, actor, peer_name, avatars, older=False):
         """Show actual persisted messages and keep the reading position on older loads."""
+        signature = (rows, actor, peer_name, avatars)
+        if not older and signature == getattr(self, "render_signature", None):
+            return
+        self.render_signature = signature if not older else None
         old_height = max(1, self.content.winfo_height())
         old_top = self.canvas.yview()[0] * old_height
         if older:

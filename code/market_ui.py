@@ -28,6 +28,7 @@ from ui_common import (
     stored_image,
     thumbnail,
     empty_state,
+    resume_view,
 )
 
 
@@ -537,11 +538,15 @@ class MyProductsPage(ttk.Frame):
 
     def create(self):
         """Open an empty create form."""
-        ProductEditor(self, self.actor, self.refresh)
+        ProductEditor(self, self.actor, self.editor_saved)
+
+    def editor_saved(self):
+        """Update saved content while retaining the list classification and viewport."""
+        resume_view(self)
 
     def edit(self):
         """Open a form carrying the current version for conflict checking."""
-        ProductEditor(self, self.actor, self.refresh, self.table.selected())
+        ProductEditor(self, self.actor, self.editor_saved, self.table.selected())
 
     def detail(self):
         """Inspect current content and review results."""

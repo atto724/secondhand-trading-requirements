@@ -9,18 +9,36 @@ from catalog import product_detail, save_product, submit_review
 from core import money, price
 from images import validate_image
 from products import list_categories
-from ui_common import Window, guarded, stored_image, thumbnail
+from ui_common import BG, guarded, stored_image, thumbnail
 
 
-class ProductEditor(Window):
+class ProductEditor(ttk.Frame):
     """Reuse one form for new products and version-checked edits."""
 
     def __init__(self, parent, actor, on_saved, product_id=None):
-        super().__init__(parent, "编辑商品" if product_id else "创建商品草稿", "1020x740")
+        original = product_detail(actor, product_id) if product_id else None
+        super().__init__(parent)
+        self.place(x=0, y=0, relwidth=1, relheight=1)
+        self.lift()
+        header = ttk.Frame(self, padding=(22, 12))
+        header.pack(fill="x")
+        ttk.Button(header, text="← 返回我的商品", command=self.close).pack(side="left")
+        ttk.Label(header, text="编辑商品" if product_id else "创建商品", style="Title.TLabel").pack(
+            side="left", padx=20
+        )
+        footer = ttk.Frame(self, padding=(22, 8))
+        footer.pack(side="bottom", fill="x")
+        content = ttk.Frame(self)
+        content.pack(fill="both", expand=True)
+        self.canvas = tk.Canvas(content, bg=BG, highlightthickness=0)
+        scrollbar = ttk.Scrollbar(content, orient="vertical", command=self.canvas.yview)
+        scrollbar.pack(side="right", fill="y")
+        self.canvas.configure(yscrollcommand=scrollbar.set)
+        self.canvas.pack(fill="both", expand=True)
         self.actor = actor
         self.on_saved = on_saved
         self.product_id = product_id
-        self.original = product_detail(actor, product_id) if product_id else None
+        self.original = original
         self.existing = list(self.original["images"]) if self.original else []
         self.sources = []
         self.photos = []
@@ -28,8 +46,14 @@ class ProductEditor(Window):
         self.variables = {}
         self.widgets = {}
         self.saving = False
-        body = ttk.Frame(self, padding=22)
-        body.pack(fill="both", expand=True)
+        body = ttk.Frame(self.canvas, padding=22)
+        window = self.canvas.create_window(0, 0, window=body, anchor="nw")
+        self.canvas.bind(
+            "<Configure>", lambda event: self.canvas.itemconfigure(window, width=event.width)
+        )
+        body.bind(
+            "<Configure>", lambda event: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
         body.columnconfigure(0, weight=3)
         body.columnconfigure(1, weight=2)
         body.rowconfigure(1, weight=1)
@@ -84,8 +108,6 @@ class ProductEditor(Window):
         self.preview = ttk.Label(self.image_area)
         self.preview.pack(pady=10)
         self.image_list.bind("<<ListboxSelect>>", self.preview_selected)
-        footer = ttk.Frame(body)
-        footer.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(14, 0))
         ttk.Label(
             footer,
             text="* 必填；Enter 下一项；描述框 Enter 换行；Ctrl+Enter 保存。",
@@ -96,7 +118,7 @@ class ProductEditor(Window):
         )
         actions = ttk.Frame(footer)
         actions.pack(fill="x", pady=8)
-        ttk.Button(actions, text="取消", command=self.destroy).pack(side="left")
+        ttk.Button(actions, text="取消", command=self.close).pack(side="left")
         ttk.Button(actions, text="保存草稿", command=lambda: self.save(False)).pack(
             side="right", padx=5
         )
@@ -109,7 +131,7 @@ class ProductEditor(Window):
                 "<Return>",
                 lambda event, current=key, target=next_key: self.advance(current, target),
             )
-        self.bind("<Control-Return>", self.keyboard_save)
+        self.bind_shortcuts(self)
         if self.original:
             item = self.original
             for key, value in (
@@ -127,6 +149,18 @@ class ProductEditor(Window):
             self.description.insert("1.0", item["description"])
         self.refresh_images()
         self.widgets["title"].focus_set()
+
+    def bind_shortcuts(self, widget):
+        """Keep shortcuts local to this form now that it is not a separate window."""
+        widget.bind("<Control-Return>", self.keyboard_save)
+        widget.bind("<Escape>", self.close)
+        for child in widget.winfo_children():
+            self.bind_shortcuts(child)
+
+    def close(self, _event=None):
+        """Return to the existing list without writing pending form changes."""
+        self.destroy()
+        return "break"
 
     def validate_field(self, key):
         """Validate before moving focus or submitting with skipped fields."""
@@ -258,7 +292,8 @@ class ProductEditor(Window):
             prefix = "草稿已保存，但提交审核失败：" if succeeded else ""
             messagebox.showerror("操作未完成", prefix + str(error), parent=self)
         else:
-            self.on_saved()
+            parent, callback = self.master, self.on_saved
             self.destroy()
+            guarded(parent, callback)
         finally:
             self.saving = False

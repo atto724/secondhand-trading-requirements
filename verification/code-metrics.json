@@ -30,8 +30,8 @@
       "nonblank_noncomment_nondocstring": 18
     },
     "editor_ui.py": {
-      "physical_lines": 264,
-      "nonblank_noncomment_nondocstring": 240
+      "physical_lines": 299,
+      "nonblank_noncomment_nondocstring": 271
     },
     "governance.py": {
       "physical_lines": 312,
@@ -50,8 +50,8 @@
       "nonblank_noncomment_nondocstring": 37
     },
     "market_ui.py": {
-      "physical_lines": 568,
-      "nonblank_noncomment_nondocstring": 512
+      "physical_lines": 573,
+      "nonblank_noncomment_nondocstring": 515
     },
     "message_ui.py": {
       "physical_lines": 365,
@@ -102,7 +102,7 @@
       "nonblank_noncomment_nondocstring": 130
     }
   },
-  "physical_total": 7388,
-  "nonblank_noncomment_nondocstring_total": 6440,
+  "physical_total": 7428,
+  "nonblank_noncomment_nondocstring_total": 6474,
   "checked_at": "2026-11-17"
 }

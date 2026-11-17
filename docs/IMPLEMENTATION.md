@@ -104,3 +104,5 @@ D-027：direct_messages增量增加可空product_snapshot，旧行仍为普通�
 D-028：main.open_tab及admin_workspace的二级路由复用holder中既有实例，避免双重Notebook事件重建。resume_view沿页内覆盖层进入当前页面；列表显式on_resume刷新并捕获/恢复Canvas视口。普通输入表单不挂刷新钩子。ChatPanel通过Text修改事件存储会话内草稿，ChatPage.on_resume同步同联系人的其他入口编辑结果，发送成功清空。logout销毁页面后清空草稿；无效账号或撤权时处理缓存。新增5项回归覆盖列表实时状态、页面/输入/覆盖层/滚动保留、草稿恢复与对方隔离、管理员二级导航及撤权、退出切换和禁用后的清除。
 
 D-029：新增ui_runtime.py并纳入wheel模块。PhotoImage归属Tk解释器且LRU有上限；文件元数据改变时失效。后台工作线程仅放入结果队列，root.after在主线程回调；线程闭包不持有Tk任务对象，窗口销毁取消结果投递。异步登录用session_generation防旧结果串入新账号。滚动路由优先处理可滚动画布，对原生编辑控件不截获；包含按屏幕坐标处理焦点/鼠标不一致、微小delta累积与延迟回调清理。新增专项测试验证缓存命中/变更/上限/跨解释器、图片和按钮滚动、焦点路由、事件合并、原生编辑滚动边界、未变卡片复用、后台UI心跳/线程身份/销毁、异步登录重复及过期结果/失败恢复、维护不叠加。
+
+D-030：ProductEditor继承ttk.Frame并用place占据MyProductsPage，读取原商品权限后才挂载。Canvas承载双列表单，底部操作与返回入口不随正文滚动；快捷键递归绑定当前表单控件，避免原Toplevel绑定在Frame内失效或泄漏到主界面。保存成功先移除编辑覆盖页，再经editor_saved/resume_view更新列表和恢复视口。新增3项原生Tk测试覆盖真实创建/编辑入口无Toplevel、跨导航输入保留、必填拒绝/两张图持久化/编辑提交审核、快捷键及1080x740固定按钮边界。

@@ -15,7 +15,7 @@ from operations import (
     mark_all_messages_read,
     messages,
     platform_statistics,
-    query_audit,
+    audit_page,
     seller_statistics,
     verify_backup,
 )
@@ -690,6 +690,10 @@ class MaintenancePage(ttk.Frame):
         super().__init__(parent, padding=18)
         self.actor = actor
         self.keyword = tk.StringVar(master=self)
+        self.audit_keyword = ""
+        self.audit_number = 1
+        self.audit_snapshot = None
+        self.audit_total = 0
         ttk.Label(self, text="审计与备份", style="Title.TLabel").pack(anchor="w", pady=12)
         toolbar = ttk.Frame(self)
         toolbar.pack(fill="x", pady=8)
@@ -711,6 +715,20 @@ class MaintenancePage(ttk.Frame):
             text="备份包含数据库与图片；验证恢复在临时目录进行，不覆盖当前数据。应用开启时每日自动备份一次。",
             style="Sub.TLabel",
         ).pack(anchor="w", pady=8)
+        pager = ttk.Frame(self)
+        pager.pack(side="bottom", fill="x", pady=8)
+        self.previous = ttk.Button(
+            pager, text="上一页", command=lambda: guarded(self, lambda: self.turn_audit(-1))
+        )
+        self.previous.pack(side="left")
+        self.page_status = ttk.Label(pager)
+        self.page_status.pack(side="left", padx=12)
+        self.next_page = ttk.Button(
+            pager, text="下一页", command=lambda: guarded(self, lambda: self.turn_audit(1))
+        )
+        self.next_page.pack(side="left")
+        self.export_status = ttk.Label(self, style="Sub.TLabel")
+        self.export_status.pack(side="bottom", anchor="w")
         self.table = DataTable(
             self,
             [
@@ -728,8 +746,34 @@ class MaintenancePage(ttk.Frame):
         self.refresh()
 
     def refresh(self):
-        """Use the audited service for every log query."""
-        rows = query_audit(self.actor, self.keyword.get())
+        """Start a fresh snapshot only when the user explicitly queries again."""
+        self.audit_keyword = self.keyword.get()
+        self.audit_number = 1
+        self.audit_snapshot = None
+        self.export_status.configure(text="")
+        self.load_audit_page()
+
+    def turn_audit(self, step):
+        """Retain applied filters and the snapshot boundary across page changes."""
+        target = self.audit_number + step
+        if 1 <= target <= max(1, (self.audit_total + 99) // 100):
+            self.audit_number = target
+            self.load_audit_page()
+
+    def load_audit_page(self):
+        """Show all matching records through bounded pages and visible totals."""
+        result = audit_page(
+            self.actor, self.audit_keyword, page=self.audit_number, upper_id=self.audit_snapshot
+        )
+        rows = result["rows"]
+        self.audit_number, self.audit_total = result["page"], result["total"]
+        self.audit_snapshot = result["upper_id"]
+        pages = max(1, (self.audit_total + 99) // 100)
+        self.page_status.configure(
+            text=f"共 {self.audit_total} 条 · 第 {self.audit_number}/{pages} 页 · 每页100条"
+        )
+        self.previous.configure(state="normal" if self.audit_number > 1 else "disabled")
+        self.next_page.configure(state="normal" if self.audit_number < pages else "disabled")
         self.rows = {row["id"]: row for row in rows}
         self.table.fill(
             (
@@ -757,8 +801,10 @@ class MaintenancePage(ttk.Frame):
             parent=self, defaultextension=".csv", filetypes=[("CSV", "*.csv")]
         )
         if path:
-            export_audit(self.actor, path, self.keyword.get())
-            self.refresh()
+            count = export_audit(self.actor, path, self.audit_keyword, upper_id=self.audit_snapshot)
+            self.export_status.configure(
+                text=f"已导出 {count} 条：当前查询的全部匹配记录（不限于本页）。"
+            )
 
     def backup(self):
         """Create a backup using SQLite's consistent backup API."""
@@ -768,7 +814,7 @@ class MaintenancePage(ttk.Frame):
             {
                 "备份状态": "成功",
                 "保存位置": str(create_backup(self.actor)),
-                "备份内容": "数据库与商品图片",
+                "备份内容": "数据库、商品图片、自定义头像及历史引用图片",
             },
         )
         self.refresh()

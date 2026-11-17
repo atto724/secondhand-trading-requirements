@@ -13,6 +13,15 @@ test_last_admin_protection_and_restore_does_not_grant_roles (test_admin_presenta
 test_plain_admin_navigation_and_reason_panel_visible_at_minimum_size (test_admin_presentation.AdminPresentationTests.test_plain_admin_navigation_and_reason_panel_visible_at_minimum_size) ... ok
 test_review_confirmation_keeps_target_and_rejects_stale_version (test_admin_presentation.AdminPresentationTests.test_review_confirmation_keeps_target_and_rejects_stale_version) ... ok
 test_review_groups_and_inline_rejection_require_reason (test_admin_presentation.AdminPresentationTests.test_review_groups_and_inline_rejection_require_reason) ... ok
+test_all_five_attachment_groups_and_restore_are_complete (test_backup_audit.BackupAuditTests.test_all_five_attachment_groups_and_restore_are_complete) ... ok
+test_backup_creation_refuses_missing_historical_file (test_backup_audit.BackupAuditTests.test_backup_creation_refuses_missing_historical_file) ... ok
+test_export_failure_and_permission_checks_preserve_existing_destination (test_backup_audit.BackupAuditTests.test_export_failure_and_permission_checks_preserve_existing_destination) ... ok
+test_export_over_2000_rows_filters_snapshot_and_formula_protection (test_backup_audit.BackupAuditTests.test_export_over_2000_rows_filters_snapshot_and_formula_protection) ... ok
+test_invalid_historical_json_paths_and_missing_database_are_rejected (test_backup_audit.BackupAuditTests.test_invalid_historical_json_paths_and_missing_database_are_rejected) ... ok
+test_missing_each_attachment_and_corrupt_avatar_are_rejected (test_backup_audit.BackupAuditTests.test_missing_each_attachment_and_corrupt_avatar_are_rejected) ... ok
+test_older_backup_without_optional_avatar_or_message_columns (test_backup_audit.BackupAuditTests.test_older_backup_without_optional_avatar_or_message_columns) ... ok
+test_pages_do_not_shift_when_queries_generate_new_matching_audit_rows (test_backup_audit.BackupAuditTests.test_pages_do_not_shift_when_queries_generate_new_matching_audit_rows) ... ok
+test_ui_pages_and_exports_all_applied_results (test_backup_audit.BackupAuditTests.test_ui_pages_and_exports_all_applied_results) ... ok
 test_avatar_database_failure_cleans_copy (test_community.CommunityTests.test_avatar_database_failure_cleans_copy) ... ok
 test_avatar_is_owner_scoped_and_survives_source_removal (test_community.CommunityTests.test_avatar_is_owner_scoped_and_survives_source_removal) ... ok
 test_bidirectional_messages_unread_and_third_party_isolation (test_community.CommunityTests.test_bidirectional_messages_unread_and_third_party_isolation) ... ok
@@ -117,11 +126,34 @@ test_waiting_blocks_edit_and_delist (test_workflows.WorkflowTests.test_waiting_b
 test_zero_cohort_statistics_and_backup_restore (test_workflows.WorkflowTests.test_zero_cohort_statistics_and_backup_restore) ... ok
 
 ----------------------------------------------------------------------
-Ran 112 tests in 177.740s
+Ran 121 tests in 179.369s
 
 OK
 ͼƬ�����ݻ���handbag����ǰ״̬����ЧԤԼ���ƣ�
-Black formatting: 39 files passed
+Black formatting: 40 files passed
+************* Module operations
+operations.py:159:8: R0916: Too many boolean expressions in if statement (6/5) (too-many-boolean-expressions)
+
+------------------------------------
+Your code has been rated at 10.00/10
+
+
+--- Simplified pagination guards: final regression, style and package build ---
+test_all_five_attachment_groups_and_restore_are_complete (test_backup_audit.BackupAuditTests.test_all_five_attachment_groups_and_restore_are_complete) ... ok
+test_backup_creation_refuses_missing_historical_file (test_backup_audit.BackupAuditTests.test_backup_creation_refuses_missing_historical_file) ... ok
+test_export_failure_and_permission_checks_preserve_existing_destination (test_backup_audit.BackupAuditTests.test_export_failure_and_permission_checks_preserve_existing_destination) ... ok
+test_export_over_2000_rows_filters_snapshot_and_formula_protection (test_backup_audit.BackupAuditTests.test_export_over_2000_rows_filters_snapshot_and_formula_protection) ... ok
+test_invalid_historical_json_paths_and_missing_database_are_rejected (test_backup_audit.BackupAuditTests.test_invalid_historical_json_paths_and_missing_database_are_rejected) ... ok
+test_missing_each_attachment_and_corrupt_avatar_are_rejected (test_backup_audit.BackupAuditTests.test_missing_each_attachment_and_corrupt_avatar_are_rejected) ... ok
+test_older_backup_without_optional_avatar_or_message_columns (test_backup_audit.BackupAuditTests.test_older_backup_without_optional_avatar_or_message_columns) ... ok
+test_pages_do_not_shift_when_queries_generate_new_matching_audit_rows (test_backup_audit.BackupAuditTests.test_pages_do_not_shift_when_queries_generate_new_matching_audit_rows) ... ok
+test_ui_pages_and_exports_all_applied_results (test_backup_audit.BackupAuditTests.test_ui_pages_and_exports_all_applied_results) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 2.268s
+
+OK
+Black formatting: 40 files passed
 
 ------------------------------------
 Your code has been rated at 10.00/10
@@ -221,6 +253,7 @@ copying secondhand_trading_desktop.egg-info\requires.txt -> secondhand_trading_d
 copying secondhand_trading_desktop.egg-info\top_level.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
 copying tests\test_accounts.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_admin_presentation.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_backup_audit.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_community.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_detail_ui.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_gallery.py -> secondhand_trading_desktop-0.3.0\tests
@@ -387,7 +420,7 @@ running install_egg_info
 Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
 running install_scripts
 creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
-creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-tyr69c0m\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-0zrcwewx\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
 adding 'accounts.py'
 adding 'admin_ui.py'
 adding 'benchmark.py'

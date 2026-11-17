@@ -1,17 +1,19 @@
 """Messages, statistics, audit export and portable backup operations."""
 
 import csv
+import json
 import sqlite3
 import zipfile
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from tempfile import TemporaryDirectory
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 from uuid import uuid4
 
 import database
 from core import active, admin, audit, now, transaction
 from database import connect_database
+from images import validate_image
 
 
 def messages(actor):
@@ -132,18 +134,49 @@ def platform_statistics(actor, start, end):
         return result
 
 
-def query_audit(actor, keyword="", start="2000-01-01", end="2099-12-31"):
-    """Search audit records with an audit trail for the query itself."""
+def audit_filter(keyword, start, end, upper_id):
+    """Share parameterized filters between page queries and complete exports."""
     lower, upper = date_range(start, end)
+    if not isinstance(keyword, str):
+        raise ValueError("日志关键词必须为文本。")
+    if upper_id is not None and (
+        (not isinstance(upper_id, int) or isinstance(upper_id, bool)) or upper_id < 0
+    ):
+        raise ValueError("日志查询边界无效。")
+    where = (
+        "created_at>=? AND created_at<? AND id<=? AND "
+        "(instr(action,?)>0 OR instr(object_type,?)>0 OR instr(reason,?)>0 "
+        "OR CAST(actor_id AS TEXT)=? OR CAST(object_id AS TEXT)=?)"
+    )
+    return where, (lower, upper, upper_id, keyword, keyword, keyword, keyword, keyword)
+
+
+def audit_page(
+    actor, keyword="", start="2000-01-01", end="2099-12-31", page=1, page_size=100, upper_id=None
+):
+    """Page a fixed ID snapshot so new audit events do not shift older pages."""
+    for value in (page, page_size):
+        if not isinstance(value, int) or isinstance(value, bool):
+            raise ValueError("日志分页参数无效。")
+    if page < 1 or not 1 <= page_size <= 2000:
+        raise ValueError("日志分页参数无效。")
+    audit_filter(keyword, start, end, upper_id)
     with transaction() as connection:
         admin(connection, actor)
+        if upper_id is None:
+            upper_id = connection.execute("SELECT COALESCE(MAX(id),0) FROM audit_logs").fetchone()[
+                0
+            ]
+        where, args = audit_filter(keyword, start, end, upper_id)
+        total = connection.execute(
+            "SELECT COUNT(*) FROM audit_logs WHERE " + where, args
+        ).fetchone()[0]
+        page = min(page, max(1, (total + page_size - 1) // page_size))
         rows = [
             dict(row)
             for row in connection.execute(
-                "SELECT * FROM audit_logs WHERE created_at>=? AND created_at<? AND "
-                "(instr(action,?)>0 OR instr(object_type,?)>0 OR instr(reason,?)>0 "
-                "OR CAST(actor_id AS TEXT)=? OR CAST(object_id AS TEXT)=?) ORDER BY id DESC LIMIT 2000",
-                (lower, upper, keyword, keyword, keyword, keyword, keyword),
+                "SELECT * FROM audit_logs WHERE " + where + " ORDER BY id DESC LIMIT ? OFFSET ?",
+                args + (page_size, (page - 1) * page_size),
             )
         ]
         audit(
@@ -152,41 +185,83 @@ def query_audit(actor, keyword="", start="2000-01-01", end="2099-12-31"):
             "query_audit",
             "audit",
             None,
-            reason=f"{start} 至 {end}；关键词={keyword}",
+            reason=f"{start} 至 {end}；关键词={keyword}；第{page}页；边界={upper_id}",
         )
-        return rows
+    return {
+        "rows": rows,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "upper_id": upper_id,
+    }
 
 
-def export_audit(actor, destination, keyword="", start="2000-01-01", end="2099-12-31"):
-    """Export CSV with formula injection protection and a separate export audit."""
-    rows = query_audit(actor, keyword, start, end)
-    fields = [
-        "id",
-        "actor_id",
-        "action",
-        "object_type",
-        "object_id",
-        "before_value",
-        "after_value",
-        "result",
-        "reason",
-        "created_at",
-    ]
-    with Path(destination).open("w", encoding="utf-8-sig", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=fields)
-        writer.writeheader()
-        for row in rows:
-            writer.writerow(
-                {
-                    key: (
-                        "'" + str(value) if str(value).startswith(("=", "+", "-", "@")) else value
-                    )
-                    for key, value in row.items()
-                }
+def query_audit(actor, keyword="", start="2000-01-01", end="2099-12-31"):
+    """Compatibility first-page query; the UI uses audit_page with visible totals."""
+    return audit_page(actor, keyword, start, end, page_size=2000)["rows"]
+
+
+def export_audit(
+    actor, destination, keyword="", start="2000-01-01", end="2099-12-31", upper_id=None
+):
+    """Stream every matching snapshot row, then publish a completed CSV atomically."""
+    audit_filter(keyword, start, end, upper_id)
+    destination = Path(destination)
+    temporary = None
+    count = 0
+    try:
+        with closing(connect_database()) as connection:
+            connection.execute("BEGIN")
+            admin(connection, actor)
+            if upper_id is None:
+                upper_id = connection.execute(
+                    "SELECT COALESCE(MAX(id),0) FROM audit_logs"
+                ).fetchone()[0]
+            where, args = audit_filter(keyword, start, end, upper_id)
+            cursor = connection.execute(
+                "SELECT * FROM audit_logs WHERE " + where + " ORDER BY id DESC", args
             )
-    with transaction() as connection:
-        admin(connection, actor)
-        audit(connection, actor, "export_audit", "audit", None, reason=f"导出 {len(rows)} 条记录")
+            fields = [item[0] for item in cursor.description]
+            with NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8-sig",
+                newline="",
+                dir=destination.parent,
+                prefix="audit_",
+                suffix=".tmp",
+                delete=False,
+            ) as stream:
+                temporary = Path(stream.name)
+                writer = csv.DictWriter(stream, fieldnames=fields)
+                writer.writeheader()
+                while batch := cursor.fetchmany(500):
+                    for row in batch:
+                        writer.writerow(
+                            {
+                                key: (
+                                    "'" + str(value)
+                                    if str(value).lstrip(" \t\r\n").startswith(("=", "+", "-", "@"))
+                                    else value
+                                )
+                                for key, value in dict(row).items()
+                            }
+                        )
+                        count += 1
+        with transaction() as connection:
+            admin(connection, actor)
+            audit(
+                connection,
+                actor,
+                "export_audit",
+                "audit",
+                None,
+                reason=f"导出 {count} 条记录；{start} 至 {end}；关键词={keyword}；边界={upper_id}",
+            )
+            temporary.replace(destination)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+    return count
 
 
 def create_backup(actor):
@@ -206,11 +281,13 @@ def create_backup(actor):
                 with closing(connect_database()) as source:
                     with closing(sqlite3.connect(snapshot)) as target:
                         source.backup(target)
+                with closing(sqlite3.connect(snapshot)) as validation:
+                    check_backup_images(validation, root)
                 with zipfile.ZipFile(destination, "w", zipfile.ZIP_DEFLATED) as archive:
                     archive.write(snapshot, "trading.db")
-                    for image in (root / "images").glob("*"):
-                        if image.is_file():
-                            archive.write(image, f"images/{image.name}")
+                    for image in (root / "images").rglob("*"):
+                        if image.is_file() and image.resolve().is_relative_to(root.resolve()):
+                            archive.write(image, image.relative_to(root).as_posix())
         with transaction() as connection:
             connection.execute(
                 "INSERT INTO backup_runs(file_name,result,created_at) VALUES(?,'success',?)",
@@ -238,8 +315,107 @@ def backup_status(actor):
         ]
 
 
+def snapshot_image_paths(serialized, label):
+    """Read only attachment fields from immutable historical JSON."""
+    try:
+        data = json.loads(serialized)
+        if not isinstance(data, dict):
+            raise ValueError("快照必须为对象。")
+        images = data.get("images", [])
+        if not isinstance(images, list):
+            raise ValueError("图片列表格式无效。")
+        paths = [item.get("file_path") if isinstance(item, dict) else item for item in images]
+        if data.get("image") is not None:
+            paths.append(data["image"])
+        if any(not isinstance(item, str) or not item.strip() for item in paths):
+            raise ValueError("图片引用格式无效。")
+        return paths
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"{label} 的历史图片信息无效。") from error
+
+
+def backup_image_references(connection):
+    """Collect current products, custom avatars and all supported historical references."""
+    tables = {
+        row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    }
+    required = {
+        "accounts",
+        "products",
+        "product_images",
+        "reservations",
+        "product_history",
+        "audit_logs",
+    }
+    if required - tables:
+        raise ValueError("备份缺少必要数据表：" + "、".join(sorted(required - tables)))
+    groups = {
+        name: set()
+        for name in ("商品图片", "用户头像", "预约快照图片", "商品历史图片", "商品消息图片")
+    }
+    groups["商品图片"].update(
+        row[0] for row in connection.execute("SELECT file_path FROM product_images")
+    )
+    if "public_profiles" in tables:
+        columns = {row[1] for row in connection.execute("PRAGMA table_info(public_profiles)")}
+        if "avatar_path" in columns:
+            groups["用户头像"].update(
+                row[0]
+                for row in connection.execute(
+                    "SELECT avatar_path FROM public_profiles WHERE avatar_path<>''"
+                )
+            )
+    for table, column, group in (
+        ("reservations", "snapshot", "预约快照图片"),
+        ("product_history", "content", "商品历史图片"),
+        ("direct_messages", "product_snapshot", "商品消息图片"),
+    ):
+        if table not in tables:
+            continue
+        columns = {row[1] for row in connection.execute(f"PRAGMA table_info({table})")}
+        if column not in columns:
+            continue
+        for key, value in connection.execute(
+            f"SELECT id,{column} FROM {table} WHERE {column} IS NOT NULL"
+        ):
+            groups[group].update(snapshot_image_paths(value, f"{group} #{key}"))
+    return groups
+
+
+def check_backup_images(connection, root):
+    """Reject missing, escaping or unreadable referenced images, with useful filenames."""
+    groups = backup_image_references(connection)
+    references = {}
+    for group, paths in groups.items():
+        for relative in paths:
+            if not isinstance(relative, str) or not relative.strip():
+                raise ValueError(f"{group}存在空白或无效的图片路径。")
+            references.setdefault(relative, []).append(group)
+    errors = []
+    root = root.resolve()
+    for relative, sources in references.items():
+        path = root / relative
+        if Path(relative).anchor or not path.resolve().is_relative_to(root):
+            problem = "图片路径越界或不是相对路径"
+        elif not path.is_file():
+            problem = "文件缺失"
+        else:
+            try:
+                validate_image(path)
+                continue
+            except ValueError:
+                problem = "文件损坏或不是受支持的图片"
+        errors.append(f"{relative}（{'、'.join(sources)}）：{problem}")
+    if errors:
+        raise ValueError(f"备份图片检查失败，共{len(errors)}项：\n" + "\n".join(errors))
+    return {
+        "图片数量": len(references),
+        "图片分类数量": {name: len(paths) for name, paths in groups.items()},
+    }
+
+
 def verify_backup(archive_path):
-    """Validate integrity in a temporary directory without overwriting live data."""
+    """Validate database and every referenced image without overwriting live data."""
     with TemporaryDirectory(dir=database.DATABASE_PATH.parent) as folder:
         root = Path(folder)
         with zipfile.ZipFile(archive_path) as archive:
@@ -248,17 +424,21 @@ def verify_backup(archive_path):
                 if not target.is_relative_to(root.resolve()):
                     raise ValueError("备份含非法路径。")
             archive.extractall(root)
+        if not (root / "trading.db").is_file():
+            raise ValueError("备份缺少 trading.db 数据库。")
         with closing(sqlite3.connect(root / "trading.db")) as connection:
             if connection.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
                 raise ValueError("数据库完整性检查失败。")
             if connection.execute("PRAGMA foreign_key_check").fetchall():
                 raise ValueError("数据库关联检查失败。")
-            paths = connection.execute("SELECT file_path FROM product_images").fetchall()
-            for (relative,) in paths:
-                path = (root / relative).resolve()
-                if not path.is_relative_to(root.resolve()) or not path.is_file():
-                    raise ValueError("备份缺少商品图片或图片路径无效。")
-        return {"数据库完整性": "通过", "关联检查": "通过", "图片数量": len(paths)}
+            result = check_backup_images(connection, root)
+        return {
+            "数据库完整性": "通过",
+            "关联检查": "通过",
+            "图片检查": "全部引用存在且可读取",
+            "计数说明": "图片数量按文件去重；不同分类可能引用同一文件。",
+            **result,
+        }
 
 
 def restore_backup(archive_path, destination):

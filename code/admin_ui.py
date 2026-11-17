@@ -2,7 +2,7 @@
 
 import tkinter as tk
 from datetime import datetime, timedelta, timezone
-from tkinter import filedialog, simpledialog, ttk
+from tkinter import filedialog, ttk
 
 from catalog import review_product, search_products
 from governance import block_product, list_accounts, release_product, set_account_enabled, set_admin
@@ -21,6 +21,11 @@ from operations import (
 )
 from ui_common import (
     ACCENT,
+    BG,
+    INK,
+    ProductRows,
+    InlineActionPanel,
+    avatar_photo,
     MUTED,
     PAPER,
     DataTable,
@@ -34,41 +39,30 @@ from ui_common import (
 
 
 class ReviewPage(ttk.Frame):
-    """Display all product states for reasoned review and moderation."""
+    """Prioritize pending reviews with state-specific inline product actions."""
 
     def __init__(self, parent, actor):
         super().__init__(parent, padding=18)
         self.actor = actor
         self.rows = {}
-        ttk.Label(self, text="商品审核与治理", style="Title.TLabel").pack(anchor="w", pady=12)
-        toolbar = ttk.Frame(self)
-        toolbar.pack(fill="x", pady=8)
-        for label, function in [
-            ("刷新", self.refresh),
-            ("查看详情", self.detail),
-            ("审核通过", lambda: self.review(True)),
-            ("驳回审核", lambda: self.review(False)),
-            ("违规下架", self.block),
-            ("解除违规", self.release),
-        ]:
-            ttk.Button(
-                toolbar, text=label, command=lambda action=function: guarded(self, action)
-            ).pack(side="left", padx=4)
-        self.table = DataTable(
-            self,
-            [
-                ("id", "编号", 60),
-                ("title", "标题", 250),
-                ("seller", "卖家", 130),
-                ("status", "状态", 120),
-                ("version", "版本", 60),
-            ],
+        self.group = "pending_review"
+        header = ttk.Frame(self)
+        header.pack(fill="x", pady=(0, 12))
+        ttk.Label(header, text="商品审核与治理", style="Title.TLabel").pack(side="left")
+        ttk.Button(header, text="刷新", command=lambda: guarded(self, self.refresh)).pack(
+            side="right"
         )
+        self.filters = ttk.Frame(self)
+        self.filters.pack(fill="x", pady=10)
+        self.panel = InlineActionPanel(self, self.refresh)
+        self.count = ttk.Label(self, style="Sub.TLabel")
+        self.count.pack(side="bottom", pady=8)
+        self.table = ProductRows(self, on_open=lambda key: self.detail())
         self.table.pack(fill="both", expand=True)
         self.refresh()
 
     def refresh(self):
-        """Load latest review versions and all states."""
+        """Retain exact review versions and backend permission rechecks."""
         rows = []
         page = 1
         while True:
@@ -78,108 +72,345 @@ class ReviewPage(ttk.Frame):
                 break
             page += 1
         self.rows = {row["id"]: row for row in rows}
-        self.table.fill(
-            (
-                row["id"],
-                (
-                    row["id"],
-                    row["title"],
-                    row["seller_name"],
-                    status_label(row["status"]),
-                    row["version"],
-                ),
+        self.render()
+
+    def matches(self, row, group):
+        """Include all blocked states in governance, even a previously sold item."""
+        if group == "all":
+            return True
+        if group == "violation":
+            return bool(row["blocked"])
+        return row["status"] == group and not row["blocked"]
+
+    def choose_group(self, group):
+        """Filter without applying or carrying over a pending admin action."""
+        self.panel.close()
+        self.group = group
+        self.render()
+
+    def render(self):
+        """Display pictures, seller identity and only applicable actions."""
+        for widget in self.filters.winfo_children():
+            widget.destroy()
+        for group, label in (
+            ("pending_review", "待审核"),
+            ("published", "已发布"),
+            ("violation", "违规下架"),
+            ("all", "全部"),
+        ):
+            count = sum(self.matches(row, group) for row in self.rows.values())
+            tk.Button(
+                self.filters,
+                text=f"{label} {count}",
+                command=lambda key=group: self.choose_group(key),
+                bg=ACCENT if self.group == group else BG,
+                fg="white" if self.group == group else INK,
+                relief="flat",
+                bd=0,
+                padx=14,
+                pady=8,
+                cursor="hand2",
+            ).pack(side="left", padx=(0, 10))
+        cards = []
+        for row in self.rows.values():
+            if not self.matches(row, self.group):
+                continue
+            actions = [("查看详情", self.detail)]
+            note = ""
+            if row["blocked"]:
+                if not row["has_live"]:
+                    actions.append(("解除违规", self.release))
+                else:
+                    note = "有未处理预约或争议，需先处理后才能解除限制。"
+            elif row["status"] == "pending_review":
+                actions += [
+                    ("审核通过", lambda: self.review(True)),
+                    ("驳回审核", lambda: self.review(False)),
+                ]
+            elif row["status"] in ("published", "reserved", "sold"):
+                actions.append(
+                    ("违规下架" if row["status"] == "published" else "违规处理", self.block)
+                )
+            cards.append(
+                {
+                    "id": row["id"],
+                    "title": row["title"] or "未填写标题",
+                    "price": row["price_cents"],
+                    "image": row["cover"],
+                    "status": "违规限制" if row["blocked"] else status_label(row["status"]),
+                    "subtitle": f"卖家：{row['seller_name']} · 商品编号 {row['id']}\n{note}",
+                    "actions": actions,
+                }
             )
-            for row in rows
-        )
+        self.table.fill(cards)
+        self.count.configure(text=f"当前分类共 {len(cards)} 件商品")
 
     def detail(self):
-        """Inspect the content being reviewed."""
+        """Open content/version details in the same page."""
         ProductDetail(self, self.actor, self.table.selected())
 
     def review(self, approved):
-        """Use the displayed version to reject stale review submissions."""
+        """Capture the chosen product and displayed version before confirmation."""
         key = self.table.selected()
-        reason = (
-            "" if approved else simpledialog.askstring("审核驳回", "请填写驳回原因：", parent=self)
+        row = self.rows[key]
+        version = row["version"]
+        self.panel.open(
+            "审核通过" if approved else "驳回审核",
+            f"商品：{row['title']} · 编号 {key} · 版本 {version}",
+            lambda reason: review_product(self.actor, key, version, approved, reason),
+            requires_reason=not approved,
         )
-        if reason is None:
-            return
-        review_product(self.actor, key, self.rows[key]["version"], approved, reason)
-        self.refresh()
 
     def block(self):
-        """Moderate a product and its reservations together."""
+        """Explain linked transaction effects before confirming moderation."""
         key = self.table.selected()
-        reason = simpledialog.askstring("违规处理", "请填写违规依据：", parent=self)
-        if reason is not None:
-            block_product(self.actor, key, reason)
-            self.refresh()
+        row = self.rows[key]
+        self.panel.open(
+            "违规处理",
+            f"商品：{row['title']} · 编号 {key}",
+            lambda reason: block_product(self.actor, key, reason),
+            note="请填写违规依据。确认后商品将受限，关联有效预约按原交易规则处理。",
+        )
 
     def release(self):
-        """Release a restriction without directly republishing the item."""
+        """Keep release separate from publishing."""
         key = self.table.selected()
-        reason = simpledialog.askstring("解除违规", "请填写核实依据：", parent=self)
-        if reason is not None:
-            release_product(self.actor, key, reason)
-            self.refresh()
+        row = self.rows[key]
+        self.panel.open(
+            "解除违规",
+            f"商品：{row['title']} · 编号 {key}",
+            lambda reason: release_product(self.actor, key, reason),
+            note="请填写核实依据。解除限制不会直接将商品重新上架。",
+        )
 
 
 class AccountsPage(ttk.Frame):
-    """Explicit administrator authorization and account status changes."""
+    """Searchable avatar rows separating account status from administrator roles."""
 
     def __init__(self, parent, actor):
         super().__init__(parent, padding=18)
         self.actor = actor
-        ttk.Label(self, text="账号与授权", style="Title.TLabel").pack(anchor="w", pady=12)
-        toolbar = ttk.Frame(self)
-        toolbar.pack(fill="x", pady=8)
-        actions = [
-            ("刷新", self.refresh),
-            ("禁用账号", lambda: self.change("enabled", False)),
-            ("恢复账号", lambda: self.change("enabled", True)),
-            ("授予管理员", lambda: self.change("admin", True)),
-            ("撤销管理员", lambda: self.change("admin", False)),
-        ]
-        for label, function in actions:
-            ttk.Button(
-                toolbar, text=label, command=lambda action=function: guarded(self, action)
-            ).pack(side="left", padx=4)
-        self.table = DataTable(
-            self,
-            [
-                ("id", "账号编号", 70),
-                ("name", "登录名", 180),
-                ("status", "状态", 100),
-                ("roles", "角色", 260),
-            ],
+        self.group = "all"
+        self.rows = {}
+        self.cards = {}
+        header = ttk.Frame(self)
+        header.pack(fill="x", pady=(0, 12))
+        ttk.Label(header, text="账号与授权", style="Title.TLabel").pack(side="left")
+        ttk.Button(header, text="刷新", command=lambda: guarded(self, self.refresh)).pack(
+            side="right"
         )
-        self.table.pack(fill="both", expand=True)
+        search = ttk.Frame(self)
+        search.pack(fill="x", pady=8)
+        ttk.Label(search, text="搜索账号：").pack(side="left")
+        self.keyword = tk.StringVar(master=self)
+        entry = ttk.Entry(search, textvariable=self.keyword, width=32)
+        entry.pack(side="left", padx=8)
+        entry.bind("<Return>", lambda event: self.render())
+        ttk.Button(search, text="搜索", command=self.render).pack(side="left")
+        self.filters = ttk.Frame(self)
+        self.filters.pack(fill="x", pady=10)
+        self.notice = ttk.Label(self, style="Sub.TLabel")
+        self.notice.pack(anchor="w")
+        self.panel = InlineActionPanel(self, self.refresh)
+        self.count = ttk.Label(self, style="Sub.TLabel")
+        self.count.pack(side="bottom", pady=8)
+        self.canvas = tk.Canvas(self, bg=BG, highlightthickness=0)
+        scrollbar = ttk.Scrollbar(self, command=self.canvas.yview)
+        scrollbar.pack(side="right", fill="y")
+        self.canvas.pack(fill="both", expand=True)
+        self.canvas.configure(yscrollcommand=scrollbar.set)
+        self.body = tk.Frame(self.canvas, bg=BG)
+        self.window = self.canvas.create_window(0, 0, window=self.body, anchor="nw")
+        self.canvas.bind(
+            "<Configure>", lambda event: self.canvas.itemconfigure(self.window, width=event.width)
+        )
+        self.body.bind(
+            "<Configure>", lambda event: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+        self.canvas.bind("<MouseWheel>", self.wheel)
         self.refresh()
 
+    def wheel(self, event):
+        """Scroll only the account list."""
+        self.canvas.yview_scroll(-int(event.delta / 120), "units")
+        return "break"
+
     def refresh(self):
-        """Refresh roles from the database rather than UI state."""
-        rows = list_accounts(self.actor)
-        self.table.fill(
-            (
-                row["id"],
-                (
-                    row["id"],
-                    row["username"],
-                    display_value(row["status"]),
-                    display_value(row["roles"], "roles"),
-                ),
-            )
-            for row in rows
+        """Remove privileged controls if this account lost administrator access."""
+        try:
+            self.rows = {row["id"]: row for row in list_accounts(self.actor)}
+            self.notice.configure(text="")
+        except ValueError:
+            self.rows = {}
+            self.panel.close()
+            self.notice.configure(text="当前管理员权限不可用，请退出后重新登录。")
+        self.render()
+
+    def choose_group(self, key):
+        """Keep status and role filters separate, allowing administrator overlap."""
+        self.panel.close()
+        self.group = key
+        self.render()
+
+    def matches(self, row, key):
+        """Match state or explicit administrator membership."""
+        return (
+            key == "all"
+            or (key == "admin" and "admin" in (row["roles"] or "").split(","))
+            or row["status"] == key
         )
 
-    def change(self, kind, enabled):
-        """Require an explanation for every privileged account mutation."""
-        key = self.table.selected()
-        reason = simpledialog.askstring("操作依据", "请填写原因：", parent=self)
-        if reason is not None:
-            function = set_admin if kind == "admin" else set_account_enabled
-            function(self.actor, key, enabled, reason)
-            self.refresh()
+    def render(self):
+        """Search only public metadata and rebuild compact account rows."""
+        query = self.keyword.get().strip().casefold()
+        rows = [
+            row
+            for row in self.rows.values()
+            if query in f"{row['id']} {row['username']} {row['nickname']}".casefold()
+        ]
+        for widget in self.filters.winfo_children():
+            widget.destroy()
+        for key, label in (
+            ("all", "全部"),
+            ("active", "正常"),
+            ("disabled", "已禁用"),
+            ("admin", "管理员"),
+        ):
+            count = sum(self.matches(row, key) for row in rows)
+            tk.Button(
+                self.filters,
+                text=f"{label} {count}",
+                command=lambda value=key: self.choose_group(value),
+                bg=ACCENT if key == self.group else BG,
+                fg="white" if key == self.group else INK,
+                relief="flat",
+                bd=0,
+                padx=14,
+                pady=8,
+                cursor="hand2",
+            ).pack(side="left", padx=(0, 10))
+        for widget in self.body.winfo_children():
+            widget.destroy()
+        self.cards = {}
+        admins = sum(
+            row["status"] == "active" and "admin" in (row["roles"] or "").split(",")
+            for row in self.rows.values()
+        )
+        for row in rows:
+            if self.matches(row, self.group):
+                self.draw_account(row, admins)
+        if not self.cards:
+            ttk.Label(self.body, text="暂无匹配账号", style="Sub.TLabel").pack(pady=45)
+        self.count.configure(text=f"当前筛选共 {len(self.cards)} 个账号")
+
+    def draw_account(self, row, admins):
+        """Put state and authorization actions next to their specific account."""
+        key = row["id"]
+        roles = (row["roles"] or "").split(",")
+        card = tk.Frame(
+            self.body,
+            bg=PAPER,
+            padx=14,
+            pady=14,
+            highlightbackground="#edcdb7",
+            highlightthickness=1,
+        )
+        card.pack(fill="x", pady=(0, 10))
+        avatar = tk.Label(card, bg=PAPER)
+        avatar.photo = avatar_photo(self, key, row["avatar_path"], (48, 48), circular=True)
+        avatar.configure(image=avatar.photo)
+        avatar.pack(side="left", padx=(0, 16))
+        actions = tk.Frame(card, bg=PAPER)
+        actions.pack(side="right", padx=(12, 0))
+        buttons = []
+        state_box = tk.Frame(actions, bg=PAPER)
+        state_box.pack(side="left", padx=12)
+        tk.Label(state_box, text="账号状态", bg=PAPER, fg=MUTED, font=("Microsoft YaHei", 9)).pack()
+        if key == self.actor:
+            tk.Label(state_box, text="当前账号", bg=PAPER, fg=MUTED).pack(pady=8)
+        else:
+            text = "禁用账号" if row["status"] == "active" else "恢复账号"
+            button = ttk.Button(
+                state_box,
+                text=text,
+                command=lambda: self.open_change(key, "enabled", row["status"] != "active"),
+            )
+            button.pack(pady=5)
+            buttons.append(button)
+        role_box = tk.Frame(actions, bg=PAPER)
+        role_box.pack(side="left", padx=12)
+        tk.Label(
+            role_box, text="管理员权限", bg=PAPER, fg=MUTED, font=("Microsoft YaHei", 9)
+        ).pack()
+        if row["status"] != "active":
+            tk.Label(role_box, text="恢复后可调整", bg=PAPER, fg=MUTED).pack(pady=8)
+        elif "admin" in roles and admins <= 1:
+            tk.Label(role_box, text="最后一位管理员", bg=PAPER, fg=MUTED).pack(pady=8)
+        else:
+            text = "撤销管理员" if "admin" in roles else "授予管理员"
+            button = ttk.Button(
+                role_box,
+                text=text,
+                command=lambda: self.open_change(key, "admin", "admin" not in roles),
+            )
+            button.pack(pady=5)
+            buttons.append(button)
+        info = tk.Frame(card, bg=PAPER)
+        info.pack(side="left", fill="both", expand=True)
+        tk.Label(
+            info,
+            text=row["nickname"] or row["username"],
+            bg=PAPER,
+            fg=INK,
+            font=("Microsoft YaHei", 12, "bold"),
+            anchor="w",
+        ).pack(fill="x")
+        tk.Label(
+            info,
+            text=f"登录名 {row['username']} · 账号编号 {key}",
+            bg=PAPER,
+            fg=MUTED,
+            font=("Microsoft YaHei", 9),
+            anchor="w",
+        ).pack(fill="x", pady=4)
+        badges = tk.Frame(info, bg=PAPER)
+        badges.pack(anchor="w")
+        tk.Label(
+            badges,
+            text="正常" if row["status"] == "active" else "已禁用",
+            bg="#edf7ee" if row["status"] == "active" else "#fff0e9",
+            fg="#39714b" if row["status"] == "active" else "#ba4028",
+            padx=8,
+            pady=3,
+        ).pack(side="left", padx=(0, 6))
+        for role in roles:
+            tk.Label(
+                badges,
+                text=display_value(role),
+                bg="#fff1e1" if role == "admin" else "#f5f4f2",
+                fg=ACCENT if role == "admin" else MUTED,
+                padx=8,
+                pady=3,
+            ).pack(side="left", padx=(0, 6))
+        self.cards[key] = {"frame": card, "buttons": buttons, "data": row}
+        for widget in (card, avatar, info, *info.winfo_children()):
+            widget.bind("<MouseWheel>", self.wheel)
+
+    def open_change(self, key, kind, enabled):
+        """Capture the target ID and show reason/confirmation inline."""
+        row = self.rows[key]
+        title = (
+            ("恢复账号" if enabled else "禁用账号")
+            if kind == "enabled"
+            else ("授予管理员" if enabled else "撤销管理员")
+        )
+        function = set_account_enabled if kind == "enabled" else set_admin
+        self.panel.open(
+            title,
+            f"账号：{row['username']} · 编号 {key}",
+            lambda reason: function(self.actor, key, enabled, reason),
+            note="请填写处理依据。账号状态与管理员权限是两种独立操作，确认后将留下审计记录。",
+        )
 
 
 class MessagesPage(ttk.Frame):

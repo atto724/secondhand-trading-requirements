@@ -6,8 +6,8 @@
       "nonblank_noncomment_nondocstring": 81
     },
     "admin_ui.py": {
-      "physical_lines": 542,
-      "nonblank_noncomment_nondocstring": 475
+      "physical_lines": 773,
+      "nonblank_noncomment_nondocstring": 690
     },
     "catalog.py": {
       "physical_lines": 364,
@@ -34,16 +34,16 @@
       "nonblank_noncomment_nondocstring": 240
     },
     "governance.py": {
-      "physical_lines": 310,
-      "nonblank_noncomment_nondocstring": 273
+      "physical_lines": 312,
+      "nonblank_noncomment_nondocstring": 275
     },
     "images.py": {
       "physical_lines": 72,
       "nonblank_noncomment_nondocstring": 51
     },
     "main.py": {
-      "physical_lines": 370,
-      "nonblank_noncomment_nondocstring": 326
+      "physical_lines": 400,
+      "nonblank_noncomment_nondocstring": 356
     },
     "manage.py": {
       "physical_lines": 45,
@@ -94,11 +94,11 @@
       "nonblank_noncomment_nondocstring": 550
     },
     "ui_common.py": {
-      "physical_lines": 611,
-      "nonblank_noncomment_nondocstring": 535
+      "physical_lines": 695,
+      "nonblank_noncomment_nondocstring": 609
     }
   },
-  "physical_total": 6493,
-  "nonblank_noncomment_nondocstring_total": 5661,
-  "checked_at": "2026-11-16"
+  "physical_total": 6840,
+  "nonblank_noncomment_nondocstring_total": 5982,
+  "checked_at": "2026-11-17"
 }

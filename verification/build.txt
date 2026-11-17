@@ -8,6 +8,11 @@ test_registration_assigns_ordinary_roles (test_accounts.AccountTests.test_regist
 New accounts receive buyer and seller roles only. ... ok
 test_valid_login (test_accounts.AccountTests.test_valid_login)
 Correct credentials return the account ID. ... ok
+test_account_search_filters_and_frozen_target_for_inline_change (test_admin_presentation.AdminPresentationTests.test_account_search_filters_and_frozen_target_for_inline_change) ... ok
+test_last_admin_protection_and_restore_does_not_grant_roles (test_admin_presentation.AdminPresentationTests.test_last_admin_protection_and_restore_does_not_grant_roles) ... ok
+test_plain_admin_navigation_and_reason_panel_visible_at_minimum_size (test_admin_presentation.AdminPresentationTests.test_plain_admin_navigation_and_reason_panel_visible_at_minimum_size) ... ok
+test_review_confirmation_keeps_target_and_rejects_stale_version (test_admin_presentation.AdminPresentationTests.test_review_confirmation_keeps_target_and_rejects_stale_version) ... ok
+test_review_groups_and_inline_rejection_require_reason (test_admin_presentation.AdminPresentationTests.test_review_groups_and_inline_rejection_require_reason) ... ok
 test_avatar_database_failure_cleans_copy (test_community.CommunityTests.test_avatar_database_failure_cleans_copy) ... ok
 test_avatar_is_owner_scoped_and_survives_source_removal (test_community.CommunityTests.test_avatar_is_owner_scoped_and_survives_source_removal) ... ok
 test_bidirectional_messages_unread_and_third_party_isolation (test_community.CommunityTests.test_bidirectional_messages_unread_and_third_party_isolation) ... ok
@@ -91,11 +96,11 @@ test_waiting_blocks_edit_and_delist (test_workflows.WorkflowTests.test_waiting_b
 test_zero_cohort_statistics_and_backup_restore (test_workflows.WorkflowTests.test_zero_cohort_statistics_and_backup_restore) ... ok
 
 ----------------------------------------------------------------------
-Ran 86 tests in 82.349s
+Ran 91 tests in 156.071s
 
 OK
 ͼƬ�����ݻ���handbag����ǰ״̬����ЧԤԼ���ƣ�
-Black formatting: 33 files passed
+Black formatting: 34 files passed
 
 ------------------------------------
 Your code has been rated at 10.00/10
@@ -193,6 +198,7 @@ copying secondhand_trading_desktop.egg-info\entry_points.txt -> secondhand_tradi
 copying secondhand_trading_desktop.egg-info\requires.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
 copying secondhand_trading_desktop.egg-info\top_level.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
 copying tests\test_accounts.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_admin_presentation.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_community.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_detail_ui.py -> secondhand_trading_desktop-0.3.0\tests
 copying tests\test_gallery.py -> secondhand_trading_desktop-0.3.0\tests
@@ -353,7 +359,7 @@ running install_egg_info
 Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
 running install_scripts
 creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
-creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-xax5g7un\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-bs99ifnw\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
 adding 'accounts.py'
 adding 'admin_ui.py'
 adding 'benchmark.py'

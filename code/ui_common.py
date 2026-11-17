@@ -146,6 +146,90 @@ class DataTable(ttk.Frame):
         return int(selection[0])
 
 
+class InlineActionPanel(ttk.Frame):
+    """A visible target, reason and final confirmation without modal dialogs."""
+
+    def __init__(self, parent, on_success):
+        super().__init__(parent, padding=14)
+        self.on_success = on_success
+        self.handler = None
+        self.requires_reason = True
+        self.title = ttk.Label(self, font=("Microsoft YaHei", 12, "bold"))
+        self.title.pack(anchor="w")
+        self.subject = ttk.Label(self, wraplength=900)
+        self.subject.pack(anchor="w", pady=6)
+        self.note = ttk.Label(self, style="Sub.TLabel", wraplength=900)
+        self.note.pack(anchor="w", pady=(0, 6))
+        self.reason = tk.Text(
+            self,
+            height=2,
+            wrap="word",
+            font=("Microsoft YaHei", 10),
+            relief="flat",
+            highlightbackground="#e5c9b5",
+            highlightthickness=1,
+        )
+        self.error = ttk.Label(self, foreground="#bc3e29", wraplength=900)
+        self.error.pack(anchor="w", pady=4)
+        buttons = ttk.Frame(self)
+        buttons.pack(fill="x")
+        ttk.Button(buttons, text="确认操作", style="Accent.TButton", command=self.submit).pack(
+            side="right"
+        )
+        ttk.Button(buttons, text="取消", command=self.close).pack(side="right", padx=10)
+
+    def open(self, title, subject, handler, requires_reason=True, note=""):
+        """Freeze the intended target in the callback until confirmation or cancel."""
+        self.handler = handler
+        self.requires_reason = requires_reason
+        self.title.configure(text=title)
+        self.subject.configure(text=subject)
+        self.note.configure(
+            text=note
+            or (
+                "请填写处理原因，确认后将记录在审计中。"
+                if requires_reason
+                else "请核对目标信息后确认操作。"
+            )
+        )
+        self.error.configure(text="")
+        self.reason.delete("1.0", "end")
+        self.reason.pack_forget()
+        if requires_reason:
+            self.reason.pack(fill="x", before=self.error, pady=4)
+        flexible = [
+            widget
+            for widget in self.master.pack_slaves()
+            if widget != self and widget.pack_info().get("expand")
+        ]
+        placement = {"before": flexible[0]} if flexible else {}
+        self.pack(side="bottom", fill="x", pady=(12, 0), **placement)
+        if requires_reason:
+            self.reason.focus_set()
+
+    def close(self):
+        """Cancel without persisting changes."""
+        self.handler = None
+        self.pack_forget()
+
+    def submit(self):
+        """Keep failures and unsaved reason text visible inline."""
+        if self.handler is None:
+            return
+        reason = self.reason.get("1.0", "end-1c").strip()
+        if self.requires_reason and not reason:
+            self.error.configure(text="请先填写处理原因。")
+            self.reason.focus_set()
+            return
+        try:
+            self.handler(reason)
+        except (ValueError, sqlite3.Error, OSError) as error:
+            self.error.configure(text=str(error))
+            return
+        self.close()
+        self.on_success()
+
+
 class ProductRows(ttk.Frame):
     """Scrollable horizontal product cards with keyed selection and inline actions."""
 

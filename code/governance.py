@@ -303,8 +303,10 @@ def list_accounts(actor):
         return [
             dict(row)
             for row in connection.execute(
-                "SELECT a.id,a.username,a.status,a.created_at,"
+                "SELECT a.id,a.username,a.status,a.created_at,COALESCE(p.nickname,'') AS nickname,"
+                "COALESCE(p.avatar_path,'') AS avatar_path,"
                 "(SELECT group_concat(r.name,',') FROM account_roles ar JOIN roles r ON r.id=ar.role_id "
-                "WHERE ar.account_id=a.id) AS roles FROM accounts a ORDER BY a.id"
+                "WHERE ar.account_id=a.id) AS roles FROM accounts a "
+                "LEFT JOIN public_profiles p ON p.account_id=a.id ORDER BY a.id"
             )
         ]

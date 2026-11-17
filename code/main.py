@@ -252,7 +252,12 @@ class TradingApp:
         """Keep privileged component pages in a dedicated secondary tab set."""
         if "admin" not in account_profile(self.account_id)["roles"]:
             raise ValueError("管理员权限已被撤销。")
-        notebook = ttk.Notebook(parent)
+        workspace = ttk.Frame(parent)
+        navigation = tk.Frame(workspace, bg=PAPER, padx=12, pady=4)
+        navigation.pack(fill="x")
+        notebook = ttk.Notebook(workspace, style="Main.TNotebook")
+        notebook.pack(fill="both", expand=True)
+        tabs = {}
         factories = [
             ("审核与治理", lambda p: ReviewPage(p, self.account_id)),
             ("交易处理", lambda p: ReservationsPage(p, self.account_id, "admin")),
@@ -265,18 +270,43 @@ class TradingApp:
             frame = ttk.Frame(notebook)
             notebook.add(frame, text=label)
             slots[str(frame)] = (frame, factory)
+            item = tk.Frame(navigation, bg=PAPER)
+            item.pack(side="left", padx=8)
+            button = tk.Button(
+                item,
+                text=label,
+                command=lambda target=frame: notebook.select(target),
+                bg=PAPER,
+                fg=INK,
+                relief="flat",
+                bd=0,
+                font=("Microsoft YaHei", 12),
+                padx=12,
+                pady=8,
+                cursor="hand2",
+            )
+            button.pack()
+            line = tk.Frame(item, bg=PAPER, height=2)
+            line.pack(fill="x")
+            tabs[str(frame)] = (button, line)
 
         def changed(_event=None):
             key = notebook.select()
             if not key:
                 return
+            for identity, (button, line) in tabs.items():
+                button.configure(fg=ACCENT if identity == key else INK)
+                line.configure(bg=ACCENT if identity == key else PAPER)
             frame, factory = slots[key]
             for child in frame.winfo_children():
                 child.destroy()
             guarded(self.root, lambda: factory(frame).pack(fill="both", expand=True))
 
         notebook.bind("<<NotebookTabChanged>>", changed)
-        return notebook
+        workspace.notebook = notebook
+        workspace.nav_items = tabs
+        changed()
+        return workspace
 
     def show_account_menu(self):
         """Anchor a dismissible menu beneath the circular account avatar."""

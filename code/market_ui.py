@@ -447,6 +447,10 @@ class MyProductsPage(ttk.Frame):
         self.count.pack(fill="x", pady=8)
         self.refresh()
 
+    def on_resume(self):
+        """Update live rows while keeping the existing session controls."""
+        self.refresh()
+
     def refresh(self):
         """Render owner product states without hiding historical or legacy drafts."""
         self.rows = {row["id"]: row for row in list_my_products(self.actor)}

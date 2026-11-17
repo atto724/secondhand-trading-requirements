@@ -100,3 +100,5 @@ RoundedBubble使用Canvas平滑多边形和原生text项，按文本bbox调整�
 D-026：InlineActionPanel复用页内原因和确认，闭包捕获目标编号及审核版本；失败保留原因且不跳转。账号查询补充公开昵称/头像，操作仍调用原治理服务。新增5项测试覆盖原因、审核版本冲突、筛选后固定目标、最后管理员保护、恢复与授权分离、导航与最小窗口边界。2026-11-17全量91项测试通过。
 
 D-027：direct_messages增量增加可空product_snapshot，旧行仍为普通文字。send_product_message事务内检查双方账号、公开状态和商品归属，只保存白名单快照并写普通消息审计；会话列表使用[商品]标题摘要。ProductMessageCard复用消息行/已读布局并响应宽度，点击复用页内ProductDetail。empty_state与navigate_to提供说明和现有导航入口；不会伪造消息或演示记录。新增5项回归覆盖消息快照/参与者、拒绝非公开与错误归属/禁用、旧表迁移幂等、显式发送和当前详情权限、空页面入口与筛选恢复。
+
+D-028：main.open_tab及admin_workspace的二级路由复用holder中既有实例，避免双重Notebook事件重建。resume_view沿页内覆盖层进入当前页面；列表显式on_resume刷新并捕获/恢复Canvas视口。普通输入表单不挂刷新钩子。ChatPanel通过Text修改事件存储会话内草稿，ChatPage.on_resume同步同联系人的其他入口编辑结果，发送成功清空。logout销毁页面后清空草稿；无效账号或撤权时处理缓存。新增5项回归覆盖列表实时状态、页面/输入/覆盖层/滚动保留、草稿恢复与对方隔离、管理员二级导航及撤权、退出切换和禁用后的清除。

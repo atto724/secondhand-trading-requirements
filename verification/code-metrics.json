@@ -6,8 +6,8 @@
       "nonblank_noncomment_nondocstring": 81
     },
     "admin_ui.py": {
-      "physical_lines": 773,
-      "nonblank_noncomment_nondocstring": 690
+      "physical_lines": 781,
+      "nonblank_noncomment_nondocstring": 694
     },
     "catalog.py": {
       "physical_lines": 364,
@@ -42,20 +42,20 @@
       "nonblank_noncomment_nondocstring": 51
     },
     "main.py": {
-      "physical_lines": 400,
-      "nonblank_noncomment_nondocstring": 356
+      "physical_lines": 445,
+      "nonblank_noncomment_nondocstring": 400
     },
     "manage.py": {
       "physical_lines": 45,
       "nonblank_noncomment_nondocstring": 37
     },
     "market_ui.py": {
-      "physical_lines": 564,
-      "nonblank_noncomment_nondocstring": 510
+      "physical_lines": 568,
+      "nonblank_noncomment_nondocstring": 512
     },
     "message_ui.py": {
-      "physical_lines": 357,
-      "nonblank_noncomment_nondocstring": 315
+      "physical_lines": 361,
+      "nonblank_noncomment_nondocstring": 317
     },
     "operations.py": {
       "physical_lines": 277,
@@ -82,23 +82,23 @@
       "nonblank_noncomment_nondocstring": 38
     },
     "seller_ui.py": {
-      "physical_lines": 764,
-      "nonblank_noncomment_nondocstring": 672
+      "physical_lines": 794,
+      "nonblank_noncomment_nondocstring": 698
     },
     "trades.py": {
       "physical_lines": 439,
       "nonblank_noncomment_nondocstring": 393
     },
     "trades_ui.py": {
-      "physical_lines": 635,
-      "nonblank_noncomment_nondocstring": 571
+      "physical_lines": 639,
+      "nonblank_noncomment_nondocstring": 573
     },
     "ui_common.py": {
-      "physical_lines": 736,
-      "nonblank_noncomment_nondocstring": 644
+      "physical_lines": 763,
+      "nonblank_noncomment_nondocstring": 665
     }
   },
-  "physical_total": 7053,
-  "nonblank_noncomment_nondocstring_total": 6172,
+  "physical_total": 7175,
+  "nonblank_noncomment_nondocstring_total": 6273,
   "checked_at": "2026-11-17"
 }

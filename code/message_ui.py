@@ -217,6 +217,10 @@ class MessageCenter(ttk.Frame):
         self.canvas.yview_scroll(-int(event.delta / 120), "units")
         return "break"
 
+    def on_resume(self):
+        """Update live rows while keeping the existing session controls."""
+        self.refresh()
+
     def refresh(self):
         """Merge caller-owned direct conversations with grouped system notifications."""
         position = self.canvas.yview()[0]

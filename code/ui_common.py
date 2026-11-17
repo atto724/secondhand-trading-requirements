@@ -734,3 +734,30 @@ def empty_state(parent, title, description, action=None, action_label="", backgr
             frame, text=action_label, style="Accent.TButton", command=lambda: guarded(frame, action)
         ).pack()
     return frame
+
+
+def resume_view(page):
+    """Refresh opted-in lists without replacing their forms or scroll positions."""
+    # In-page overlays own their current form/history; do not replace their contents.
+    overlays = [child for child in page.winfo_children() if child.place_info()]
+    if overlays:
+        resume_view(overlays[-1])
+        return
+    callback = getattr(page, "on_resume", None)
+    if callback is None:
+        return
+    positions = []
+
+    def capture(widget):
+        if isinstance(widget, tk.Canvas):
+            positions.append((widget, widget.xview()[0], widget.yview()[0]))
+        for child in widget.winfo_children():
+            capture(child)
+
+    capture(page)
+    callback()
+    page.update_idletasks()
+    for canvas, left, top in positions:
+        if canvas.winfo_exists():
+            canvas.xview_moveto(left)
+            canvas.yview_moveto(top)

@@ -373,6 +373,13 @@ class ChatPanel(tk.Frame):
             highlightthickness=0,
         )
         self.editor.pack(fill="x", expand=True)
+        self.draft_store = self.winfo_toplevel()
+        if not hasattr(self.draft_store, "chat_drafts"):
+            self.draft_store.chat_drafts = {}
+        self.draft_key = (actor, peer)
+        self.editor.insert("1.0", self.draft_store.chat_drafts.get(self.draft_key, ""))
+        self.editor.edit_modified(False)
+        self.editor.bind("<<Modified>>", self.remember_draft)
         self.editor.bind("<Control-Return>", self.keyboard_send)
         footer = tk.Frame(composer, bg=PAPER)
         footer.pack(fill="x", pady=(6, 0))
@@ -391,6 +398,16 @@ class ChatPanel(tk.Frame):
         self.receipt_timer = self.after(2000, self.poll_receipt)
         self.bind("<Destroy>", self.stop_poll)
 
+    def remember_draft(self, _event=None):
+        """Keep only unsent text in session memory, scoped to actor and recipient."""
+        if self.editor.edit_modified():
+            value = self.editor.get("1.0", "end-1c")
+            if value:
+                self.draft_store.chat_drafts[self.draft_key] = value
+            else:
+                self.draft_store.chat_drafts.pop(self.draft_key, None)
+            self.editor.edit_modified(False)
+
     def stop_poll(self, event):
         """Release the page-local timer when navigating away."""
         if event.widget == self and self.receipt_timer is not None:
@@ -399,6 +416,9 @@ class ChatPanel(tk.Frame):
 
     def poll_receipt(self):
         """Observe read receipts without marking unopened messages read."""
+        if not self.winfo_ismapped():
+            self.receipt_timer = self.after(2000, self.poll_receipt)
+            return
         try:
             self.history.show_receipt(latest_read_message(self.actor, self.peer))
         except (ValueError, sqlite3.Error):
@@ -429,6 +449,7 @@ class ChatPanel(tk.Frame):
         """Clear the draft only after successful persistence."""
         send_direct_message(self.actor, self.peer, self.editor.get("1.0", "end-1c"))
         self.editor.delete("1.0", "end")
+        self.draft_store.chat_drafts.pop(self.draft_key, None)
         self.refresh()
 
     def keyboard_send(self, _event):
@@ -515,6 +536,14 @@ class ChatPage(tk.Frame):
         self.chat.editor.focus_set()
         self.bind("<Escape>", lambda event: self.go_back())
 
+    def on_resume(self):
+        """Reconcile the shared draft when this peer is open through another entry."""
+        value = self.chat.draft_store.chat_drafts.get(self.chat.draft_key, "")
+        if self.chat.editor.get("1.0", "end-1c") != value:
+            self.chat.editor.delete("1.0", "end")
+            self.chat.editor.insert("1.0", value)
+            self.chat.editor.edit_modified(False)
+
     def send_product(self, actor, peer, product_id):
         """Persist a card without consuming any unsent text draft."""
         send_product_message(actor, peer, product_id)
@@ -530,6 +559,7 @@ class ChatPage(tk.Frame):
     def go_back(self):
         """Return to the caller and refresh its unread indicators."""
         callback = self.on_back
+        self.chat.remember_draft()
         self.destroy()
         if callback:
             callback()

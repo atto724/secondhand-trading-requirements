@@ -18,7 +18,7 @@ from registration_ui import RegistrationWindow
 from seller_ui import SellerPage
 from trades import run_timeouts
 from trades_ui import ReservationsPage
-from ui_common import ACCENT, INK, PAPER, avatar_photo, configure_style, guarded
+from ui_common import ACCENT, INK, PAPER, avatar_photo, configure_style, guarded, resume_view
 from community import seller_profile
 
 
@@ -27,6 +27,8 @@ class TradingApp:
 
     def __init__(self, root):
         self.root = root
+        self.root.chat_drafts = {}
+        self.active_tab = None
         self.account_id = None
         self.profile = None
         self.notebook = None
@@ -178,6 +180,7 @@ class TradingApp:
         self.notebook = ttk.Notebook(self.container, style="Main.TNotebook")
         self.notebook.pack(fill="both", expand=True, padx=12, pady=(0, 12))
         self.pages = {}
+        self.active_tab = None
         definitions = [
             ("浏览商品", lambda parent: CatalogPage(parent, self.account_id)),
             ("我的商品", lambda parent: MyProductsPage(parent, self.account_id)),
@@ -227,20 +230,48 @@ class TradingApp:
         self.open_tab()
 
     def open_tab(self, _event=None):
-        """Refresh the selected view so transitions do not leave stale progress."""
+        """Reuse session-owned pages while rechecking the current account."""
+        if self.notebook is None:
+            return
+        try:
+            self.profile = account_profile(self.account_id)
+        except ValueError:
+            self.logout()
+            messagebox.showwarning("请重新登录", "账号已不可用，已清除当前页面。", parent=self.root)
+            return
+        for key, (holder, _) in list(self.pages.items()):
+            if (
+                self.notebook.tab(key, "text") == "管理后台"
+                and "admin" not in self.profile["roles"]
+            ):
+                self.notebook.forget(holder)
+                holder.destroy()
+                self.nav_items.pop(key)[0].master.destroy()
+                del self.pages[key]
         selected = self.notebook.select()
         if not selected:
             return
         for key, (button, underline) in self.nav_items.items():
             button.configure(fg=ACCENT if key == selected else INK)
             underline.configure(bg=ACCENT if key == selected else PAPER)
+        if selected == self.active_tab:
+            return
+        self.active_tab = selected
         holder, factory = self.pages[selected]
-        for child in holder.winfo_children():
-            child.destroy()
 
         def build():
-            page = factory(holder)
-            page.pack(fill="both", expand=True)
+            children = holder.winfo_children()
+            if children:
+                resume_view(children[0])
+            else:
+                try:
+                    page = factory(holder)
+                    page.pack(fill="both", expand=True)
+                except Exception:
+                    for child in holder.winfo_children():
+                        child.destroy()
+                    self.active_tab = None
+                    raise
 
         guarded(self.root, build)
 
@@ -290,21 +321,32 @@ class TradingApp:
             line.pack(fill="x")
             tabs[str(frame)] = (button, line)
 
+        workspace.active_key = None
+
         def changed(_event=None):
+            if "admin" not in account_profile(self.account_id)["roles"]:
+                for child in workspace.winfo_children():
+                    child.destroy()
+                raise ValueError("管理员权限已被撤销，请切换到普通页面。")
             key = notebook.select()
             if not key:
                 return
             for identity, (button, line) in tabs.items():
                 button.configure(fg=ACCENT if identity == key else INK)
                 line.configure(bg=ACCENT if identity == key else PAPER)
+            if key == workspace.active_key:
+                return
+            workspace.active_key = key
             frame, factory = slots[key]
-            for child in frame.winfo_children():
-                child.destroy()
-            guarded(self.root, lambda: factory(frame).pack(fill="both", expand=True))
+            if frame.winfo_children():
+                guarded(self.root, lambda: resume_view(frame.winfo_children()[0]))
+            else:
+                guarded(self.root, lambda: factory(frame).pack(fill="both", expand=True))
 
-        notebook.bind("<<NotebookTabChanged>>", changed)
+        notebook.bind("<<NotebookTabChanged>>", lambda event: guarded(self.root, changed))
         workspace.notebook = notebook
         workspace.nav_items = tabs
+        workspace.on_resume = lambda: resume_view(slots[notebook.select()][0].winfo_children()[0])
         changed()
         return workspace
 
@@ -335,6 +377,7 @@ class TradingApp:
         self.profile = None
         self.username.set("")
         self.password.set("")
+        self.root.chat_drafts.clear()
         self.root.destroy()
 
     def logout(self):
@@ -347,6 +390,8 @@ class TradingApp:
         self.username.set("")
         self.password.set("")
         self.show_login()
+        self.root.chat_drafts.clear()
+        self.active_tab = None
         self.pages = {}
         self.nav_items = {}
         self.notebook = None

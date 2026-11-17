@@ -61,6 +61,10 @@ class ReviewPage(ttk.Frame):
         self.table.pack(fill="both", expand=True)
         self.refresh()
 
+    def on_resume(self):
+        """Update live rows while keeping the existing session controls."""
+        self.refresh()
+
     def refresh(self):
         """Retain exact review versions and backend permission rechecks."""
         rows = []
@@ -234,6 +238,10 @@ class AccountsPage(ttk.Frame):
         """Scroll only the account list."""
         self.canvas.yview_scroll(-int(event.delta / 120), "units")
         return "break"
+
+    def on_resume(self):
+        """Update live rows while keeping the existing session controls."""
+        self.refresh()
 
     def refresh(self):
         """Remove privileged controls if this account lost administrator access."""

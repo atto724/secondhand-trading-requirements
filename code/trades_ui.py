@@ -421,6 +421,10 @@ class ReservationsPage(ttk.Frame):
         self.table.bind("<<CardSelected>>", self.show_actions)
         self.refresh()
 
+    def on_resume(self):
+        """Update live rows while keeping the existing session controls."""
+        self.refresh()
+
     def refresh(self):
         """Refresh states/counts and retain the selected classification."""
         rows = list_reservations(self.actor, self.scope)

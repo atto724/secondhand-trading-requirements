@@ -2,7 +2,7 @@
 
 import json
 import tkinter as tk
-from tkinter import messagebox, simpledialog, ttk
+from tkinter import messagebox, ttk
 
 from governance import correct_sale, resolve_dispute
 from trades import (
@@ -569,18 +569,36 @@ class ReservationsPage(ttk.Frame):
             "correct": self.correct,
         }
 
-    def reason(self, title):
-        """Ask for a required reason; cancellation leaves the operation untouched."""
-        return simpledialog.askstring(title, "请填写原因或核实依据：", parent=self)
+    def reason_action(self, key, title, button, handler, note):
+        """Collect an explanation for a fixed reservation without opening a window."""
+        row = self.rows[key]
+        snapshot = json.loads(row["snapshot"])
+        self.rejection_panel.submit_button.configure(text=button)
+        self.rejection_panel.open(
+            title,
+            f"{snapshot['title']}  ·  预约编号 {key}  ·  买家 {row['buyer_name']}",
+            handler,
+            note=note + "\n原因或依据限1～1000字；Enter换行，Ctrl+Enter确认，Esc取消。",
+        )
 
     def detail(self):
         """Inspect the immutable snapshot and authorized contact field."""
         key = self.table.selected()
-        reason = self.reason("管理员访问依据") if self.scope == "admin" else ""
-        if reason is None:
-            return
-        data = transaction_detail(self.actor, key, reason)
-        ReservationDetail(self, self.actor, data, self.scope, reason)
+
+        def open_detail(reason):
+            data = transaction_detail(self.actor, key, reason)
+            ReservationDetail(self, self.actor, data, self.scope, reason)
+
+        if self.scope == "admin":
+            self.reason_action(
+                key,
+                "查看交易详情 · 填写访问依据",
+                "确认并查看",
+                open_detail,
+                "请说明本次核查目的；管理员访问依据将记录在审计日志中。",
+            )
+        else:
+            open_detail("")
 
     def confirm(self):
         """Confirm one buyer after explicit user intent."""
@@ -594,16 +612,12 @@ class ReservationsPage(ttk.Frame):
     def reject(self):
         """Explain the frozen target and collect a reason inside the current page."""
         key = self.table.selected()
-        row = self.rows[key]
-        snapshot = json.loads(row["snapshot"])
-        self.rejection_panel.open(
+        self.reason_action(
+            key,
             "拒绝预约 · 填写原因",
-            f"{snapshot['title']}  ·  预约编号 {key}  ·  买家 {row['buyer_name']}",
+            "确认拒绝预约",
             lambda reason: reject_reservation(self.actor, key, reason),
-            note=(
-                "拒绝原因将通知买家并保留记录，仅关闭这条预约，商品仍可接受其他预约。\n"
-                "请填写具体原因（1～1000字）；Enter换行，Ctrl+Enter确认，Esc取消。"
-            ),
+            "拒绝原因将通知买家并保留记录，仅关闭这条预约，商品仍可接受其他预约。",
         )
 
     def submit_rejection(self, _event=None):
@@ -619,10 +633,18 @@ class ReservationsPage(ttk.Frame):
     def cancel(self):
         """Cancel intent or start bilateral cancellation."""
         key = self.table.selected()
-        reason = self.reason("取消预约")
-        if reason is not None:
-            cancel_reservation(self.actor, key, reason)
-            self.refresh()
+        waiting = self.rows[key]["status"] == "waiting"
+        self.reason_action(
+            key,
+            "取消预约 · 填写原因" if waiting else "申请取消 · 填写原因",
+            "确认取消预约" if waiting else "提交取消申请",
+            lambda reason: cancel_reservation(self.actor, key, reason),
+            (
+                "尚未确认的预约可以直接取消，原因将保留并通知对方。"
+                if waiting
+                else "已确认的交易不会立即取消，需要对方同意；若存在争议，将交管理员核实。"
+            ),
+        )
 
     def respond(self, agree):
         """Respond as the other participant."""
@@ -647,16 +669,26 @@ class ReservationsPage(ttk.Frame):
         """Apply a reasoned administrator dispute resolution."""
 
         key = self.table.selected()
-        reason = self.reason("核实争议")
-        if reason is not None:
-            resolve_dispute(self.actor, key, cancel, reason)
-            self.refresh()
+        self.reason_action(
+            key,
+            "核实争议 · 填写处理依据",
+            "确认取消交易" if cancel else "确认继续交易",
+            lambda reason: resolve_dispute(self.actor, key, cancel, reason),
+            (
+                "核实后将取消交易并保留处理记录。"
+                if cancel
+                else "核实后将恢复交易进度并保留处理记录。"
+            ),
+        )
 
     def correct(self):
         """Append a correction instead of rewriting completed history."""
 
         key = self.table.selected()
-        reason = self.reason("更正错误成交")
-        if reason is not None:
-            correct_sale(self.actor, key, reason)
-            self.refresh()
+        self.reason_action(
+            key,
+            "更正错误成交 · 填写核实依据",
+            "确认更正成交",
+            lambda reason: correct_sale(self.actor, key, reason),
+            "仅在核实确未成交后操作；保留原成交及更正记录，商品回到待审核，不会直接公开。",
+        )

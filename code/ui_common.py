@@ -209,6 +209,10 @@ class InlineActionPanel(ttk.Frame):
             self.error.configure(text="请先填写处理原因。")
             self.reason.focus_set()
             return
+        if self.requires_reason and len(reason) > 1000:
+            self.error.configure(text="原因或核实依据不能超过1000个字符。")
+            self.reason.focus_set()
+            return
         try:
             self.handler(reason)
         except (ValueError, sqlite3.Error, OSError) as error:

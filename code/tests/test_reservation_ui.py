@@ -178,6 +178,66 @@ class ReservationPageTests(unittest.TestCase):
             reject.assert_called_once_with(2, 1, "暂时无法安排交付")
         self.assertEqual(panel.winfo_manager(), "")
 
+    def test_cancel_explains_direct_and_bilateral_flows_and_keeps_target(self):
+        for state, label in (("waiting", "确认取消预约"), ("confirmed", "提交取消申请")):
+            with self.subTest(state=state):
+                self.records[0] = fixture(1, state)
+                self.page.refresh()
+                self.select_group("all")
+                self.select(1)
+                with patch("trades_ui.cancel_reservation") as cancel:
+                    self.page.cancel()
+                    panel = self.page.rejection_panel
+                    self.assertEqual(panel.submit_button.cget("text"), label)
+                    if state == "confirmed":
+                        self.assertIn("需要对方同意", panel.note.cget("text"))
+                    panel.submit()
+                    cancel.assert_not_called()
+                    panel.reason.insert("1.0", "无法安排交易时间")
+                    self.select(2)
+                    panel.submit()
+                    cancel.assert_called_once_with(2, 1, "无法安排交易时间")
+
+    def test_admin_reason_actions_and_access_are_deferred_until_submit(self):
+        self.page.scope = "admin"
+        self.select(1)
+        panel = self.page.rejection_panel
+        for method, service, argument in (
+            (lambda: self.page.resolve(True), "resolve_dispute", True),
+            (lambda: self.page.resolve(False), "resolve_dispute", False),
+            (self.page.correct, "correct_sale", None),
+        ):
+            with self.subTest(service=service, argument=argument):
+                with patch("trades_ui." + service) as action:
+                    method()
+                    action.assert_not_called()
+                    panel.reason.insert("1.0", "已核查双方记录")
+                    panel.submit()
+                    expected = (2, 1, "已核查双方记录")
+                    if argument is not None:
+                        expected = (2, 1, argument, "已核查双方记录")
+                    action.assert_called_once_with(*expected)
+        with patch("trades_ui.transaction_detail", return_value={}) as detail:
+            with patch("trades_ui.ReservationDetail") as view:
+                self.page.detail()
+                detail.assert_not_called()
+                panel.reason.insert("1.0", "核实本次预约争议")
+                panel.submit()
+                detail.assert_called_once_with(2, 1, "核实本次预约争议")
+                view.assert_called_once_with(self.page, 2, {}, "admin", "核实本次预约争议")
+
+    def test_reason_limit_and_cancel_keep_database_handler_untouched(self):
+        self.select(1)
+        with patch("trades_ui.cancel_reservation") as cancel:
+            self.page.cancel()
+            panel = self.page.rejection_panel
+            panel.reason.insert("1.0", "字" * 1001)
+            panel.submit()
+            self.assertIn("1000", panel.error.cget("text"))
+            self.assertEqual(len(panel.reason.get("1.0", "end-1c")), 1001)
+            self.page.close_rejection()
+            cancel.assert_not_called()
+
     def test_card_uses_booking_snapshot_and_actions_target_the_clicked_record(self):
         snapshot = {
             "title": "预约当时的标题",

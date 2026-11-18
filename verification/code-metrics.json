@@ -90,19 +90,19 @@
       "nonblank_noncomment_nondocstring": 393
     },
     "trades_ui.py": {
-      "physical_lines": 662,
-      "nonblank_noncomment_nondocstring": 592
+      "physical_lines": 694,
+      "nonblank_noncomment_nondocstring": 622
     },
     "ui_common.py": {
-      "physical_lines": 756,
-      "nonblank_noncomment_nondocstring": 658
+      "physical_lines": 760,
+      "nonblank_noncomment_nondocstring": 662
     },
     "ui_runtime.py": {
       "physical_lines": 170,
       "nonblank_noncomment_nondocstring": 130
     }
   },
-  "physical_total": 7678,
-  "nonblank_noncomment_nondocstring_total": 6701,
+  "physical_total": 7714,
+  "nonblank_noncomment_nondocstring_total": 6735,
   "checked_at": "2026-11-18"
 }

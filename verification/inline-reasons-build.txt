@@ -1,0 +1,472 @@
+test_disabled_account_cannot_login (test_accounts.AccountTests.test_disabled_account_cannot_login)
+Disabled accounts cannot log in with a correct password. ... ok
+test_duplicate_registration_is_rejected (test_accounts.AccountTests.test_duplicate_registration_is_rejected)
+Duplicate names and phones do not create extra accounts. ... ok
+test_invalid_login (test_accounts.AccountTests.test_invalid_login)
+Wrong passwords and unknown accounts are rejected. ... ok
+test_registration_assigns_ordinary_roles (test_accounts.AccountTests.test_registration_assigns_ordinary_roles)
+New accounts receive buyer and seller roles only. ... ok
+test_valid_login (test_accounts.AccountTests.test_valid_login)
+Correct credentials return the account ID. ... ok
+test_account_search_filters_and_frozen_target_for_inline_change (test_admin_presentation.AdminPresentationTests.test_account_search_filters_and_frozen_target_for_inline_change) ... ok
+test_last_admin_protection_and_restore_does_not_grant_roles (test_admin_presentation.AdminPresentationTests.test_last_admin_protection_and_restore_does_not_grant_roles) ... ok
+test_plain_admin_navigation_and_reason_panel_visible_at_minimum_size (test_admin_presentation.AdminPresentationTests.test_plain_admin_navigation_and_reason_panel_visible_at_minimum_size) ... ok
+test_review_confirmation_keeps_target_and_rejects_stale_version (test_admin_presentation.AdminPresentationTests.test_review_confirmation_keeps_target_and_rejects_stale_version) ... ok
+test_review_groups_and_inline_rejection_require_reason (test_admin_presentation.AdminPresentationTests.test_review_groups_and_inline_rejection_require_reason) ... ok
+test_all_five_attachment_groups_and_restore_are_complete (test_backup_audit.BackupAuditTests.test_all_five_attachment_groups_and_restore_are_complete) ... ok
+test_backup_creation_refuses_missing_historical_file (test_backup_audit.BackupAuditTests.test_backup_creation_refuses_missing_historical_file) ... ok
+test_export_failure_and_permission_checks_preserve_existing_destination (test_backup_audit.BackupAuditTests.test_export_failure_and_permission_checks_preserve_existing_destination) ... ok
+test_export_over_2000_rows_filters_snapshot_and_formula_protection (test_backup_audit.BackupAuditTests.test_export_over_2000_rows_filters_snapshot_and_formula_protection) ... ok
+test_invalid_historical_json_paths_and_missing_database_are_rejected (test_backup_audit.BackupAuditTests.test_invalid_historical_json_paths_and_missing_database_are_rejected) ... ok
+test_missing_each_attachment_and_corrupt_avatar_are_rejected (test_backup_audit.BackupAuditTests.test_missing_each_attachment_and_corrupt_avatar_are_rejected) ... ok
+test_older_backup_without_optional_avatar_or_message_columns (test_backup_audit.BackupAuditTests.test_older_backup_without_optional_avatar_or_message_columns) ... ok
+test_pages_do_not_shift_when_queries_generate_new_matching_audit_rows (test_backup_audit.BackupAuditTests.test_pages_do_not_shift_when_queries_generate_new_matching_audit_rows) ... ok
+test_ui_pages_and_exports_all_applied_results (test_backup_audit.BackupAuditTests.test_ui_pages_and_exports_all_applied_results) ... ok
+test_avatar_database_failure_cleans_copy (test_community.CommunityTests.test_avatar_database_failure_cleans_copy) ... ok
+test_avatar_is_owner_scoped_and_survives_source_removal (test_community.CommunityTests.test_avatar_is_owner_scoped_and_survives_source_removal) ... ok
+test_bidirectional_messages_unread_and_third_party_isolation (test_community.CommunityTests.test_bidirectional_messages_unread_and_third_party_isolation) ... ok
+test_bulk_read_is_idempotent_and_scoped_to_incoming_messages (test_community.CommunityTests.test_bulk_read_is_idempotent_and_scoped_to_incoming_messages) ... ok
+test_cursor_pagination_does_not_mark_unseen_older_messages_read (test_community.CommunityTests.test_cursor_pagination_does_not_mark_unseen_older_messages_read) ... ok
+test_invalid_or_disabled_sender_and_receiver_cannot_send (test_community.CommunityTests.test_invalid_or_disabled_sender_and_receiver_cannot_send) ... ok
+test_latest_read_receipt_is_cleared_by_a_new_unread_message (test_community.CommunityTests.test_latest_read_receipt_is_cleared_by_a_new_unread_message) ... ok
+test_public_allowlist_zero_cohort_and_self_profile_update (test_community.CommunityTests.test_public_allowlist_zero_cohort_and_self_profile_update) ... ok
+test_public_inventory_and_rate_have_distinct_historical_scope (test_community.CommunityTests.test_public_inventory_and_rate_have_distinct_historical_scope) ... ok
+test_all_accounts_have_default_avatar_and_owner_can_replace (test_detail_ui.DetailPageTests.test_all_accounts_have_default_avatar_and_owner_can_replace) ... ok
+test_booking_detail_keeps_snapshot_images_and_refresh_rechecks_contact (test_detail_ui.DetailPageTests.test_booking_detail_keeps_snapshot_images_and_refresh_rechecks_contact) ... ok
+test_buyer_and_seller_booking_details_open_inline_and_preserve_category (test_detail_ui.DetailPageTests.test_buyer_and_seller_booking_details_open_inline_and_preserve_category) ... ok
+test_chat_long_text_wraps_and_refresh_keeps_one_bubble_per_message (test_detail_ui.DetailPageTests.test_chat_long_text_wraps_and_refresh_keeps_one_bubble_per_message) ... ok
+test_chat_receipt_only_appears_after_latest_outgoing_is_read (test_detail_ui.DetailPageTests.test_chat_receipt_only_appears_after_latest_outgoing_is_read) ... ok
+test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox (test_detail_ui.DetailPageTests.test_chat_send_failure_keeps_draft_and_reply_is_available_in_inbox) ... ok
+test_conversation_center_avatar_row_opens_chat_and_refreshes_dot_on_return (test_detail_ui.DetailPageTests.test_conversation_center_avatar_row_opens_chat_and_refreshes_dot_on_return) ... ok
+test_exit_application_menu_closes_app_without_mutating_stored_account (test_detail_ui.DetailPageTests.test_exit_application_menu_closes_app_without_mutating_stored_account) ... ok
+test_gallery_boundaries_and_real_thumbnail_switching (test_detail_ui.DetailPageTests.test_gallery_boundaries_and_real_thumbnail_switching) ... ok
+test_header_uses_transparent_circle_and_three_account_actions (test_detail_ui.DetailPageTests.test_header_uses_transparent_circle_and_three_account_actions) ... ok
+test_logout_and_switch_account_forget_credentials_and_old_pages (test_detail_ui.DetailPageTests.test_logout_and_switch_account_forget_credentials_and_old_pages) ... ok
+test_modern_chat_uses_rounded_wrapped_bubbles_and_compact_header (test_detail_ui.DetailPageTests.test_modern_chat_uses_rounded_wrapped_bubbles_and_compact_header) ... ok
+test_my_products_cards_filter_and_bind_actions_to_each_product (test_detail_ui.DetailPageTests.test_my_products_cards_filter_and_bind_actions_to_each_product) ... ok
+test_owner_profile_can_be_saved_without_a_product (test_detail_ui.DetailPageTests.test_owner_profile_can_be_saved_without_a_product) ... ok
+test_plain_primary_navigation_preserves_labels_and_switches_pages (test_detail_ui.DetailPageTests.test_plain_primary_navigation_preserves_labels_and_switches_pages) ... ok
+test_primary_message_center_has_no_tables_or_nested_tabs (test_detail_ui.DetailPageTests.test_primary_message_center_has_no_tables_or_nested_tabs) ... ok
+test_private_composer_visible_at_minimum_window_size (test_detail_ui.DetailPageTests.test_private_composer_visible_at_minimum_window_size) ... ok
+test_private_inbox_dots_clear_after_read_or_mark_all (test_detail_ui.DetailPageTests.test_private_inbox_dots_clear_after_read_or_mark_all) ... ok
+test_private_message_button_opens_only_conversation_and_returns_to_detail (test_detail_ui.DetailPageTests.test_private_message_button_opens_only_conversation_and_returns_to_detail) ... ok
+test_product_card_with_waiting_reservation_hides_edit_and_delist (test_detail_ui.DetailPageTests.test_product_card_with_waiting_reservation_hides_edit_and_delist) ... ok
+test_return_preserves_list_state_without_secondary_window (test_detail_ui.DetailPageTests.test_return_preserves_list_state_without_secondary_window) ... ok
+test_seller_box_opens_profile_without_reading_private_messages (test_detail_ui.DetailPageTests.test_seller_box_opens_profile_without_reading_private_messages) ... ok
+test_sent_and_received_bubbles_are_visible_and_align_by_sender (test_detail_ui.DetailPageTests.test_sent_and_received_bubbles_are_visible_and_align_by_sender) ... ok
+test_system_notification_opens_inline_and_dot_disappears (test_detail_ui.DetailPageTests.test_system_notification_opens_inline_and_dot_disappears) ... ok
+test_system_thread_groups_notifications_and_only_reads_the_opened_group (test_detail_ui.DetailPageTests.test_system_thread_groups_notifications_and_only_reads_the_opened_group) ... ok
+test_duplicate_legacy_category_merges_without_losing_products (test_gallery.GalleryTests.test_duplicate_legacy_category_merges_without_losing_products) ... ok
+test_gallery_images_classification_and_idempotency (test_gallery.GalleryTests.test_gallery_images_classification_and_idempotency) ... ok
+test_interrupted_photo_marker_does_not_duplicate_images (test_gallery.GalleryTests.test_interrupted_photo_marker_does_not_duplicate_images) ... ok
+test_legacy_rename_preserves_product_id_and_snapshot (test_gallery.GalleryTests.test_legacy_rename_preserves_product_id_and_snapshot) ... ok
+test_photo_upgrade_defers_live_booking_and_preserves_snapshot (test_gallery.GalleryTests.test_photo_upgrade_defers_live_booking_and_preserves_snapshot) ... ok
+test_ten_categories_in_confirmed_order (test_gallery.GalleryTests.test_ten_categories_in_confirmed_order) ... ok
+test_create_and_edit_open_inline_and_survive_navigation (test_inline_editor.InlineEditorTests.test_create_and_edit_open_inline_and_survive_navigation) ... ok
+test_local_keyboard_shortcuts_and_minimum_window_footer (test_inline_editor.InlineEditorTests.test_local_keyboard_shortcuts_and_minimum_window_footer) ... ok
+test_required_fields_images_and_save_keep_list_state (test_inline_editor.InlineEditorTests.test_required_fields_images_and_save_keep_list_state) ... ok
+test_admin_subpages_preserve_inputs_and_revoke_clears_cache (test_page_state.PageStateTests.test_admin_subpages_preserve_inputs_and_revoke_clears_cache) ... ok
+test_chat_draft_survives_tabs_back_and_isolated_peers (test_page_state.PageStateTests.test_chat_draft_survives_tabs_back_and_isolated_peers) ... ok
+test_lists_refresh_live_data_without_resetting_filter (test_page_state.PageStateTests.test_lists_refresh_live_data_without_resetting_filter) ... ok
+test_logout_switch_and_disabled_account_clear_drafts_and_pages (test_page_state.PageStateTests.test_logout_switch_and_disabled_account_clear_drafts_and_pages) ... ok
+test_search_pagination_overlay_and_scroll_survive_navigation (test_page_state.PageStateTests.test_search_pagination_overlay_and_scroll_survive_navigation) ... ok
+test_missing_information_is_explicit (test_presentation.PresentationTests.test_missing_information_is_explicit) ... ok
+test_money_is_shown_in_yuan (test_presentation.PresentationTests.test_money_is_shown_in_yuan) ... ok
+test_password_material_is_not_displayed (test_presentation.PresentationTests.test_password_material_is_not_displayed) ... ok
+test_roles_and_state_are_localized (test_presentation.PresentationTests.test_roles_and_state_are_localized) ... ok
+test_utc_timestamp_crosses_into_next_local_date (test_presentation.PresentationTests.test_utc_timestamp_crosses_into_next_local_date) ... ok
+test_empty_state_actions_restore_filters_and_offer_navigation (test_product_messages.ProductMessageTests.test_empty_state_actions_restore_filters_and_offer_navigation) ... ok
+test_explicit_send_card_render_click_and_text_draft (test_product_messages.ProductMessageTests.test_explicit_send_card_render_click_and_text_draft) ... ok
+test_migration_preserves_plain_text_and_is_repeatable (test_product_messages.ProductMessageTests.test_migration_preserves_plain_text_and_is_repeatable) ... ok
+test_reject_wrong_seller_private_product_and_disabled_sender (test_product_messages.ProductMessageTests.test_reject_wrong_seller_private_product_and_disabled_sender) ... ok
+test_snapshot_survives_product_change_and_is_participant_scoped (test_product_messages.ProductMessageTests.test_snapshot_survives_product_change_and_is_participant_scoped) ... ok
+test_categories_partition_all_states_and_blocked_product_hides_confirmation (test_reservation_ui.ReservationActionTests.test_categories_partition_all_states_and_blocked_product_hides_confirmation) ... ok
+test_each_state_has_only_meaningful_buyer_and_seller_actions (test_reservation_ui.ReservationActionTests.test_each_state_has_only_meaningful_buyer_and_seller_actions) ... ok
+test_admin_reason_actions_and_access_are_deferred_until_submit (test_reservation_ui.ReservationPageTests.test_admin_reason_actions_and_access_are_deferred_until_submit) ... ok
+test_cancel_explains_direct_and_bilateral_flows_and_keeps_target (test_reservation_ui.ReservationPageTests.test_cancel_explains_direct_and_bilateral_flows_and_keeps_target) ... ok
+test_card_uses_booking_snapshot_and_actions_target_the_clicked_record (test_reservation_ui.ReservationPageTests.test_card_uses_booking_snapshot_and_actions_target_the_clicked_record) ... ok
+test_combined_trading_cards_keep_distinct_progress_and_actions (test_reservation_ui.ReservationPageTests.test_combined_trading_cards_keep_distinct_progress_and_actions) ... ok
+test_group_selection_and_cancellation_direction_control_visible_buttons (test_reservation_ui.ReservationPageTests.test_group_selection_and_cancellation_direction_control_visible_buttons) ... ok
+test_issues_sort_actionable_requests_first_and_default_all_without_pending (test_reservation_ui.ReservationPageTests.test_issues_sort_actionable_requests_first_and_default_all_without_pending) ... ok
+test_reason_limit_and_cancel_keep_database_handler_untouched (test_reservation_ui.ReservationPageTests.test_reason_limit_and_cancel_keep_database_handler_untouched) ... ok
+test_refresh_removes_changed_record_and_stale_actions_without_resetting_category (test_reservation_ui.ReservationPageTests.test_refresh_removes_changed_record_and_stale_actions_without_resetting_category) ... ok
+test_rejection_is_inline_and_cancel_or_blank_does_not_mutate (test_reservation_ui.ReservationPageTests.test_rejection_is_inline_and_cancel_or_blank_does_not_mutate) ... ok
+test_rejection_retains_failure_and_uses_original_target (test_reservation_ui.ReservationPageTests.test_rejection_retains_failure_and_uses_original_target) ... ok
+test_async_login_ignores_duplicates_and_stale_session_result (test_ui_runtime.RuntimeTests.test_async_login_ignores_duplicates_and_stale_session_result) ... ok
+test_background_work_keeps_ui_alive_and_delivers_on_main_thread (test_ui_runtime.RuntimeTests.test_background_work_keeps_ui_alive_and_delivers_on_main_thread) ... ok
+test_image_cache_reuses_pixels_invalidates_changes_and_is_bounded (test_ui_runtime.RuntimeTests.test_image_cache_reuses_pixels_invalidates_changes_and_is_bounded) ... ok
+test_maintenance_uses_one_background_job (test_ui_runtime.RuntimeTests.test_maintenance_uses_one_background_job) ... ok
+test_touchpad_over_product_image_and_button_scrolls_only_its_canvas (test_ui_runtime.RuntimeTests.test_touchpad_over_product_image_and_button_scrolls_only_its_canvas) ... ok
+test_unchanged_card_refresh_keeps_existing_widgets (test_ui_runtime.RuntimeTests.test_unchanged_card_refresh_keeps_existing_widgets) ... ok
+test_wheel_coalesces_and_preserves_native_editor_scrolling (test_ui_runtime.RuntimeTests.test_wheel_coalesces_and_preserves_native_editor_scrolling) ... ok
+test_wheel_uses_hover_when_keyboard_focus_is_in_header (test_ui_runtime.RuntimeTests.test_wheel_uses_hover_when_keyboard_focus_is_in_header) ... ok
+test_admin_permissions_rechecked (test_workflows.WorkflowTests.test_admin_permissions_rechecked) ... ok
+test_audit_failure_and_export_are_recorded (test_workflows.WorkflowTests.test_audit_failure_and_export_are_recorded) ... ok
+test_bilateral_cancel_restores_publication (test_workflows.WorkflowTests.test_bilateral_cancel_restores_publication) ... ok
+test_combined_search_and_pagination (test_workflows.WorkflowTests.test_combined_search_and_pagination) ... ok
+test_completion_failure_does_not_sell_product (test_workflows.WorkflowTests.test_completion_failure_does_not_sell_product) ... ok
+test_completion_idempotent_and_snapshot_immutable (test_workflows.WorkflowTests.test_completion_idempotent_and_snapshot_immutable) ... ok
+test_confirmation_fault_rolls_back_both_states (test_workflows.WorkflowTests.test_confirmation_fault_rolls_back_both_states) ... ok
+test_contacts_hidden_before_confirm_and_after_completion (test_workflows.WorkflowTests.test_contacts_hidden_before_confirm_and_after_completion) ... ok
+test_database_image_failure_rolls_back_and_cleans (test_workflows.WorkflowTests.test_database_image_failure_rolls_back_and_cleans) ... ok
+test_disabled_seller_restore_does_not_republish (test_workflows.WorkflowTests.test_disabled_seller_restore_does_not_republish) ... ok
+test_edit_published_requires_new_review_and_preserves_history (test_workflows.WorkflowTests.test_edit_published_requires_new_review_and_preserves_history) ... ok
+test_image_success_and_source_independence (test_workflows.WorkflowTests.test_image_success_and_source_independence) ... ok
+test_legacy_empty_draft_requires_repair_or_delete (test_workflows.WorkflowTests.test_legacy_empty_draft_requires_repair_or_delete) ... ok
+test_more_than_five_images_rejected_atomically (test_workflows.WorkflowTests.test_more_than_five_images_rejected_atomically) ... ok
+test_notification_failure_does_not_undo_confirmation (test_workflows.WorkflowTests.test_notification_failure_does_not_undo_confirmation) ... ok
+test_overdue_delivery_remains_reserved (test_workflows.WorkflowTests.test_overdue_delivery_remains_reserved) ... ok
+test_owner_isolation (test_workflows.WorkflowTests.test_owner_isolation) ... ok
+test_required_fields_and_price (test_workflows.WorkflowTests.test_required_fields_and_price) ... ok
+test_restore_into_new_directory_and_refuse_overwrite (test_workflows.WorkflowTests.test_restore_into_new_directory_and_refuse_overwrite) ... ok
+test_review_rejection_and_stale_version (test_workflows.WorkflowTests.test_review_rejection_and_stale_version) ... ok
+test_schema_upgrade_preserves_old_rows (test_workflows.WorkflowTests.test_schema_upgrade_preserves_old_rows) ... ok
+test_second_image_failure_rolls_back_everything (test_workflows.WorkflowTests.test_second_image_failure_rolls_back_everything) ... ok
+test_self_reservation_forbidden_and_retry_idempotent (test_workflows.WorkflowTests.test_self_reservation_forbidden_and_retry_idempotent) ... ok
+test_soft_delete_draft (test_workflows.WorkflowTests.test_soft_delete_draft) ... ok
+test_timeout_boundary_and_fresh_request (test_workflows.WorkflowTests.test_timeout_boundary_and_fresh_request) ... ok
+test_twenty_concurrent_confirmations_only_one_succeeds (test_workflows.WorkflowTests.test_twenty_concurrent_confirmations_only_one_succeeds) ... ok
+test_violation_cancellation_never_republishes (test_workflows.WorkflowTests.test_violation_cancellation_never_republishes) ... ok
+test_waiting_blocks_edit_and_delist (test_workflows.WorkflowTests.test_waiting_blocks_edit_and_delist) ... ok
+test_zero_cohort_statistics_and_backup_restore (test_workflows.WorkflowTests.test_zero_cohort_statistics_and_backup_restore) ... ok
+
+----------------------------------------------------------------------
+Ran 126 tests in 185.283s
+
+OK
+ͼƬ�����ݻ���handbag����ǰ״̬����ЧԤԼ���ƣ�
+Black formatting: 40 files passed
+
+------------------------------------
+Your code has been rated at 10.00/10
+
+* Getting build dependencies for sdist...
+running egg_info
+writing secondhand_trading_desktop.egg-info\PKG-INFO
+writing dependency_links to secondhand_trading_desktop.egg-info\dependency_links.txt
+writing entry points to secondhand_trading_desktop.egg-info\entry_points.txt
+writing requirements to secondhand_trading_desktop.egg-info\requires.txt
+writing top-level names to secondhand_trading_desktop.egg-info\top_level.txt
+reading manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+writing manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+* Building sdist...
+running sdist
+running egg_info
+writing secondhand_trading_desktop.egg-info\PKG-INFO
+writing dependency_links to secondhand_trading_desktop.egg-info\dependency_links.txt
+writing entry points to secondhand_trading_desktop.egg-info\entry_points.txt
+writing requirements to secondhand_trading_desktop.egg-info\requires.txt
+writing top-level names to secondhand_trading_desktop.egg-info\top_level.txt
+reading manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+writing manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+running check
+creating secondhand_trading_desktop-0.3.0
+creating secondhand_trading_desktop-0.3.0\demo_assets
+creating secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+creating secondhand_trading_desktop-0.3.0\tests
+copying files to secondhand_trading_desktop-0.3.0...
+copying README.md -> secondhand_trading_desktop-0.3.0
+copying accounts.py -> secondhand_trading_desktop-0.3.0
+copying admin_ui.py -> secondhand_trading_desktop-0.3.0
+copying benchmark.py -> secondhand_trading_desktop-0.3.0
+copying catalog.py -> secondhand_trading_desktop-0.3.0
+copying community.py -> secondhand_trading_desktop-0.3.0
+copying core.py -> secondhand_trading_desktop-0.3.0
+copying database.py -> secondhand_trading_desktop-0.3.0
+copying demo.py -> secondhand_trading_desktop-0.3.0
+copying domain.py -> secondhand_trading_desktop-0.3.0
+copying editor_ui.py -> secondhand_trading_desktop-0.3.0
+copying governance.py -> secondhand_trading_desktop-0.3.0
+copying images.py -> secondhand_trading_desktop-0.3.0
+copying main.py -> secondhand_trading_desktop-0.3.0
+copying manage.py -> secondhand_trading_desktop-0.3.0
+copying market_ui.py -> secondhand_trading_desktop-0.3.0
+copying message_ui.py -> secondhand_trading_desktop-0.3.0
+copying operations.py -> secondhand_trading_desktop-0.3.0
+copying products.py -> secondhand_trading_desktop-0.3.0
+copying products_ui.py -> secondhand_trading_desktop-0.3.0
+copying pyproject.toml -> secondhand_trading_desktop-0.3.0
+copying registration_ui.py -> secondhand_trading_desktop-0.3.0
+copying schema.py -> secondhand_trading_desktop-0.3.0
+copying security.py -> secondhand_trading_desktop-0.3.0
+copying seller_ui.py -> secondhand_trading_desktop-0.3.0
+copying trades.py -> secondhand_trading_desktop-0.3.0
+copying trades_ui.py -> secondhand_trading_desktop-0.3.0
+copying ui_common.py -> secondhand_trading_desktop-0.3.0
+copying ui_runtime.py -> secondhand_trading_desktop-0.3.0
+copying demo_assets\README.md -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\__init__.py -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\avatar_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\avatar_2.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\avatar_3.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\avatar_4.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\backpack.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\backpack_detail_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\badminton.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\bear_light.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\bear_light_detail_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\bear_light_detail_2.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\board_game.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\board_game_detail_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\chair.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\desk_lamp.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\foundation.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\foundation_detail_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\foundation_detail_2.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\handbag.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\handbag_detail_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\handbag_detail_2.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\jacket.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\laptop.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\laptop_detail_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\laptop_detail_2.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\pet_carrier.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\scooter.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\shoes.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\stroller.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\stroller_detail_1.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\stroller_detail_2.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying demo_assets\textbook.jpg -> secondhand_trading_desktop-0.3.0\demo_assets
+copying secondhand_trading_desktop.egg-info\PKG-INFO -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying secondhand_trading_desktop.egg-info\SOURCES.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying secondhand_trading_desktop.egg-info\dependency_links.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying secondhand_trading_desktop.egg-info\entry_points.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying secondhand_trading_desktop.egg-info\requires.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying secondhand_trading_desktop.egg-info\top_level.txt -> secondhand_trading_desktop-0.3.0\secondhand_trading_desktop.egg-info
+copying tests\test_accounts.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_admin_presentation.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_backup_audit.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_community.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_detail_ui.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_gallery.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_inline_editor.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_page_state.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_presentation.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_product_messages.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_reservation_ui.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_ui_runtime.py -> secondhand_trading_desktop-0.3.0\tests
+copying tests\test_workflows.py -> secondhand_trading_desktop-0.3.0\tests
+Writing secondhand_trading_desktop-0.3.0\setup.cfg
+Creating tar archive
+removing 'secondhand_trading_desktop-0.3.0' (and everything under it)
+* Building wheel from sdist
+* Getting build dependencies for wheel...
+running egg_info
+writing secondhand_trading_desktop.egg-info\PKG-INFO
+writing dependency_links to secondhand_trading_desktop.egg-info\dependency_links.txt
+writing entry points to secondhand_trading_desktop.egg-info\entry_points.txt
+writing requirements to secondhand_trading_desktop.egg-info\requires.txt
+writing top-level names to secondhand_trading_desktop.egg-info\top_level.txt
+reading manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+writing manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+* Building wheel...
+running bdist_wheel
+running build
+running build_py
+creating build\lib
+copying accounts.py -> build\lib
+copying admin_ui.py -> build\lib
+copying catalog.py -> build\lib
+copying community.py -> build\lib
+copying core.py -> build\lib
+copying database.py -> build\lib
+copying demo.py -> build\lib
+copying domain.py -> build\lib
+copying editor_ui.py -> build\lib
+copying governance.py -> build\lib
+copying images.py -> build\lib
+copying main.py -> build\lib
+copying manage.py -> build\lib
+copying market_ui.py -> build\lib
+copying message_ui.py -> build\lib
+copying operations.py -> build\lib
+copying products.py -> build\lib
+copying products_ui.py -> build\lib
+copying registration_ui.py -> build\lib
+copying schema.py -> build\lib
+copying seller_ui.py -> build\lib
+copying security.py -> build\lib
+copying trades.py -> build\lib
+copying trades_ui.py -> build\lib
+copying ui_common.py -> build\lib
+copying ui_runtime.py -> build\lib
+copying benchmark.py -> build\lib
+creating build\lib\demo_assets
+copying demo_assets\__init__.py -> build\lib\demo_assets
+running egg_info
+writing secondhand_trading_desktop.egg-info\PKG-INFO
+writing dependency_links to secondhand_trading_desktop.egg-info\dependency_links.txt
+writing entry points to secondhand_trading_desktop.egg-info\entry_points.txt
+writing requirements to secondhand_trading_desktop.egg-info\requires.txt
+writing top-level names to secondhand_trading_desktop.egg-info\top_level.txt
+reading manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+writing manifest file 'secondhand_trading_desktop.egg-info\SOURCES.txt'
+copying demo_assets\README.md -> build\lib\demo_assets
+copying demo_assets\avatar_1.jpg -> build\lib\demo_assets
+copying demo_assets\avatar_2.jpg -> build\lib\demo_assets
+copying demo_assets\avatar_3.jpg -> build\lib\demo_assets
+copying demo_assets\avatar_4.jpg -> build\lib\demo_assets
+copying demo_assets\backpack.jpg -> build\lib\demo_assets
+copying demo_assets\backpack_detail_1.jpg -> build\lib\demo_assets
+copying demo_assets\badminton.jpg -> build\lib\demo_assets
+copying demo_assets\bear_light.jpg -> build\lib\demo_assets
+copying demo_assets\bear_light_detail_1.jpg -> build\lib\demo_assets
+copying demo_assets\bear_light_detail_2.jpg -> build\lib\demo_assets
+copying demo_assets\board_game.jpg -> build\lib\demo_assets
+copying demo_assets\board_game_detail_1.jpg -> build\lib\demo_assets
+copying demo_assets\chair.jpg -> build\lib\demo_assets
+copying demo_assets\desk_lamp.jpg -> build\lib\demo_assets
+copying demo_assets\foundation.jpg -> build\lib\demo_assets
+copying demo_assets\foundation_detail_1.jpg -> build\lib\demo_assets
+copying demo_assets\foundation_detail_2.jpg -> build\lib\demo_assets
+copying demo_assets\handbag.jpg -> build\lib\demo_assets
+copying demo_assets\handbag_detail_1.jpg -> build\lib\demo_assets
+copying demo_assets\handbag_detail_2.jpg -> build\lib\demo_assets
+copying demo_assets\jacket.jpg -> build\lib\demo_assets
+copying demo_assets\laptop.jpg -> build\lib\demo_assets
+copying demo_assets\laptop_detail_1.jpg -> build\lib\demo_assets
+copying demo_assets\laptop_detail_2.jpg -> build\lib\demo_assets
+copying demo_assets\pet_carrier.jpg -> build\lib\demo_assets
+copying demo_assets\scooter.jpg -> build\lib\demo_assets
+copying demo_assets\shoes.jpg -> build\lib\demo_assets
+copying demo_assets\stroller.jpg -> build\lib\demo_assets
+copying demo_assets\stroller_detail_1.jpg -> build\lib\demo_assets
+copying demo_assets\stroller_detail_2.jpg -> build\lib\demo_assets
+copying demo_assets\textbook.jpg -> build\lib\demo_assets
+installing to build\bdist.win-amd64\wheel
+running install
+running install_lib
+creating build\bdist.win-amd64\wheel
+copying build\lib\accounts.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\admin_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\benchmark.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\catalog.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\community.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\core.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\database.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\demo.py -> build\bdist.win-amd64\wheel\.
+creating build\bdist.win-amd64\wheel\demo_assets
+copying build\lib\demo_assets\avatar_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\avatar_2.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\avatar_3.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\avatar_4.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\backpack.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\backpack_detail_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\badminton.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\bear_light.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\bear_light_detail_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\bear_light_detail_2.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\board_game.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\board_game_detail_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\chair.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\desk_lamp.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\foundation.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\foundation_detail_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\foundation_detail_2.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\handbag.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\handbag_detail_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\handbag_detail_2.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\jacket.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\laptop.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\laptop_detail_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\laptop_detail_2.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\pet_carrier.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\README.md -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\scooter.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\shoes.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\stroller.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\stroller_detail_1.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\stroller_detail_2.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\textbook.jpg -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\demo_assets\__init__.py -> build\bdist.win-amd64\wheel\.\demo_assets
+copying build\lib\domain.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\editor_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\governance.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\images.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\main.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\manage.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\market_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\message_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\operations.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\products.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\products_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\registration_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\schema.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\security.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\seller_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\trades.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\trades_ui.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\ui_common.py -> build\bdist.win-amd64\wheel\.
+copying build\lib\ui_runtime.py -> build\bdist.win-amd64\wheel\.
+running install_egg_info
+Copying secondhand_trading_desktop.egg-info to build\bdist.win-amd64\wheel\.\secondhand_trading_desktop-0.3.0-py3.14.egg-info
+running install_scripts
+creating build\bdist.win-amd64\wheel\secondhand_trading_desktop-0.3.0.dist-info\WHEEL
+creating 'C:\\Users\\12822\\Documents\\secondhand-trading-requirements\\code\\dist\\.tmp-__aab0zs\\secondhand_trading_desktop-0.3.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+adding 'accounts.py'
+adding 'admin_ui.py'
+adding 'benchmark.py'
+adding 'catalog.py'
+adding 'community.py'
+adding 'core.py'
+adding 'database.py'
+adding 'demo.py'
+adding 'domain.py'
+adding 'editor_ui.py'
+adding 'governance.py'
+adding 'images.py'
+adding 'main.py'
+adding 'manage.py'
+adding 'market_ui.py'
+adding 'message_ui.py'
+adding 'operations.py'
+adding 'products.py'
+adding 'products_ui.py'
+adding 'registration_ui.py'
+adding 'schema.py'
+adding 'security.py'
+adding 'seller_ui.py'
+adding 'trades.py'
+adding 'trades_ui.py'
+adding 'ui_common.py'
+adding 'ui_runtime.py'
+adding 'demo_assets/README.md'
+adding 'demo_assets/__init__.py'
+adding 'demo_assets/avatar_1.jpg'
+adding 'demo_assets/avatar_2.jpg'
+adding 'demo_assets/avatar_3.jpg'
+adding 'demo_assets/avatar_4.jpg'
+adding 'demo_assets/backpack.jpg'
+adding 'demo_assets/backpack_detail_1.jpg'
+adding 'demo_assets/badminton.jpg'
+adding 'demo_assets/bear_light.jpg'
+adding 'demo_assets/bear_light_detail_1.jpg'
+adding 'demo_assets/bear_light_detail_2.jpg'
+adding 'demo_assets/board_game.jpg'
+adding 'demo_assets/board_game_detail_1.jpg'
+adding 'demo_assets/chair.jpg'
+adding 'demo_assets/desk_lamp.jpg'
+adding 'demo_assets/foundation.jpg'
+adding 'demo_assets/foundation_detail_1.jpg'
+adding 'demo_assets/foundation_detail_2.jpg'
+adding 'demo_assets/handbag.jpg'
+adding 'demo_assets/handbag_detail_1.jpg'
+adding 'demo_assets/handbag_detail_2.jpg'
+adding 'demo_assets/jacket.jpg'
+adding 'demo_assets/laptop.jpg'
+adding 'demo_assets/laptop_detail_1.jpg'
+adding 'demo_assets/laptop_detail_2.jpg'
+adding 'demo_assets/pet_carrier.jpg'
+adding 'demo_assets/scooter.jpg'
+adding 'demo_assets/shoes.jpg'
+adding 'demo_assets/stroller.jpg'
+adding 'demo_assets/stroller_detail_1.jpg'
+adding 'demo_assets/stroller_detail_2.jpg'
+adding 'demo_assets/textbook.jpg'
+adding 'secondhand_trading_desktop-0.3.0.dist-info/METADATA'
+adding 'secondhand_trading_desktop-0.3.0.dist-info/WHEEL'
+adding 'secondhand_trading_desktop-0.3.0.dist-info/entry_points.txt'
+adding 'secondhand_trading_desktop-0.3.0.dist-info/top_level.txt'
+adding 'secondhand_trading_desktop-0.3.0.dist-info/RECORD'
+removing build\bdist.win-amd64\wheel
+Successfully built secondhand_trading_desktop-0.3.0.tar.gz and secondhand_trading_desktop-0.3.0-py3-none-any.whl

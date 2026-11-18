@@ -160,9 +160,10 @@ class InlineActionPanel(ttk.Frame):
         self.error.pack(anchor="w", pady=4)
         buttons = ttk.Frame(self)
         buttons.pack(fill="x")
-        ttk.Button(buttons, text="确认操作", style="Accent.TButton", command=self.submit).pack(
-            side="right"
+        self.submit_button = ttk.Button(
+            buttons, text="确认操作", style="Accent.TButton", command=self.submit
         )
+        self.submit_button.pack(side="right")
         ttk.Button(buttons, text="取消", command=self.close).pack(side="right", padx=10)
 
     def open(self, title, subject, handler, requires_reason=True, note=""):

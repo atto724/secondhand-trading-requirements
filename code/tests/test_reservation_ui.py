@@ -139,6 +139,45 @@ class ReservationPageTests(unittest.TestCase):
         self.select(1)
         self.assertEqual(self.buttons(), ["登记交付", "申请取消"])
 
+    def test_rejection_is_inline_and_cancel_or_blank_does_not_mutate(self):
+        self.select(1)
+        with patch("trades_ui.reject_reservation") as reject:
+            self.page.reject()
+            panel = self.page.rejection_panel
+            self.assertIn("商品1", panel.subject.cget("text"))
+            self.assertIn("买家", panel.subject.cget("text"))
+            self.assertEqual(panel.winfo_manager(), "pack")
+            self.assertFalse(
+                any(isinstance(child, tk.Toplevel) for child in self.root.winfo_children())
+            )
+            panel.reason.insert("1.0", "   ")
+            panel.submit()
+            self.assertIn("请先填写", panel.error.cget("text"))
+            reject.assert_not_called()
+            self.page.close_rejection()
+            reject.assert_not_called()
+            self.assertEqual(panel.winfo_manager(), "")
+
+    def test_rejection_retains_failure_and_uses_original_target(self):
+        self.select(1)
+        self.page.reject()
+        panel = self.page.rejection_panel
+        panel.reason.insert("1.0", "暂时无法安排交付")
+        self.select_group("issues")
+        self.select(2)
+        with patch(
+            "trades_ui.reject_reservation", side_effect=ValueError("预约状态已变化")
+        ) as reject:
+            self.page.submit_rejection()
+            reject.assert_called_once_with(2, 1, "暂时无法安排交付")
+        self.assertEqual(panel.reason.get("1.0", "end-1c"), "暂时无法安排交付")
+        self.assertIn("预约状态已变化", panel.error.cget("text"))
+        with patch("trades_ui.reject_reservation") as reject:
+            self.page.submit_rejection()
+            self.page.submit_rejection()
+            reject.assert_called_once_with(2, 1, "暂时无法安排交付")
+        self.assertEqual(panel.winfo_manager(), "")
+
     def test_card_uses_booking_snapshot_and_actions_target_the_clicked_record(self):
         snapshot = {
             "title": "预约当时的标题",

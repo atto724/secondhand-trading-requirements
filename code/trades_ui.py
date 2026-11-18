@@ -23,6 +23,7 @@ from ui_common import (
     PAPER,
     MUTED,
     ProductRows,
+    InlineActionPanel,
     navigate_to,
     display_value,
     guarded,
@@ -419,6 +420,11 @@ class ReservationsPage(ttk.Frame):
         self.table = ProductRows(self, on_open=lambda key: self.detail())
         self.table.pack(fill="both", expand=True)
         self.table.bind("<<CardSelected>>", self.show_actions)
+        self.rejection_panel = InlineActionPanel(self, self.refresh)
+        self.rejection_panel.submit_button.configure(text="确认拒绝预约")
+        self.rejection_panel.reason.configure(height=4)
+        self.rejection_panel.reason.bind("<Control-Return>", self.submit_rejection)
+        self.rejection_panel.reason.bind("<Escape>", self.close_rejection)
         self.refresh()
 
     def on_resume(self):
@@ -586,12 +592,29 @@ class ReservationsPage(ttk.Frame):
             self.refresh()
 
     def reject(self):
-        """Reject a selected waiting request."""
+        """Explain the frozen target and collect a reason inside the current page."""
         key = self.table.selected()
-        reason = self.reason("拒绝预约")
-        if reason is not None:
-            reject_reservation(self.actor, key, reason)
-            self.refresh()
+        row = self.rows[key]
+        snapshot = json.loads(row["snapshot"])
+        self.rejection_panel.open(
+            "拒绝预约 · 填写原因",
+            f"{snapshot['title']}  ·  预约编号 {key}  ·  买家 {row['buyer_name']}",
+            lambda reason: reject_reservation(self.actor, key, reason),
+            note=(
+                "拒绝原因将通知买家并保留记录，仅关闭这条预约，商品仍可接受其他预约。\n"
+                "请填写具体原因（1～1000字）；Enter换行，Ctrl+Enter确认，Esc取消。"
+            ),
+        )
+
+    def submit_rejection(self, _event=None):
+        """Submit once through the same validated inline action as the button."""
+        self.rejection_panel.submit()
+        return "break"
+
+    def close_rejection(self, _event=None):
+        """Dismiss the form without changing the reservation."""
+        self.rejection_panel.close()
+        return "break"
 
     def cancel(self):
         """Cancel intent or start bilateral cancellation."""
